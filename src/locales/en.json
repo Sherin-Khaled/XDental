@@ -1,0 +1,1934 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "brands": "Brands",
+    "about": "About",
+    "contact": "Contact",
+    "search": "Search",
+    "signIn": "Sign In",
+    "account": "Account",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
+    "toggleMenu": "Toggle menu",
+    "language": "EN"
+  },
+  "globalSearch": {
+    "ariaLabel": "Global site search",
+    "placeholder": "Search products, categories, brands, or pages",
+    "close": "Close search",
+    "popularTitle": "Popular suggestions",
+    "resultsTitle": "Search results",
+    "resultCount": "{count} results",
+    "hint": "Use arrow keys to browse and Enter to open.",
+    "emptyTitle": "No results found",
+    "emptyBody": "Try searching for products, brands, categories, or pages.",
+    "groups": {
+      "product": "Products",
+      "category": "Categories",
+      "brand": "Brands",
+      "page": "Pages"
+    },
+    "metadata": {
+      "product": "Product - {category} - {price}",
+      "category": "Category",
+      "brand": "Brand",
+      "page": "Page",
+      "accountPage": "Page - Account"
+    },
+    "pages": {
+      "createAccount": "Create Account",
+      "accountDashboard": "Account Dashboard"
+    }
+  },
+  "categoryBar": {
+    "endodontics": "Endodontics",
+    "restorative": "Restorative",
+    "orthodontics": "Orthodontics",
+    "instruments": "Instruments",
+    "consumables": "Consumables",
+    "equipment": "Equipment",
+    "surgery": "Surgery",
+    "implantology": "Implantology",
+    "infectionControl": "Infection Control",
+    "clinicEssentials": "Clinic Essentials"
+  },
+  "common": {
+    "brand": "Brand",
+    "category": "Category",
+    "sku": "SKU",
+    "quantity": "Qty",
+    "items": "Items",
+    "shipping": "Shipping",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "free": "Free",
+    "edit": "Edit",
+    "apply": "Apply",
+    "clearAll": "Clear All",
+    "clearFilters": "Clear Filters",
+    "filters": "Filters",
+    "viewAll": "View All",
+    "viewDetails": "View Details",
+    "loadMoreProducts": "Load More Products",
+    "continueShopping": "Continue Shopping",
+    "addToCart": "Add to Cart",
+    "requestQuote": "Request a Quote",
+    "trackOrder": "Track Order",
+    "subscribe": "Subscribe",
+    "newsletter": "Newsletter",
+    "products": "Products",
+    "trustedBrands": "Trusted Brands",
+    "clinicsServed": "Clinics Served",
+    "backToHome": "Back to home",
+    "backToCart": "Back to Cart",
+    "logout": "Logout",
+    "myAccount": "My Account",
+    "allProducts": "All Products",
+    "weeklyOffers": "Weekly Offers",
+    "newArrivals": "New Arrivals",
+    "bestSellers": "Best Sellers",
+    "fastDelivery": "Fast Delivery",
+    "hotDeals": "Hot Deals",
+    "limitedStock": "Limited Stock",
+    "clinicEssentials": "Clinic Essentials",
+    "recommended": "Recommended",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "nameAz": "Name A-Z",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "lowStock": "Low Stock",
+    "discounted": "Discounted",
+    "min": "Min",
+    "max": "Max",
+    "allStatus": "All Status",
+    "active": "Active",
+    "featured": "Featured",
+    "partners": "Partners",
+    "last6Months": "Last 6 months",
+    "last30Days": "Last 30 days",
+    "allTime": "All time",
+    "newestFirst": "Newest First"
+  },
+  "account": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "myOrders": "My Orders",
+    "orderDetails": "Order Details",
+    "wishlist": "Wishlist",
+    "mySupplyLists": "My Supply Lists",
+    "clinicBranches": "Clinic Branches",
+    "addressBook": "Address Book",
+    "quotes": "Quotes",
+    "quoteDetails": "Quote Details",
+    "productRequests": "Product Requests",
+    "productRequestDetails": "Product Request Details",
+    "notifications": "Notifications",
+    "walletPoints": "Wallet & Points",
+    "supportTickets": "Support Tickets",
+    "supportTicketDetails": "Support Ticket Details",
+    "settings": "Settings"
+  },
+  "footer": {
+    "description": "Your trusted partner for premium dental supplies, instruments, and clinic essentials, serving clinics and professionals across the region.",
+    "newsletterTitle": "Stay updated on new arrivals & offers",
+    "newsletterBody": "Subscribe to receive product updates, weekly deals, and dental supply news.",
+    "subscribed": "You're subscribed. Thank you.",
+    "emailPlaceholder": "your@email.com",
+    "copyright": "© 2026 X Dental Store. All rights reserved.",
+    "creditPrefix": "Designed & developed by",
+    "creditAriaLabel": "Open SK Behance portfolio",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": {
+      "ordersWhatsApp": "Orders WhatsApp"
+    },
+    "sections": {
+      "shop": "Shop",
+      "categories": "Categories",
+      "company": "Company",
+      "support": "Support"
+    },
+    "links": {
+      "allProducts": "All Products",
+      "weeklyOffers": "Weekly Offers",
+      "newArrivals": "New Arrivals",
+      "bestSellers": "Best Sellers",
+      "requestQuote": "Request a Quote",
+      "endodontics": "Endodontics",
+      "dentalInstruments": "Dental Instruments",
+      "restorativeMaterials": "Restorative Materials",
+      "infectionControl": "Infection Control",
+      "orthodontics": "Orthodontics",
+      "implantology": "Implantology",
+      "aboutUs": "About Us",
+      "trustedBrands": "Trusted Brands",
+      "ourPartners": "Our Partners",
+      "blog": "Blog",
+      "contactUs": "Contact Us",
+      "howToOrder": "How to Order",
+      "shippingDelivery": "Shipping & Delivery",
+      "returnsPolicy": "Returns Policy",
+      "faqs": "FAQs",
+      "trackYourOrder": "Track Your Order"
+    }
+  },
+  "dailyOffer": {
+    "badge": "15% OFF",
+    "meta": "Weekly Offer",
+    "title": "Weekly Special Offer",
+    "description": "Save on selected dental essentials this week.",
+    "productName": "Selected Dental Essentials",
+    "cta": "Shop Offer",
+    "secondary": "Maybe Later",
+    "close": "Close scheduled offer",
+    "weekly": {
+      "monday": {
+        "badge": "15% OFF",
+        "meta": "Monday Offer",
+        "title": "Endodontic Monday Deal",
+        "description": "Save on selected endodontic essentials every Monday."
+      },
+      "tuesday": {
+        "badge": "10% OFF",
+        "meta": "Tuesday Offer",
+        "title": "Restorative Tuesday Deal",
+        "description": "Save on selected restorative materials every Tuesday."
+      },
+      "wednesday": {
+        "badge": "12% OFF",
+        "meta": "Wednesday Offer",
+        "title": "Instrument Wednesday Deal",
+        "description": "Save on selected dental instruments every Wednesday."
+      },
+      "thursday": {
+        "badge": "15% OFF",
+        "meta": "Thursday Offer",
+        "title": "Implantology Thursday Deal",
+        "description": "Save on selected implantology essentials every Thursday."
+      },
+      "friday": {
+        "badge": "10% OFF",
+        "meta": "Friday Offer",
+        "title": "Clinic Essentials Friday Deal",
+        "description": "Save on selected clinic essentials every Friday."
+      },
+      "saturday": {
+        "badge": "12% OFF",
+        "meta": "Saturday Offer",
+        "title": "Infection Control Saturday Deal",
+        "description": "Save on selected infection control supplies every Saturday."
+      },
+      "sunday": {
+        "badge": "15% OFF",
+        "meta": "Sunday Offer",
+        "title": "Best Sellers Sunday Deal",
+        "description": "Save on selected best-selling dental supplies every Sunday."
+      }
+    }
+  },
+  "home": {
+    "heroBadge": "Trusted Dental Supplies",
+    "heroTitle": "Premium Dental Products for Clinics & Professionals",
+    "heroBody": "We provide high-quality dental instruments, clinic essentials, and trusted brands - all in one place with competitive pricing and reliable delivery.",
+    "browseProducts": "Browse Products",
+    "infoStrip": {
+      "ariaLabel": "X Dental Store benefits",
+      "products": "500+ Products",
+      "brands": "50+ Trusted Brands",
+      "delivery": "Fast Delivery",
+      "quoteSupport": "Quote Support",
+      "supplyLists": "Clinic Supply Lists",
+      "specialRequests": "Special Requests"
+    },
+    "stats": {
+      "products": "Products",
+      "brands": "Trusted Brands",
+      "clinics": "Clinics Served"
+    },
+    "orbit": {
+      "verified": "Verified Supplies",
+      "delivery": "Fast Delivery",
+      "quote": "Quote Support"
+    },
+    "sections": {
+      "categoriesTitle": "Shop by Category",
+      "categoriesSubtitle": "Browse products by dental specialty and everyday clinic need.",
+      "weeklyTitle": "Weekly Offers",
+      "weeklySubtitle": "Limited-time deals on everyday dental supplies and clinic essentials.",
+      "whyTitle": "Why Clinics Choose X Dental Store",
+      "whySubtitle": "Practical tools and reliable support for smoother dental purchasing.",
+      "bestSellersTitle": "Best Sellers",
+      "bestSellersSubtitle": "Popular products ordered by dental clinics and professionals.",
+      "trustedBrandsEyebrow": "Our Partners",
+      "trustedBrandsTitle": "Trusted Brands",
+      "trustedBrandsSubtitle": "Explore dental supplies from reliable brands and suppliers trusted by clinics and professionals.",
+      "bestServiceBadge": "Best Service",
+      "recommendedTitle": "Recommended for Your Practice",
+      "recommendedSubtitle": "Curated products based on common clinic needs and everyday dental procedures.",
+      "fastDeliveryTitle": "Fast Delivery Items",
+      "fastDeliverySubtitle": "Ready-to-ship essentials available for faster clinic restocking.",
+      "viewFastDelivery": "View Fast Delivery"
+    },
+    "features": {
+      "authenticTitle": "Authentic Products",
+      "authenticBody": "We provide trusted dental products from reliable brands and suppliers.",
+      "pricesTitle": "Competitive Prices",
+      "pricesBody": "Get the products your clinic needs at fair, practical, and competitive pricing.",
+      "deliveryTitle": "Fast Delivery",
+      "deliveryBody": "Quick and dependable delivery to keep your clinic stocked and running smoothly.",
+      "rangeTitle": "Wide Product Range",
+      "rangeBody": "From instruments to clinic essentials, find everything in one place.",
+      "orderingTitle": "Easy Ordering",
+      "orderingBody": "Browse products, request quotes, or place orders with a simple smooth process.",
+      "supportTitle": "Support for Clinics",
+      "supportBody": "We understand dental practice needs and help clinics choose the right supplies."
+    },
+    "categoryDescriptions": {
+      "endodontics": "Root canal files, obturation tools, and endodontic essentials.",
+      "hand-instruments": "Mirrors, probes, tweezers, and everyday clinical instruments.",
+      "sterilization-disposables": "Daily-use products and consumables for smooth clinic operations.",
+      "composites-bonding": "Composite, bonding, etching, and finishing products.",
+      "orthodontics": "Brackets, wires, elastics, and orthodontic accessories.",
+      "infection-control": "Sterilization, disinfection, and protective supplies.",
+      "dental-burs": "Burs for cutting, shaping, and finishing procedures.",
+      "impression-materials": "Materials and accessories for precise dental impressions.",
+      "implantology": "Implant tools, components, and clinical essentials."
+    },
+    "contact": {
+      "headline": "Need help choosing dental supplies?",
+      "body": "Our team can help you find the right products, instruments, and clinic supplies for your needs.",
+      "call": "Call us",
+      "email": "Email us",
+      "visit": "Visit us",
+      "ordersWhatsApp": "Orders WhatsApp",
+      "mainSupport": "Main Support",
+      "branch": "Branch",
+      "location": "Cairo, Egypt",
+      "newsletterEyebrow": "OFFERS & UPDATES",
+      "newsletterTitle": "Get product updates and weekly offers",
+      "newsletterBody": "Subscribe to receive new arrivals, offers, and dental supply updates.",
+      "subscribed": "You're subscribed - thank you!"
+    }
+  },
+  "products": {
+    "catalogEyebrow": "Product Catalog",
+    "titleAll": "All Dental Supplies",
+    "titleWeekly": "Weekly Offers",
+    "fallbackTitle": "Dental Supplies",
+    "intro": "Browse, filter, and compare trusted dental products for clinics, professionals, and everyday practice needs.",
+    "showingResults": "Showing {count} results",
+    "searchPlaceholder": "Search products, brands, suppliers, or SKU",
+    "sortLabel": "Sort products",
+    "category": "Category",
+    "brand": "Brand",
+    "priceRange": "Price Range",
+    "availability": "Availability",
+    "offers": "Offers",
+    "noProductsTitle": "No products found",
+    "noProductsBody": "Try adjusting your filters, clearing selected options, or searching for another product name, brand, or SKU.",
+    "collections": {
+      "all": "All Products",
+      "weekly": "Weekly Offers",
+      "hot": "Hot Deals",
+      "fast": "Fast Delivery",
+      "new": "New Arrivals",
+      "best": "Best Selling",
+      "limited": "Limited Stock",
+      "clinic": "Clinic Essentials"
+    },
+    "items": {
+      "prod-1": {
+        "name": "WK-Flex K-File",
+        "category": "Endodontics",
+        "description": "High quality stainless steel K-files for endodontic procedures."
+      },
+      "prod-2": {
+        "name": "ProTaper Gold",
+        "category": "Endodontics"
+      },
+      "prod-3": {
+        "name": "Filtek Z350 XT",
+        "category": "Composites & Bonding"
+      },
+      "prod-4": {
+        "name": "Articaine 4%",
+        "category": "Anesthesia"
+      },
+      "prod-5": {
+        "name": "Aquasil Ultra",
+        "category": "Impression Materials"
+      },
+      "prod-6": {
+        "name": "Gracey Curette 7/8",
+        "category": "Hand Instruments"
+      },
+      "prod-7": {
+        "name": "Opalescence PF 35%",
+        "category": "Whitening"
+      },
+      "prod-8": {
+        "name": "Metal Brackets Roth 22",
+        "category": "Orthodontics"
+      },
+      "weekly-offer-1": {
+        "name": "Videya K-File",
+        "category": "Endodontics"
+      },
+      "weekly-offer-2": {
+        "name": "Cheek Retractor",
+        "category": "Clinic Essentials"
+      },
+      "weekly-offer-3": {
+        "name": "Dental Mirror Set",
+        "category": "Dental Instruments"
+      },
+      "weekly-offer-4": {
+        "name": "Sterilization Pouch",
+        "category": "Infection Control"
+      },
+      "weekly-offer-5": {
+        "name": "Endo File Organizer",
+        "category": "Endodontics"
+      },
+      "weekly-offer-6": {
+        "name": "Cotton Roll Holder",
+        "category": "Clinic Essentials"
+      },
+      "weekly-offer-7": {
+        "name": "Periodontal Probe",
+        "category": "Hand Instruments"
+      },
+      "weekly-offer-8": {
+        "name": "Composite Applicator",
+        "category": "Composites & Bonding"
+      },
+      "weekly-offer-9": {
+        "name": "Ortho Ligature Kit",
+        "category": "Orthodontics"
+      },
+      "weekly-offer-10": {
+        "name": "Impression Tray Set",
+        "category": "Impression Materials"
+      },
+      "weekly-offer-11": {
+        "name": "Surgical Suction Tips",
+        "category": "Clinic Essentials"
+      },
+      "weekly-offer-12": {
+        "name": "Implant Driver Kit",
+        "category": "Implantology"
+      }
+    }
+  },
+  "categories": {
+    "items": {
+      "endodontics": "Endodontics",
+      "composites-bonding": "Composites & Bonding",
+      "anesthesia": "Anesthesia",
+      "impression-materials": "Impression Materials",
+      "hand-instruments": "Hand Instruments",
+      "whitening": "Whitening",
+      "orthodontics": "Orthodontics",
+      "preventive-care": "Preventive Care",
+      "sterilization-disposables": "Sterilization & Disposables",
+      "infection-control": "Infection Control",
+      "clinic-essentials": "Clinic Essentials",
+      "restorative": "Restorative Materials",
+      "instruments": "Dental Instruments",
+      "consumables": "Consumables",
+      "equipment": "Equipment",
+      "surgery": "Surgery",
+      "implantology": "Implantology",
+      "dental-burs": "Dental Burs",
+      "prophylaxis": "Prophylaxis",
+      "lab-supplies": "Lab Supplies",
+      "radiology": "Radiology",
+      "disposables": "Disposables"
+    }
+  },
+  "categoriesPage": {
+    "title": "Shop by Dental Category",
+    "intro": "Browse dental supplies organized by specialty, treatment type, and everyday clinic needs.",
+    "searchPlaceholder": "Search categories",
+    "statusLabel": "Filter categories by status",
+    "dateLabel": "Filter categories by date",
+    "sortLabel": "Sort categories",
+    "shortcutsEyebrow": "This may help you",
+    "shortcutsTitle": "Popular",
+    "shortcutsTitleSecond": "Shortcuts",
+    "shortcutsIntro": "Quick access to the most common ways clinics shop.",
+    "quickActions": {
+      "Weekly Offers": "Weekly Offers",
+      "Best Sellers": "Best Sellers",
+      "New Arrivals": "New Arrivals",
+      "Top Machines": "Top Machines",
+      "Fast Delivery": "Fast Delivery",
+      "Brands": "Brands",
+      "Clinic Essentials": "Clinic Essentials"
+    },
+    "helpTitle": "How X Dental Store",
+    "helpTitleSecond": "Helps Your Clinic",
+    "helpIntro": "From saved supply lists to quote requests, X Dental Store helps clinics order faster and manage dental supplies with less effort.",
+    "step1": "Step 1",
+    "stepTitle": "Browse by Category",
+    "stepBody": "Find dental products organized by specialty, treatment type, and clinic needs.",
+    "imageAlt": "Dental supplies"
+  },
+  "brandsPage": {
+    "featuredEyebrow": "Featured Brands",
+    "featuredTitle": "Discover our most requested dental brands and suppliers.",
+    "searchPlaceholder": "Search for brand name",
+    "statusLabel": "Filter brands by status",
+    "dateLabel": "Filter brands by date",
+    "sortLabel": "Sort brands",
+    "heroTitleLine1": "Trusted Dental",
+    "heroTitleLine2": "Brands",
+    "over": "Over",
+    "allIn": "All in",
+    "onePlace": "One Place",
+    "trusted": "Trusted"
+  },
+  "contactPage": {
+    "toastTitle": "Message sent",
+    "toastBody": "Our team will get back to you as soon as possible.",
+    "heroTitle": "Expert support for products, orders, and quotes",
+    "heroBody": "Have a question about a product, order, quote, or clinic supply request? Our team is ready to help you choose the right items and support your clinic clearly.",
+    "supplySupport": "Clinic Supply Support",
+    "stats": {
+      "Products": "Products",
+      "Trusted Brands": "Trusted Brands",
+      "Clinics Served": "Clinics Served"
+    },
+    "getInTouch": "Get in Touch",
+    "reachTitle": "Reach our",
+    "reachTitleSecond": "team directly",
+    "reachBody": "Choose the easiest way to contact us for product questions, order updates, quotes, or clinic support.",
+    "actions": {
+      "Call Us": "Call Us",
+      "Email Us": "Email Us",
+      "WhatsApp Support": "WhatsApp Support",
+      "Visit / Warehouse": "Visit / Warehouse"
+    },
+    "cardSubtitles": {
+      "Support Numbers": "Support Numbers",
+      "Customer Email": "Customer Email",
+      "Orders WhatsApp": "Orders WhatsApp",
+      "Branch Contacts": "Branch Contacts"
+    },
+    "contactLabels": {
+      "Orders WhatsApp": "Orders WhatsApp",
+      "Main Support": "Main Support",
+      "Office Landline": "Office Landline",
+      "Branch Landline": "Branch Landline",
+      "Branch Mobile": "Branch Mobile"
+    },
+    "sendMessage": "Send a Message",
+    "messageTitle": "Tell us what you need",
+    "messageBody": "Share your question or request, and our team will get back to you as soon as possible.",
+    "phoneNo": "Phone No.",
+    "productInterest": "Product Interest",
+    "message": "Message",
+    "send": "Send",
+    "locationEyebrow": "Our Location",
+    "locationTitle": "Find us in Egypt",
+    "locationBody": "Our team supports clinics and dental professionals across Egypt. Visits are available by appointment only.",
+    "mapAlt": "Map showing regional delivery coverage",
+    "faqEyebrow": "Common Questions",
+    "faqTitle": "Answers before you contact us",
+    "faqTitleSecond": "",
+    "faqBody": "Find quick answers about quotes, supply lists, product requests, and account tools.",
+    "viewMoreFaqs": "View More FAQs",
+    "faqs": {
+      "quoteBeforeOrdering": {
+        "question": "Can I request a quote before ordering?",
+        "answer": "Yes. You can request a quote for products before placing an order, especially for bulk quantities or special pricing."
+      },
+      "saveRepeatedLists": {
+        "question": "Can clinics save monthly or repeated purchase lists?",
+        "answer": "Yes. Clinics can use Supply Lists to save frequently ordered products and reorder them faster."
+      },
+      "sourceUnlistedProduct": {
+        "question": "Can you help source a product that is not listed?",
+        "answer": "Yes. You can submit a product request, and the team can review availability or suggest alternatives."
+      }
+    }
+  },
+  "faqsPage": {
+    "eyebrow": "Help Center",
+    "heroTitle": "Questions, answered clearly",
+    "heroBody": "Find practical guidance about quotes, supply lists, product requests, and the account tools available to your clinic.",
+    "categoryNavLabel": "Browse FAQ categories",
+    "libraryEyebrow": "FAQ Library",
+    "libraryTitle": "Browse answers by topic",
+    "ctaEyebrow": "Still need help?",
+    "ctaTitle": "Talk to our support team",
+    "ctaBody": "If you need help with a product, quote, supply list, or account tool, contact our team and tell us what you need.",
+    "ctaButton": "Contact Us",
+    "categories": {
+      "ordersQuotes": {
+        "title": "Orders & Quotes",
+        "description": "Understand when to place an order, request a quote, and where to follow up.",
+        "items": {
+          "quoteBeforeOrdering": {
+            "question": "Can I request a quote before ordering?",
+            "answer": "Yes. You can request a quote before placing an order, especially for bulk quantities, clinic purchases, or products that need price confirmation."
+          },
+          "trackQuotes": {
+            "question": "Where can I track my quote requests?",
+            "answer": "You can track your quote requests from your account under the Quotes section."
+          },
+          "orderVsQuote": {
+            "question": "What is the difference between placing an order and requesting a quote?",
+            "answer": "Placing an order is used when you are ready to buy with the listed product details. Requesting a quote is useful when you need pricing confirmation, bulk pricing, or special product availability review."
+          }
+        }
+      },
+      "supplyLists": {
+        "title": "Supply Lists",
+        "description": "Learn how saved lists can make repeated clinic purchasing faster.",
+        "items": {
+          "saveRepeatedLists": {
+            "question": "Can clinics save monthly or repeated purchase lists?",
+            "answer": "Yes. Clinics can create Supply Lists to save frequently purchased products and reorder them faster in the future."
+          },
+          "whatIsSupplyList": {
+            "question": "What is a Supply List?",
+            "answer": "A Supply List is a saved list of products that a clinic may need regularly, such as monthly essentials or repeated clinic supplies."
+          },
+          "cartToSupplyList": {
+            "question": "Can I add products from my cart to a Supply List?",
+            "answer": "Yes. You can save cart items as a reusable Supply List for faster future ordering."
+          }
+        }
+      },
+      "productRequests": {
+        "title": "Product Requests",
+        "description": "See how to request an unlisted product and track the request in your account.",
+        "items": {
+          "unlistedProduct": {
+            "question": "Can I request a product that is not listed on the website?",
+            "answer": "Yes. If a product is not listed, you can send a product request with the product name, brand, or details so the team can review it."
+          },
+          "unavailableProduct": {
+            "question": "What happens if a product is unavailable?",
+            "answer": "You can submit a product request. The request will be sent to the company for review, and the team can later reply with availability or alternatives."
+          },
+          "requestsInAccount": {
+            "question": "Will product requests appear in my account?",
+            "answer": "Yes. Product requests should appear in your account as sent requests so you can track them. Full email/chat handling will be connected during the backend phase."
+          }
+        }
+      },
+      "accountSupport": {
+        "title": "Account & Support",
+        "description": "Find out which clinic tools need an account and how to reach support.",
+        "items": {
+          "accountRequired": {
+            "question": "Do I need an account to use clinic tools?",
+            "answer": "Yes. Account features such as quotes, supply lists, product requests, wishlist, and order tracking require signing in."
+          },
+          "contactSupport": {
+            "question": "Where can I contact support?",
+            "answer": "You can contact support from the Contact page using the available phone, WhatsApp, or support options."
+          }
+        }
+      }
+    }
+  },
+  "productDetail": {
+    "brand": "Brand:",
+    "category": "Category:",
+    "pack": "1 Pack / 6 Pcs",
+    "productOptions": "Product Options",
+    "length": "Length",
+    "size": "Size",
+    "stockReady": "In Stock - Ready to ship",
+    "stockNotify": "Out of Stock - Notify me when available",
+    "notifyMe": "Notify Me",
+    "requestProduct": "Request Product",
+    "productRequestSent": "Product request sent to support.",
+    "productRequestFailed": "Failed to send request. Please try again.",
+    "openSupportChat": "Open Support Chat",
+    "messageSupport": "Message Support",
+    "quoteStarted": "Quote request started for {name}.",
+    "addedToCart": "{name} added to cart.",
+    "backInStock": "We will notify you when this product is back in stock.",
+    "addSupplyTitle": "Add to Supply List",
+    "addSupplyBody": "Save this product to one of your clinic reorder lists for easier future purchasing.",
+    "addToList": "Add to List",
+    "addedToSupplyList": "{name} added to supply list.",
+    "aboutBrand": "About the Brand",
+    "brandBody": "{brand} offers reliable dental products designed for everyday clinical use and trusted by dental professionals.",
+    "viewBrandProducts": "View Brand Products",
+    "tabs": {
+      "description": "Description",
+      "specifications": "Specifications",
+      "reviews": "Reviews",
+      "shipping": "Shipping & Returns"
+    },
+    "defaultDescription": "High-quality dental product designed for precise clinical use, smooth handling, and reliable performance during everyday dental procedures.",
+    "bullets": {
+      "control": "Smooth tactile control",
+      "cutting": "Reliable cutting efficiency",
+      "routine": "Designed for routine professional treatment",
+      "sizes": "Available in multiple lengths and sizes"
+    },
+    "selectedOption": "Selected option:",
+    "reviewsBody": "Reviews are being collected from verified clinic purchases.",
+    "shippingBody": "Shipping options and taxes are calculated at checkout. Returns are accepted according to product condition and supplier policy.",
+    "tags": "Product Tags",
+    "rootCanal": "Root Canal",
+    "stainlessSteel": "Stainless Steel",
+    "manualFiles": "Manual Files",
+    "relatedTitle": "Related Products",
+    "relatedSubtitle": "Explore similar products commonly used with this item.",
+    "moreFromBrand": "More from {brand}",
+    "moreFromBrandSubtitle": "Discover more trusted products from the same brand.",
+    "shareProduct": "Share product",
+    "toggleWishlist": "Toggle wishlist",
+    "viewProductImage": "View product image {number}"
+  },
+  "cart": {
+    "emptyTitle": "Your cart is empty",
+    "emptyBody": "Add dental supplies to review quantities, request a quote, or proceed to checkout.",
+    "checkoutEmpty": "Your cart is empty. Add products before starting checkout.",
+    "checkoutUnavailable": "No confirmed order is available. Checkout will be completed after backend connection.",
+    "title": "Shopping Cart",
+    "intro": "Review your selected dental supplies, update quantities, and proceed to checkout or request a quote.",
+    "remove": "Remove {name}",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "coupon": "Coupon Code",
+    "couponPlaceholder": "Enter coupon code",
+    "couponCheck": "Coupon {code} will be checked at checkout.",
+    "couponEmpty": "Enter a coupon code before applying.",
+    "couponInvalid": "Invalid coupon code.",
+    "couponUnavailable": "This coupon is no longer available.",
+    "couponMinimum": "This coupon requires a minimum order of {amount}.",
+    "couponClinicOnly": "CLINIC15 applies only to Clinic Essentials products.",
+    "couponNotEligible": "This coupon is not eligible for the current cart.",
+    "couponApplied": "{code} applied.",
+    "couponDemoHint": "Available demo codes: WELCOME10 (EGP 500 min), SAVE100 (EGP 1,000 min), FREESHIP (EGP 1,000 min), CLINIC15 (Clinic Essentials only, EGP 1,500 eligible subtotal).",
+    "removeCoupon": "Remove",
+    "discount": "Discount",
+    "saveListTitle": "Save Cart as Supply List",
+    "saveListBody": "Save these items as a reusable list for faster future ordering.",
+    "saveAsList": "Save as List",
+    "savedAsList": "Cart saved as a supply list draft.",
+    "saveListEyebrow": "Supply Lists",
+    "saveListModalTitle": "Save Cart as Supply List",
+    "saveListModalBody": "Choose an existing list or create a new one. Current cart products will be added by default.",
+    "saveListExisting": "Existing list",
+    "saveListNew": "New list",
+    "saveListChooseExisting": "Choose supply list",
+    "saveListName": "List name",
+    "saveListNamePlaceholder": "Cart Supply List",
+    "saveListDescriptionPlaceholder": "Saved from cart.",
+    "saveListDescriptionDefault": "Saved from cart.",
+    "saveListProductsDefault": "Products in your current cart will be added to this supply list.",
+    "saveListSubmit": "Save Cart",
+    "savedToSupplyList": "Cart saved to {name}.",
+    "viewList": "View list",
+    "summary": "Order Summary",
+    "itemsCount": "Items ({count})",
+    "proceedCheckout": "Proceed to Checkout",
+    "quoteStarted": "Quote request started for your cart.",
+    "quoteEmpty": "Your cart is empty. Add products before requesting a quote.",
+    "quoteSubmitted": "Quote request submitted. You can track it from Account → Quotes.",
+    "viewQuotes": "View Quotes",
+    "taxNote": "Shipping and taxes are calculated at checkout.",
+    "recommendedTitle": "You Might Also Like",
+    "recommendedBody": "Recommended products related to the items in your cart."
+  },
+  "orderConfirmed": {
+    "eyebrow": "Order Confirmed",
+    "title": "Your order has been confirmed.",
+    "intro": "We received your order successfully. A confirmation message has been sent to your email and phone number.",
+    "orderNumber": "Order Number",
+    "orderDate": "Order Date",
+    "estimatedDelivery": "Estimated Delivery",
+    "deliveryWindow": "2-4 business days",
+    "viewMyOrders": "View My Orders",
+    "orderDetails": "Order Details",
+    "mainBranch": "Main Clinic Branch",
+    "orderedItems": "Ordered Items",
+    "nextTitle": "What Happens Next?",
+    "nextBody": "Your order is now being prepared. Our team may contact you to confirm delivery details before shipping.",
+    "nextReview": "We will review and confirm your order.",
+    "nextPrepare": "Your products will be prepared for delivery.",
+    "nextTrack": "You can track your order from your account.",
+    "quickActions": "Quick Actions",
+    "saveAsSupplyList": "Save Order as Supply List",
+    "helpTitle": "Need help with your order?",
+    "helpBody": "Contact our support team for payment, delivery, or product assistance.",
+    "contactSupport": "Contact Support",
+    "moreTitle": "Need More Supplies?",
+    "moreBody": "Explore products commonly ordered with your latest purchase."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "intro": "Complete your order details and choose your preferred delivery and payment method.",
+    "steps": {
+      "delivery": "Delivery Details",
+      "payment": "Payment",
+      "review": "Review Order"
+    },
+    "contactDetails": "Contact Details",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone Number",
+    "phoneNote": "We'll only use this number to confirm your order or help with delivery.",
+    "email": "Email",
+    "shippingAddress": "Shipping Address",
+    "country": "Country",
+    "governorate": "Governorate",
+    "cityArea": "City / Area",
+    "streetAddress": "Street Address",
+    "buildingNumber": "Building Number / Name",
+    "apartmentFloor": "Apartment / Floor",
+    "postalCode": "Postal Code (optional)",
+    "deliveryNotes": "Delivery Notes (optional)",
+    "deliveryNotesPlaceholder": "Add delivery instructions, landmark, or preferred delivery time.",
+    "clinicDetails": "Clinic Details (Optional)",
+    "clinicName": "Clinic Name (optional)",
+    "clinicBranch": "Clinic Branch (optional)",
+    "updates": "Send me updates about offers, new products, and clinic supply deals.",
+    "continuePayment": "Continue to Payment",
+    "shippingMethod": "Shipping Method",
+    "usePoints": "Use Your Points (Optional)",
+    "currentBalance": "Current Balance:",
+    "points": "0 Points",
+    "pointsPlaceholder": "Enter points",
+    "applyPoints": "Apply Points",
+    "pointsUnavailable": "You don't have available points yet.",
+    "pointsEmpty": "Enter points before applying.",
+    "pointsNoBalance": "You don't have available points to apply yet.",
+    "pointsDiscount": "Points Discount",
+    "rewardDiscount": "Reward Discount",
+    "freeShipping": "Free Shipping",
+    "pts": "pts",
+    "paymentMethod": "Payment Method",
+    "cashNote": "Pay with cash when your order is delivered. Please have the exact amount ready.",
+    "cardNumber": "Card number",
+    "cardExpiry": "MM / YY",
+    "cardName": "Name on card",
+    "cardCvv": "CVV",
+    "fawryNote": "A Fawry payment reference will be generated after placing your order.",
+    "walletNote": "Complete payment using your supported mobile wallet.",
+    "instapayNote": "Transfer the order total using Instapay.",
+    "bankNote": "Bank transfer instructions will be provided after placing your order.",
+    "accountName": "Account Name: X Dental Supplies",
+    "iban": "IBAN: EG00 0000 0000 0000 0000 0000",
+    "billingAddress": "Billing Address",
+    "billingSame": "Billing address is the same as shipping address",
+    "orderNotes": "Order Notes (Optional)",
+    "orderNotesPlaceholder": "Add delivery instructions, invoice details, or product notes.",
+    "backDelivery": "Back to Delivery Details",
+    "reviewOrder": "Review Order",
+    "payment": "Payment",
+    "backPayment": "Back to Payment",
+    "placeOrder": "Place Order",
+    "completeRequiredFields": "Please complete all required fields before continuing.",
+    "completeCardFields": "Please enter valid card details before reviewing your order.",
+    "backendPending": "Checkout will be completed after backend connection. No order has been submitted.",
+    "redirectingToCart": "Your cart is empty. Returning to the cart.",
+    "itemsReview": "Items",
+    "itemsSubtotal": "Items Subtotal",
+    "secureNote": "Your order details are secure and will only be used to process your purchase.",
+    "fallbackAddress": {
+      "building": "270C Villa, north academy,",
+      "street": "Anour St.,",
+      "area": "First Settlement, New Cairo,",
+      "governorate": "Cairo"
+    },
+    "shippingMethods": {
+      "standard": {
+        "title": "Standard Delivery",
+        "description": "Delivery within 2-4 business days",
+        "price": "EGP 50"
+      },
+      "fast": {
+        "title": "Fast Delivery",
+        "description": "Available for in-stock products",
+        "price": "EGP 80"
+      },
+      "pickup": {
+        "title": "Store Pickup",
+        "description": "Pick up from our branch or warehouse",
+        "price": "Free"
+      }
+    },
+    "paymentMethods": {
+      "cash": {
+        "title": "Cash on Delivery",
+        "short": "Pay when your order arrives."
+      },
+      "card": {
+        "title": "Card Payment",
+        "short": "Pay securely using your debit or credit card."
+      },
+      "fawry": {
+        "title": "Fawry",
+        "short": "Fawry payment reference generated after order."
+      },
+      "wallet": {
+        "title": "Mobile Wallet",
+        "short": "Complete payment using your mobile wallet."
+      },
+      "instapay": {
+        "title": "Instapay",
+        "short": "Transfer the order total using Instapay."
+      },
+      "bank": {
+        "title": "Bank Transfer",
+        "short": "Bank transfer instructions after placing your order."
+      }
+    },
+    "fallbackItems": {
+      "kfile": "Videya K-File",
+      "retractor": "Cheek Retractor",
+      "xDental": "X Dental",
+      "instruments": "Instruments",
+      "lengthOption": "Length: 25mm",
+      "sizeOption": "Size: K15",
+      "packOption": "Pack: 1 Pack / 6 Pcs",
+      "packOne": "Pack: 1 pcs"
+    }
+  },
+  "auth": {
+    "serviceUnavailable": "Authentication service is currently unavailable. Please try again later.",
+    "login": {
+      "toastTitle": "Welcome back",
+      "toastDescription": "Redirecting to your dashboard...",
+      "invalidTitle": "Sign in failed",
+      "invalidDescription": "Check your email and password, then try again.",
+      "sideTitle": "Welcome back to your clinic supply hub.",
+      "sideBody": "Sign in to manage your orders, review saved supplies, and keep your clinic moving.",
+      "sideCaption": "Supplies made simple",
+      "eyebrow": "Professional account",
+      "title": "Welcome back",
+      "intro": "Sign in securely to access your X Dental Store account.",
+      "email": "Email address",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "forgot": "Forgot password?",
+      "signingIn": "Signing in...",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account"
+    },
+    "signup": {
+      "sideTitle": "Join a smarter way to stock your clinic.",
+      "sideBody": "Create your professional account to order trusted dental supplies, save favorites, and track every delivery.",
+      "title": "Create your account",
+      "intro": "Create a secure account to access your clinic purchasing workspace.",
+      "fullName": "Full name",
+      "confirmPassword": "Confirm password",
+      "hideConfirmPassword": "Hide confirmation password",
+      "showConfirmPassword": "Show confirmation password",
+      "creating": "Creating account...",
+      "createAccount": "Create Account",
+      "hasAccount": "Already have an account?",
+      "passwordMismatchTitle": "Passwords do not match",
+      "passwordMismatchBody": "Please enter the same password in both fields.",
+      "accountExistsTitle": "Account already exists",
+      "accountExistsBody": "Use a different email or sign in with this account.",
+      "errorTitle": "Could not create account",
+      "toastTitle": "Account created successfully",
+      "toastDescription": "Redirecting to your dashboard..."
+    }
+  },
+  "notFound": {
+    "title": "404 Page Not Found",
+    "body": "Did you forget to add the page to the router?"
+  },
+  "seo": {
+    "siteName": "X Dental Store",
+    "defaultTitle": "X Dental Store - Premium Dental Supplies for Clinics & Professionals",
+    "defaultDescription": "Shop premium dental instruments, clinic essentials, and trusted brands. Competitive pricing, fast delivery, and support for dental clinics across Egypt.",
+    "pages": {
+      "home": {
+        "title": "X Dental Store - Premium Dental Supplies for Clinics & Professionals",
+        "description": "Shop premium dental instruments, clinic essentials, and trusted brands with competitive pricing and reliable delivery for dental clinics."
+      },
+      "products": {
+        "title": "Dental Products & Supplies | X Dental Store",
+        "description": "Browse premium dental supplies, instruments, consumables, and trusted brands for clinics and dental professionals."
+      },
+      "productDetail": {
+        "title": "{name} | X Dental Store",
+        "description": "Shop {name} from {brand}. Explore trusted dental supplies with clear pricing and clinic-focused support."
+      },
+      "categories": {
+        "title": "Dental Supply Categories | X Dental Store",
+        "description": "Browse dental supplies by specialty, treatment type, and everyday clinic needs."
+      },
+      "brands": {
+        "title": "Trusted Dental Brands | X Dental Store",
+        "description": "Discover dental brands and suppliers trusted by clinics and dental professionals."
+      },
+      "about": {
+        "title": "About X Dental Store",
+        "description": "Learn how X Dental Store helps clinics discover products, manage repeat purchasing, request quotes, and order dental supplies."
+      },
+      "contact": {
+        "title": "Contact X Dental Store",
+        "description": "Contact X Dental Store for product questions, order support, quotes, and clinic supply requests."
+      },
+      "faqs": {
+        "title": "Frequently Asked Questions | X Dental Store",
+        "description": "Find answers about quotes, supply lists, product requests, account tools, and support at X Dental Store."
+      },
+      "cart": {
+        "title": "Shopping Cart | X Dental Store",
+        "description": "Review selected dental supplies and proceed to checkout."
+      },
+      "checkout": {
+        "title": "Checkout | X Dental Store",
+        "description": "Complete your dental supply order securely."
+      },
+      "login": {
+        "title": "Sign In | X Dental Store",
+        "description": "Sign in to manage your X Dental Store account."
+      },
+      "signup": {
+        "title": "Create Account | X Dental Store",
+        "description": "Create an X Dental Store account for clinic purchasing tools."
+      },
+      "account": {
+        "title": "My Account | X Dental Store",
+        "description": "Manage orders, quotes, supply lists, addresses, and clinic account settings."
+      },
+      "orderConfirmed": {
+        "title": "Order Confirmed | X Dental Store",
+        "description": "Your X Dental Store order has been confirmed."
+      },
+      "notFound": {
+        "title": "Page Not Found | X Dental Store",
+        "description": "The page you requested could not be found."
+      }
+    }
+  },
+  "accountPages": {
+    "address": {
+      "addAddress": "Add Address",
+      "addNew": "Add New",
+      "addNewAddress": "Add New Address",
+      "address": "Address",
+      "addressLabel": "Address Label",
+      "city": "City",
+      "closeForm": "Close address form",
+      "country": "Country",
+      "default": "Default",
+      "deleteAddress": "Delete Address",
+      "deleteDescription": "This will remove {name} from your address book. Existing orders will not be changed.",
+      "deleteNamed": "Delete {name} address",
+      "deleteTitle": "Delete Address?",
+      "description": "Manage delivery locations for clinic orders, quotes, and product requests.",
+      "editAddress": "Edit Address",
+      "editNamed": "Edit {name} address",
+      "eyebrow": "Delivery Details",
+      "formDescription": "Keep delivery details accurate for clinic orders and supply requests.",
+      "governorate": "Governorate",
+      "keepAddress": "Keep Address",
+      "makeDefault": "Make this the default delivery address",
+      "messages": {
+        "added": "{name} address added.",
+        "deleted": "{name} address deleted.",
+        "setDefault": "{name} set as default.",
+        "updated": "{name} address updated."
+      },
+      "primaryDeliveryAddress": "Primary delivery address",
+      "streetAddress": "Street Address",
+      "title": "Address Book"
+    },
+    "branches": {
+      "addBranch": "Add Branch",
+      "addNewBranch": "Add New Branch",
+      "branch": "Branch",
+      "branchName": "Branch Name",
+      "closeForm": "Close branch form",
+      "contactName": "Contact Name",
+      "defaultBranch": "Default Branch",
+      "deleteBranch": "Delete Branch",
+      "deleteBranchNamed": "Delete {name}",
+      "deleteDescription": "This will remove {name} from clinic branch management. Existing orders will not be changed.",
+      "deleteTitle": "Delete Branch?",
+      "description": "Manage clinic locations, delivery contacts, and branch-specific supply lists.",
+      "editBranch": "Edit Branch",
+      "editBranchNamed": "Edit {name}",
+      "eyebrow": "Clinic Management",
+      "formDescription": "Add or edit clinic branch details used for deliveries and supply lists.",
+      "keepBranch": "Keep Branch",
+      "messages": {
+        "added": "{name} added.",
+        "deleted": "{name} deleted.",
+        "setDefault": "{name} set as default.",
+        "updated": "{name} updated."
+      },
+      "ordersCount": "{count} Orders",
+      "setAsDefault": "Set as Default",
+      "supplyListsCount": "{count} Supply Lists",
+      "title": "Clinic Branches"
+    },
+    "common": {
+      "add": "Add",
+      "addToCart": "Add to Cart",
+      "branch": "Branch",
+      "branchWithColon": "Branch:",
+      "brand": "Brand",
+      "brandWithColon": "Brand:",
+      "cancel": "Cancel",
+      "category": "Category",
+      "decreaseQuantity": "Decrease quantity",
+      "description": "Description",
+      "discount": "Discount",
+      "download": "Download",
+      "increaseQuantity": "Increase quantity",
+      "itemsCount": "{count} items",
+      "notes": "Notes",
+      "products": "products",
+      "qty": "Qty",
+      "qtyValue": "Qty: {quantity}",
+      "remove": "Remove",
+      "resetFilters": "Reset Filters",
+      "saveChanges": "Save Changes",
+      "skuWithValue": "SKU: {sku}",
+      "status": "Status",
+      "subtotal": "Subtotal",
+      "summary": "Summary",
+      "total": "Total",
+      "viewDetails": "View Details"
+    },
+    "dashboard": {
+      "metrics": {
+        "activeOrders": "Active Orders",
+        "pendingQuotes": "Pending Quotes",
+        "wishlistItems": "Wishlist Items",
+        "xPoints": "X-Points"
+      },
+      "overviewEyebrow": "Account Overview",
+      "purchasingToolsTitle": "Clinic Purchasing Tools",
+      "quickActionItems": {
+        "browseProducts": {
+          "title": "Browse Products",
+          "description": "Explore dental supplies and clinic essentials."
+        },
+        "requestQuote": {
+          "title": "Request Quote",
+          "description": "Ask for pricing on bulk or special products."
+        },
+        "support": {
+          "title": "Contact Support",
+          "description": "Get help with orders, delivery, or products."
+        },
+        "viewOrders": {
+          "title": "View Orders",
+          "description": "Track current orders and reorder previous items."
+        },
+        "mySupplyLists": {
+          "title": "My Supply Lists",
+          "description": "Save frequently ordered clinic essentials."
+        },
+        "quotes": {
+          "title": "Quotes",
+          "description": "Review and manage requested quotations."
+        },
+        "productRequests": {
+          "title": "Product Requests",
+          "description": "Request unavailable or special dental products."
+        },
+        "clinicBranches": {
+          "title": "Clinic Branches",
+          "description": "Manage delivery locations and clinic branches."
+        }
+      },
+      "quickActionsBody": "Common tasks for managing your clinic orders and purchasing flow.",
+      "quickActionsTitle": "Quick Actions",
+      "recentOrdersTitle": "Recent Orders",
+      "welcome": "Welcome back, {name}",
+      "accountSupportToolsTitle": "Account & Support Tools",
+      "accountSupportToolsDescription": "Manage your account details, rewards, notifications, and support requests.",
+      "accountSupportTools": {
+        "addressBook": {
+          "title": "Address Book",
+          "description": "Manage saved delivery addresses for your clinic."
+        },
+        "walletPoints": {
+          "title": "Wallet & Points",
+          "description": "View your points balance and available rewards."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Review order updates and important account alerts."
+        },
+        "supportTickets": {
+          "title": "Support Tickets",
+          "description": "Follow up on your support requests and replies."
+        }
+      }
+    },
+    "filters": {
+      "dateFilter": "Filter by date",
+      "nameAz": "Name A-Z",
+      "oldestFirst": "Oldest First",
+      "priceHigh": "Price High",
+      "priceLow": "Price Low",
+      "statusFilter": "Filter by status"
+    },
+    "notifications": {
+      "allRead": "All Read",
+      "description": "Stay updated on orders, quotes, product requests, back-in-stock alerts, and account activity.",
+      "emptyDescription": "New account updates will appear here.",
+      "emptyTitle": "You're all caught up",
+      "eyebrow": "Account Updates",
+      "markAllAsReadCount": "Mark All as Read ({count})",
+      "markedAllRead": "All notifications marked as read.",
+      "loadFailed": "Failed to load notifications.",
+      "updateFailed": "Failed to update notifications.",
+      "title": "Notifications",
+      "unreadNotification": "Unread notification"
+    },
+    "orders": {
+      "completePayment": "Complete Payment",
+      "dateFilterLabel": "Filter orders by date",
+      "description": "Track current orders, review previous purchases, and reorder clinic essentials quickly.",
+      "detail": {
+        "invoice": "Invoice",
+        "invoiceDownloaded": "Invoice for {orderNumber} downloaded.",
+        "itemsTitle": "Items ({count})",
+        "notFound": "Order not found",
+        "orderStatus": "Order Status",
+        "paymentInfo": "Payment Info",
+        "placedOn": "Placed on {date}",
+        "reorderItems": "Reorder Items",
+        "shippingInfo": "Shipping Info",
+        "shippingMethod": "Shipping ({method})",
+        "title": "Order Details",
+        "trackingTimeline": "Tracking timeline"
+      },
+      "emptyDescription": "Try adjusting your search, status, or date filters.",
+      "emptyTitle": "No orders found",
+      "noProducts": "No products",
+      "placedOn": "Placed {date}",
+      "reorder": "Reorder",
+      "searchLabel": "Search orders",
+      "searchPlaceholder": "Search by order number or product name",
+      "sortLabel": "Sort orders",
+      "statusFilterLabel": "Filter orders by status",
+      "tabs": {
+        "current": "Current Orders",
+        "history": "Order History"
+      },
+      "title": "My Orders",
+      "trackOrder": "Track Order"
+    },
+    "productRequests": {
+      "backToProductRequests": "Back to Product Requests",
+      "brandNotSpecified": "Brand not specified",
+      "brandPlaceholder": "Brand or manufacturer",
+      "closeForm": "Close product request form",
+      "description": "Request dental products that are not currently listed and track availability updates from our team.",
+      "detail": {
+        "addMoreDetailsDescription": "Upload another image, product code, or link to help our team find the exact product.",
+        "addMoreDetailsTitle": "Need to add more details?",
+        "addNote": "Add Note",
+        "addNoteLabel": "Add note to product request",
+        "addNotePlaceholder": "Add product code, supplier reference, size, or extra details",
+        "availabilityPending": "Availability result will appear here once our team receives supplier confirmation.",
+        "availabilityResult": "Availability Result",
+        "callSupportPhone": "Call support at +20 15 52229405",
+        "canceledNoDetails": "This request is canceled, so new details cannot be added.",
+        "cancelRequest": "Cancel Request",
+        "contactDetails": "Contact Details",
+        "editContactDetails": "Edit contact details",
+        "lastUpdated": "Last Updated",
+        "latestUpdate": "Latest update",
+        "messages": {
+          "canceled": "Request {requestNumber} has been canceled.",
+          "cancelFailed": "Failed to cancel this request.",
+          "fileAttached": "{fileName} has been attached to this request.",
+          "filesAttached": "{count} images have been attached to this request.",
+          "noteAdded": "Your note has been added to this request.",
+          "detailsFailed": "Failed to update request details."
+        },
+        "mobileCanceledUpdate": "Request canceled. Supplier checks are no longer active.",
+        "mobileCheckingUpdate": "Checking supplier availability. Updates will appear after confirmation.",
+        "notFoundDescription": "This product request is not available in the current account data.",
+        "notFoundTitle": "Request not found",
+        "notProvided": "Not provided",
+        "openSupportChat": "Open Support Chat",
+        "preferredBranch": "Preferred Branch",
+        "productLink": "Product Link",
+        "provided": "Provided",
+        "requestCanceled": "Request Canceled",
+        "requestedMeta": "Requested on {date} - {branch}",
+        "requestedProductDetails": "Requested Product Details",
+        "requestedProductDetailsDescription": "Information submitted with this product request.",
+        "requestNumber": "Request Number",
+        "saveNote": "Save Note",
+        "statusTitle": "Request Status",
+        "summaryTitle": "Request Summary",
+        "teamUpdates": "Team Updates",
+        "uploadedFile": "Uploaded File",
+        "uploadedFiles": "Uploaded Files",
+        "uploadImage": "Upload Image"
+      },
+      "emptyDescription": "Adjust your filters or request a product that your clinic needs.",
+      "emptyTitle": "No requests found",
+      "eyebrow": "Product Support",
+      "helpDescription": "Support can help identify alternatives, compatible shades, or supplier options.",
+      "helpTitle": "Need help finding a product?",
+      "messages": {
+        "callingSupport": "Calling support about Request {requestNumber}.",
+        "callingSupportPhone": "Calling support at +20 15 52229405.",
+        "submitted": "Request {requestNumber} submitted.",
+        "submitFailed": "Failed to send request. Please try again.",
+        "loadFailed": "Failed to load product requests."
+      },
+      "modalDescription": "Tell us what your clinic needs and we will check supplier availability.",
+      "notesPlaceholder": "Add product size, shade, files, or supplier preference.",
+      "productName": "Product Name",
+      "productNamePlaceholder": "Example: M3-Pro Gold Rotary Files Double",
+      "quantityNeeded": "Quantity Needed",
+      "quantityPlaceholder": "2 packs",
+      "requestCount": "{count} requests",
+      "requestProduct": "Request Product",
+      "requestTitle": "Request {requestNumber}",
+      "searchLabel": "Search product requests",
+      "searchPlaceholder": "Search by product name, brand, or category",
+      "sortLabel": "Sort product requests",
+      "submitRequest": "Submit Request",
+      "title": "Product Requests",
+      "viewProduct": "View Product"
+    },
+    "profile": {
+      "changePhoto": "Change Photo",
+      "chooseProfilePhoto": "Choose profile photo",
+      "clinicName": "Clinic Name",
+      "contactInformation": "Contact Information",
+      "contactInformationDescription": "Use reachable contact details for order confirmation, quotes, and delivery support.",
+      "description": "Update your personal details and contact information.",
+      "emailAddress": "Email Address",
+      "eyebrow": "ACCOUNT DETAILS",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "messages": {
+        "changesDiscarded": "Changes discarded.",
+        "photoSelected": "Profile photo \"{fileName}\" selected.",
+        "profileSaved": "Profile changes saved."
+      },
+      "personalInformation": "Personal Information",
+      "personalInformationDescription": "Keep your name, role, and clinic details up to date.",
+      "phoneNumber": "Phone Number",
+      "professionalRole": "Professional Role",
+      "selectedPhoto": "Selected photo: {fileName}",
+      "title": "Profile Settings",
+      "verifiedAccount": "Verified Account",
+      "verifiedEmail": "Verified account email.",
+      "whatsappHelper": "Used only for order and delivery support when needed.",
+      "whatsappNumber": "WhatsApp Number"
+    },
+    "quotes": {
+      "acceptedLabel": "Accepted:",
+      "acceptedStatusDescription": "This quote has been accepted and is ready for order processing.",
+      "acceptQuote": "Accept Quote",
+      "activityTitle": "Quote Activity",
+      "approvedDate": "Approved Date",
+      "approvedStatusDescription": "This quote is approved and available until {date}.",
+      "backToQuotes": "Back to Quotes",
+      "changeRequestDescription": "Tell the sales team what needs to change before you accept this quote.",
+      "changeRequestPlaceholder": "Example: Please adjust quantity, delivery date, or replace an unavailable product.",
+      "closeChangeRequestForm": "Close change request form",
+      "closeQuoteForm": "Close quote form",
+      "contactBranch": "Contact & Branch",
+      "contactSales": "Contact Sales",
+      "customerRequest": "Customer Request",
+      "dateFilterLabel": "Filter quotes by date",
+      "description": "Review quote requests, bulk pricing, and special product offers from our sales team.",
+      "detailsTitle": "Quote Details",
+      "downloadQuote": "Download Quote",
+      "editBranchDetails": "Edit branch details",
+      "emptyDescription": "Adjust your filters or request a new quote for your clinic.",
+      "emptyTitle": "No quotes found",
+      "expiresDate": "Expires {date}",
+      "expiresLabel": "Expires:",
+      "expiryDate": "Expiry Date",
+      "eyebrow": "Clinic Quotes",
+      "lineTotal": "Line Total",
+      "messages": {
+        "accepted": "Quote {quoteNumber} has been accepted.",
+        "callingSales": "Calling sales about #{quoteNumber}.",
+        "changeRequestSent": "Change request sent for Quote {quoteNumber}.",
+        "downloadStarted": "Quote {quoteNumber} download started.",
+        "requested": "Quote #{quoteNumber} has been requested.",
+        "requestedFrom": "Quote #{quoteNumber} requested from #{sourceQuoteNumber}."
+      },
+      "notesPlaceholder": "Add products, brands, quantities, or budget notes.",
+      "notFoundDescription": "This quote is not available in the current account data.",
+      "notFoundTitle": "Quote not found",
+      "originalPrice": "Original Price",
+      "originalSubtotal": "Original Subtotal",
+      "preparedBy": "Quote prepared by: {name}",
+      "quoteAccepted": "Quote Accepted",
+      "quoteDiscount": "Quote Discount",
+      "quotedPrice": "Quoted Price",
+      "quotedProducts": "Quoted Products",
+      "quotedProductsDescription": "Review requested quantities, quoted prices, and product availability.",
+      "quotedSubtotal": "Quoted Subtotal",
+      "quoteNumber": "Quote Number",
+      "quoteNumberTitle": "Quote #{quoteNumber}",
+      "quoteSource": "Quote Source",
+      "quoteTitle": "Quote {quoteNumber}",
+      "reorderQuote": "Reorder Quote",
+      "requestAgain": "Request Again",
+      "requestChanges": "Request Changes",
+      "requestedDate": "Requested {date}",
+      "requestedDateLabel": "Requested Date",
+      "requestedMeta": "Requested on {date} - {count} products - {branch}",
+      "requestedQty": "Requested Qty",
+      "requestModalDescription": "Tell sales what your clinic needs and we will prepare bulk pricing.",
+      "requestNewQuote": "Request New Quote",
+      "salesNotes": "Sales Notes",
+      "saveAmount": "Save {amount}",
+      "searchLabel": "Search quotes",
+      "searchPlaceholder": "Search by quote number or product name",
+      "sendRequest": "Send Request",
+      "shippingEstimate": "Shipping Estimate",
+      "sortLabel": "Sort quotes",
+      "sourceLabel": "Source:",
+      "sourceValue": "Source: {source}",
+      "statusFilterLabel": "Filter quotes by status",
+      "statusTitle": "Quote Status",
+      "submitQuoteRequest": "Submit Quote Request",
+      "summaryTitle": "Quote Summary",
+      "taxVat": "Tax / VAT",
+      "title": "Quotes",
+      "totalQuote": "Total Quote",
+      "youSave": "You Save: {amount}"
+    },
+    "settings": {
+      "accountActions": "Account Actions",
+      "accountActionsDescription": "Manage sensitive account actions.",
+      "activeSessions": "Active Sessions",
+      "activeSessionsDescription": "Sign out from other devices if you notice unusual activity.",
+      "backInStockAlerts": "Back-in-Stock Alerts",
+      "backInStockAlertsLower": "Back-in-stock alerts",
+      "changePassword": "Change Password",
+      "changePasswordDescription": "Enter your current password and choose a new secure password.",
+      "changePreferencesAnytime": "You can change these preferences at any time.",
+      "clinicSupplyDeals": "Clinic supply deals",
+      "communicationPreferences": "Communication Preferences",
+      "communicationPreferencesDescription": "Control marketing and service messages from X Dental Store.",
+      "confirmNewPassword": "Confirm New Password",
+      "country": "Country",
+      "currency": "Currency",
+      "currentPassword": "Current Password",
+      "deactivateAccount": "Deactivate Account",
+      "deactivateAccountDescription": "This starts an account deactivation request. You can contact support later if you need the account restored.",
+      "deactivateAccountQuestion": "Deactivate Account?",
+      "deactivationSubmitted": "Account deactivation request submitted.",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDescription": "This starts an account deletion request. Orders, quotes, supply lists, and saved data may no longer be available once the request is processed.",
+      "deleteAccountQuestion": "Delete Account?",
+      "deletionSubmitted": "Account deletion request submitted.",
+      "description": "Manage your account preferences, security, notifications, language, and privacy options.",
+      "eyebrow": "Account Control",
+      "language": "Language",
+      "languageRegion": "Language & Region",
+      "languageRegionDescription": "Set your preferred language, country, and shopping currency.",
+      "lastUpdated3Months": "Last updated 3 months ago",
+      "manageNotifications": "Manage Notifications",
+      "newArrivals": "New arrivals",
+      "newPassword": "New Password",
+      "notificationPreferences": "Notification Preferences",
+      "notificationPreferencesDescription": "Choose which account updates you want to receive.",
+      "orderUpdates": "Order Updates",
+      "password": "Password",
+      "passwordChanged": "Password changed successfully.",
+      "passwordHint": "Use at least 8 characters.",
+      "passwordMismatch": "New password and confirmation do not match.",
+      "passwordSecurity": "Password & Security",
+      "passwordSecurityDescription": "Manage your password, active sessions, and account protection.",
+      "passwordTooShort": "New password must be at least 8 characters.",
+      "personalizedRecommendations": "Personalized product recommendations",
+      "privacyPreferences": "Privacy Preferences",
+      "privacyPreferencesDescription": "Manage how your data is used for recommendations and account support.",
+      "productRequestUpdates": "Product Request Updates",
+      "quoteUpdates": "Quote Updates",
+      "requestDeactivation": "Request Deactivation",
+      "requestDeletion": "Request Deletion",
+      "saveBrowsingActivity": "Save browsing and wishlist activity",
+      "savePassword": "Save Password",
+      "security": "Security",
+      "signOut": "Sign Out",
+      "supportReplies": "Support Replies",
+      "title": "Settings",
+      "unsubscribeAnytime": "You can unsubscribe from marketing messages at any time.",
+      "useOrderHistory": "Use order history for reorder suggestions",
+      "weeklyOffers": "Weekly offers"
+    },
+    "statuses": {
+      "searching": "Searching"
+    },
+    "supplyLists": {
+      "closeCreateListForm": "Close create list form",
+      "copyName": "{name} Copy",
+      "createList": "Create List",
+      "createNewList": "Create New List",
+      "createNewListDescription": "Set up a reusable list for repeat clinic purchasing.",
+      "createNewSupplyList": "Create New Supply List",
+      "createNewSupplyListDescription": "Build a reusable list for monthly orders, repeat items, or branch needs.",
+      "deleteDescription": "This removes {name} from saved lists. Products in your cart will not be affected.",
+      "deleteList": "Delete List",
+      "deleteTitle": "Delete Supply List?",
+      "description": "Create reusable lists for clinic essentials, repeat orders, and frequently purchased dental supplies.",
+      "detail": {
+        "addAllAvailableToCart": "Add All Available to Cart",
+        "addProducts": "Add Products",
+        "addProductsDescription": "Choose products to add to this reusable clinic list.",
+        "allProductsAlreadyInList": "All catalog products are already in this list.",
+        "applyOption": "Apply Option",
+        "availabilityFilterLabel": "Filter products by availability",
+        "backToSupplyLists": "Back to My Supply Lists",
+        "clearList": "Clear list",
+        "closeAddProducts": "Close add products",
+        "estimatedSubtotal": "Estimated Subtotal",
+        "estimatedTotal": "Estimated Total",
+        "listSummary": "List Summary",
+        "messages": {
+          "availableAddedToCart": "{count} available products added to cart.",
+          "cleared": "All products removed from this list.",
+          "noAvailableProducts": "No available products can be added to cart.",
+          "noUnavailableProducts": "There are no unavailable products to remove.",
+          "optionsSelected": "Product options selected.",
+          "productAdded": "{name} added to this list.",
+          "productRemoved": "Product removed from this list.",
+          "quoteSubmitted": "Quote request submitted for {name}.",
+          "reset": "List reset to its saved version.",
+          "saved": "List changes saved.",
+          "unableToSave": "Unable to save this list.",
+          "unavailableRemoved": "{count} unavailable products removed."
+        },
+        "noProductsDescription": "Try changing the search term or availability filter.",
+        "noProductsTitle": "No products found",
+        "notFoundDescription": "The requested supply list may have been removed or renamed.",
+        "notFoundTitle": "Supply list not found",
+        "openListActions": "Open list actions",
+        "optionValue": "Option: {option}",
+        "productsInList": "Products in this list",
+        "productsInListDescription": "Adjust quantities before adding products to cart or requesting a quote.",
+        "quoteRequestDescription": "Submitting this request sends the current list quantities and selected options to the quotes workflow.",
+        "removeUnavailable": "Remove unavailable",
+        "resetList": "Reset list",
+        "searchProductsLabel": "Search products in this list",
+        "searchProductsPlaceholder": "Search products in this list",
+        "selectOptions": "Select Options",
+        "visibleItems": "Visible items: {amount}"
+      },
+      "addProductsNow": "Add products now",
+      "emptyListDescription": "Empty list ready for products.",
+      "emptyDescription": "Create a reusable list for clinic ordering.",
+      "emptyTitle": "No supply lists found",
+      "eyebrow": "Supply Lists",
+      "keepList": "Keep List",
+      "listName": "List Name",
+      "menu": {
+        "archiveList": "Archive list",
+        "deleteList": "Delete list",
+        "duplicateList": "Duplicate list",
+        "restoreList": "Restore list",
+        "viewDetails": "View details"
+      },
+      "messages": {
+        "addedToCart": "{count} products from {name} added to cart.",
+        "archived": "{name} archived.",
+        "created": "{name} created.",
+        "deleted": "{name} deleted.",
+        "restored": "{name} restored."
+      },
+      "openActionsFor": "Open actions for {name}",
+      "startWithCommonEssentials": "Start with common essentials",
+      "title": "My Supply Lists",
+      "updatedDays": "Updated {days}d ago",
+      "updatedFullDays": "Updated {days} days ago",
+      "updatedOneDay": "Updated 1d ago",
+      "updatedOneFullDay": "Updated 1 day ago",
+      "updatedToday": "Updated today",
+      "viewList": "View List"
+    },
+    "support": {
+      "addReply": "Add Reply",
+      "closeNewTicketForm": "Close new ticket form",
+      "createdDate": "Created {date}",
+      "description": "Contact support and track issues related to orders, delivery, payment, products, quotes, or account questions.",
+      "eyebrow": "Support Center",
+      "filterByDate": "Filter by date",
+      "filterByStatus": "Filter by status",
+      "hideDetails": "Hide Details",
+      "issueType": "Issue Type",
+      "latestLabel": "Latest",
+      "latestUpdate": "Latest update",
+      "supportChat": "Support Chat",
+      "noMessages": "No messages yet",
+      "sendFailed": "Failed to send message. Please try again.",
+      "loadFailed": "Failed to load support tickets.",
+      "loadMessagesFailed": "Failed to load messages.",
+      "waitingCustomer": "Waiting for Customer",
+      "message": "Message",
+      "messagePlaceholder": "Describe what happened and what help you need.",
+      "modalDescription": "Share the issue details so the support team can route it correctly.",
+      "noTicketsDescription": "Adjust your filters or open a new ticket so support can review the issue.",
+      "noTicketsFound": "No tickets found",
+      "openNewTicket": "Open New Ticket",
+      "openTicket": "Open Ticket",
+      "priority": "Priority",
+      "relatedLabel": "Related",
+      "relatedOrderOrQuote": "Related Order or Quote",
+      "relatedPlaceholder": "Order #XD-10245",
+      "replyAdded": "Reply added to Ticket #{ticketNumber}.",
+      "replyPlaceholder": "Add context, documents, or an update for support.",
+      "replyToTicket": "Reply to ticket",
+      "searchPlaceholder": "Search by order number or product name",
+      "searchTickets": "Search tickets",
+      "sendReply": "Send Reply",
+      "sortTickets": "Sort tickets",
+      "subject": "Subject",
+      "subjectPlaceholder": "Example: Delivery delay for Order #XD-10245",
+      "ticketCreated": "Ticket created",
+      "ticketLoggedFor": "{type} logged for {related}.",
+      "ticketNumber": "Ticket #{ticketNumber}",
+      "ticketOpened": "Ticket #{ticketNumber} opened.",
+      "ticketTimeline": "Ticket Timeline",
+      "title": "Support Tickets",
+      "typeLabel": "Type",
+      "viewTicket": "View Ticket",
+      "waiting": "Waiting"
+    },
+    "tabs": {
+      "requestHistory": "Request History"
+    },
+    "values": {
+      "common": {
+        "account": "Account",
+        "order": "Order",
+        "orders": "Orders",
+        "branch": "Branch"
+      },
+      "account": {
+        "quote": "Quote",
+        "quotes": "Quotes",
+        "productRequest": "Product Request",
+        "productRequests": "Product Requests",
+        "wishlist": "Wishlist",
+        "supportTickets": "Support Tickets",
+        "offers": "Offers"
+      },
+      "statuses": {
+        "active": "Active",
+        "added": "Added",
+        "approved": "Approved",
+        "archived": "Archived",
+        "available": "Available",
+        "backordered": "Backordered",
+        "canceled": "Canceled",
+        "cancelled": "Cancelled",
+        "complete": "Complete",
+        "current": "Current",
+        "delivered": "Delivered",
+        "expired": "Expired",
+        "inStock": "In Stock",
+        "limitedStock": "Limited Stock",
+        "lowStock": "Low Stock",
+        "needOptions": "Need Options",
+        "normal": "Normal",
+        "notAvailable": "Not Available",
+        "open": "Open",
+        "outForDelivery": "Out for Delivery",
+        "outOfStock": "Out of Stock",
+        "paid": "Paid",
+        "pending": "Pending",
+        "pendingPayment": "Pending Payment",
+        "pendingReview": "Pending Review",
+        "processing": "Processing",
+        "refunded": "Refunded",
+        "resolved": "Resolved",
+        "searchingSupplier": "Searching Supplier",
+        "shared": "Shared",
+        "shipped": "Shipped",
+        "today": "Today",
+        "underReview": "Under Review",
+        "unavailable": "Unavailable",
+        "urgent": "Urgent",
+        "used": "Used",
+        "waitingForSupport": "Waiting for Support",
+        "waitingForCustomer": "Waiting for Customer"
+      },
+      "filters": {
+        "all": "All",
+        "allAvailability": "All Availability",
+        "allStock": "All Stock",
+        "allStatus": "All Status",
+        "allStatuses": "All Statuses",
+        "allTime": "All Time",
+        "last30Days": "Last 30 days",
+        "last6Months": "Last 6 months",
+        "newestFirst": "Newest First",
+        "oldestFirst": "Oldest First",
+        "recentlySaved": "Recently Saved",
+        "unread": "Unread"
+      },
+      "tabs": {
+        "activeQuotes": "Active Quotes",
+        "activeRequests": "Active Requests",
+        "activeTickets": "Active Tickets",
+        "orderHistory": "Order History",
+        "quoteHistory": "Quote History",
+        "requestHistory": "Request History",
+        "ticketHistory": "Ticket History"
+      },
+      "branches": {
+        "general": "General",
+        "mainClinic": "Main Clinic",
+        "dokkiBranch": "Dokki Branch",
+        "nasrCityBranch": "Nasr City Branch"
+      },
+      "addressLabels": {
+        "clinic": "Clinic",
+        "home": "Home"
+      },
+      "locations": {
+        "egypt": "Egypt",
+        "cairo": "Cairo",
+        "giza": "Giza",
+        "mohandeseen": "Mohandeseen"
+      },
+      "ticketTypes": {
+        "accountQuestion": "Account Question",
+        "deliveryIssue": "Delivery Issue",
+        "orderIssue": "Order Issue",
+        "paymentIssue": "Payment Issue",
+        "productQuestion": "Product Question",
+        "quoteRequest": "Quote Request"
+      },
+      "paymentMethods": {
+        "bankTransfer": "Bank Transfer",
+        "cashOnDelivery": "Cash on Delivery",
+        "creditCardVisa": "Credit Card (Visa ending in 4242)"
+      },
+      "deliveryMethods": {
+        "fastDelivery": "Fast Delivery",
+        "standardDelivery": "Standard Delivery"
+      },
+      "deliveryStatuses": {
+        "inTransit": "In Transit",
+        "awaitingShipment": "Awaiting Shipment"
+      },
+      "quoteSources": {
+        "manualRequest": "Manual Request",
+        "monthlyClinicEssentials": "Monthly Clinic Essentials",
+        "previousOrder": "Previous Order",
+        "clinicRestock": "Clinic Restock",
+        "wishlist": "Wishlist"
+      },
+      "quoteSteps": {
+        "accepted": "Accepted",
+        "submitted": "Submitted"
+      },
+      "quoteActivity": {
+        "requestSubmitted": "Quote request submitted",
+        "salesReviewed": "Sales team reviewed your request",
+        "approved": "Quote approved",
+        "expires": "Quote expires"
+      },
+      "quoteDetails": {
+        "calculatedIfApplicable": "Calculated if applicable",
+        "customerRequest": "Need bulk pricing for restorative materials and monthly clinic essentials. Preferred delivery within one week.",
+        "salesNotes": "We applied clinic pricing for the selected quantities. Some items may require confirmation before shipping.",
+        "salesTeam": "Sales Team"
+      },
+      "requestActivity": {
+        "submitted": "Request submitted",
+        "checkingSuppliers": "Team started checking suppliers",
+        "awaitingSupplier": "Awaiting supplier response",
+        "supplierAvailable": "Supplier confirmed availability",
+        "supplierSearchStarted": "Supplier search started",
+        "supplierUnavailable": "Supplier confirmed unavailable"
+      },
+      "orderTracking": {
+        "orderPlaced": "Order Placed"
+      },
+      "categories": {
+        "endodontics": "Endodontics",
+        "restorative": "Restorative",
+        "restorativeMaterials": "Restorative Materials",
+        "compositesBonding": "Composites & Bonding",
+        "infectionControl": "Infection Control",
+        "clinicEssentials": "Clinic Essentials",
+        "dentalInstruments": "Dental Instruments",
+        "orthodontics": "Orthodontics",
+        "implantology": "Implantology"
+      },
+      "supplyLists": {
+        "monthlyClinicEssentials": "Monthly Clinic Essentials",
+        "endodonticSupplies": "Endodontic Supplies",
+        "infectionControlRestock": "Infection Control Restock",
+        "reusableSupplies": "Reusable supplies for everyday clinic operations.",
+        "endodonticDescription": "Files, irrigation tips, sealers, and endodontic essentials.",
+        "infectionControlDescription": "Sterilization and infection control products for weekly restocking."
+      },
+      "productRequests": {
+        "availability": {
+          "availableForPrice": "Available for EGP 240 per pack. Ready to add to cart.",
+          "unavailableRefillKit": "Supplier confirmed this exact refill kit is unavailable right now."
+        },
+        "updates": {
+          "checkingAvailability": "Our team is checking supplier availability and will update you once we receive confirmation.",
+          "availableInStore": "This product is now available in the store.",
+          "checkingSuppliers": "We are checking availability with suppliers.",
+          "notAvailable": "Supplier confirmed this item is not available right now.",
+          "canceledInactive": "Request canceled. Supplier checks are no longer active.",
+          "checkingMobile": "Checking supplier availability. Updates will appear after confirmation."
+        }
+      },
+      "wallet": {
+        "placeOrders": "Place Orders",
+        "placeOrdersDescription": "Earn points when your order is completed.",
+        "reorderClinicEssentials": "Reorder Clinic Essentials",
+        "reorderClinicEssentialsDescription": "Earn rewards on repeat purchases and supply lists.",
+        "useOffers": "Use Offers",
+        "useOffersDescription": "Get extra points on selected weekly deals.",
+        "completeYourProfile": "Complete Your Profile",
+        "completeYourProfileDescription": "Keep your account details updated for better rewards.",
+        "history": {
+          "orderCompleted": "Order #XD-10245 completed",
+          "redeemedAtCheckout": "Redeemed at checkout",
+          "weeklyOfferBonus": "Weekly offer bonus",
+          "expiredPoints": "Expired points"
+        },
+        "rewards": {
+          "clinicEssentials50": "EGP 50 Off Clinic Essentials",
+          "ordersAbove1000": "Use on orders above EGP 1,000.",
+          "freeDeliveryVoucher": "Free Delivery Voucher",
+          "ordersAbove800": "Use on orders above EGP 800.",
+          "extraPointsWeekly": "Extra Points on Weekly Offers",
+          "earn2x": "Earn 2x points on selected offers."
+        }
+      },
+      "notifications": {
+        "orderProcessingTitle": "Order #ORD-2023-1102 is processing",
+        "orderProcessingMessage": "Your order has been confirmed and is now being prepared for delivery.",
+        "quoteApprovedTitle": "Quote #XQ-2038 has been approved",
+        "quoteApprovedMessage": "Your quote is ready to review and will expire on 30 July 2025.",
+        "checkingSupplierTitle": "We're checking supplier availability",
+        "checkingSupplierMessage": "Our team is checking availability for M3-Pro Gold Rotary Files Double.",
+        "backInStockTitle": "Sterilization Pouches are back in stock",
+        "backInStockMessage": "Sterilization Pouches 200 pcs are available again and ready to order.",
+        "orderDeliveredTitle": "Order #ORD-2023-1042 was delivered",
+        "orderDeliveredMessage": "Your order has been delivered successfully. You can view details or reorder items from your account.",
+        "quoteExpiredTitle": "Quote #XQ-2018 has expired",
+        "quoteExpiredMessage": "This quote has expired. You can request a new quote using the same products.",
+        "weeklyOffersTitle": "New weekly offers are available",
+        "weeklyOffersMessage": "Explore selected dental supplies with updated weekly pricing and limited-time offers.",
+        "supportReplyTitle": "Support replied to your ticket",
+        "productRequestSentTitle": "Product request sent",
+        "productAvailableTitle": "Product available",
+        "productRequestUpdatedTitle": "Product request updated",
+        "supportResolvedTitle": "Support ticket resolved",
+        "supportReplyMessage": "Our team replied to your delivery question. Open the ticket to continue the conversation.",
+        "passwordChangedTitle": "Your password was changed",
+        "passwordChangedMessage": "Your account password was changed successfully. If this wasn't you, contact support immediately.",
+        "time": {
+          "twoHoursAgo": "2 hours ago",
+          "oneDayAgo": "1 day ago",
+          "twoDaysAgo": "2 days ago",
+          "threeDaysAgo": "3 days ago",
+          "fiveDaysAgo": "5 days ago",
+          "oneWeekAgo": "1 week ago",
+          "twoWeeksAgo": "2 weeks ago",
+          "threeWeeksAgo": "3 weeks ago"
+        }
+      },
+      "support": {
+        "subjects": {
+          "deliveryDelay": "Delivery delay for Order #XD-10245",
+          "paymentConfirmation": "Question about payment confirmation",
+          "missingCompositeItem": "Missing item from composite order",
+          "implantologyQuoteUpdate": "Quote update for implantology supplies"
+        },
+        "latest": {
+          "reviewingDelivery": "Our team is reviewing the delivery status.",
+          "waitingReview": "Ticket submitted and waiting for support review.",
+          "replacementShipped": "Replacement item was shipped and the ticket was resolved.",
+          "quoteUpdated": "Quote was updated and approved by the clinic.",
+          "replyAdded": "You added a reply. Support will review the update."
+        },
+        "accountSupport": "Account Support"
+      },
+      "settingsValues": {
+        "english": "English",
+        "egp": "EGP (Egyptian Pound)"
+      }
+    },
+    "wallet": {
+      "availablePoints": "Available Points",
+      "availableRewards": "Available Rewards",
+      "availableRewardsDescription": "Use rewards and vouchers when eligible during checkout.",
+      "currentBalance": "Current Balance",
+      "description": "Track your points, store credit, coupons, and reward activity in one place.",
+      "enterPoints": "Enter points",
+      "equivalent": "Equivalent",
+      "expiringSoon": "Expiring Soon",
+      "eyebrow": "Rewards & Credit",
+      "filterPointsByDate": "Filter points by date",
+      "filterPointsByStatus": "Filter points by status",
+      "howItWorks": "How It Works",
+      "howToEarnDescription": "Earn rewards as you shop, reorder clinic essentials, and use X Dental Store features.",
+      "howToEarnPoints": "How to earn points",
+      "pendingPoints": "Pending Points",
+      "pointsCheckoutNote": "Points can be applied during checkout when your cart is eligible.",
+      "pointsHistory": "Points History",
+      "pointsHistoryDescription": "Track points earned, redeemed, pending, and expired.",
+      "pointsShort": "pts",
+      "pointsUnit": "Points",
+      "redeemDescription": "Use available points to reduce your order total during checkout.",
+      "redeemPoints": "Redeem Points",
+      "searchActivity": "Search activity",
+      "showingEarnMethods": "Showing how points are earned.",
+      "showingRewards": "Showing available rewards.",
+      "storeCredit": "Store Credit",
+      "title": "Wallet & Points",
+      "useAtCheckout": "Use at Checkout",
+      "usePointsAtCheckout": "Use Points at Checkout",
+      "viewRewards": "View Rewards"
+    },
+    "wishlist": {
+      "addAllToCart": "Add All to Cart",
+      "clearWishlist": "Clear Wishlist",
+      "description": "Keep products ready for later ordering, quote requests, or clinic supply planning.",
+      "emptyDescription": "Save products from the catalog by clicking the heart icon.",
+      "emptyTitle": "Your wishlist is empty",
+      "eyebrow": "Saved Products",
+      "messages": {
+        "addedToCart": "{count} wishlist products added to cart.",
+        "cleared": "Wishlist cleared.",
+        "noAvailableProducts": "No available wishlist products can be added to cart."
+      },
+      "noSavedProductsDescription": "Try changing the search term or stock filter to find another saved product.",
+      "noSavedProductsTitle": "No saved products found",
+      "recommendedDescription": "Explore dental supplies commonly saved and reordered by clinics.",
+      "recommendedTitle": "Recommended for Your Practice",
+      "searchLabel": "Search wishlist",
+      "searchPlaceholder": "Search saved products",
+      "sortLabel": "Sort wishlist",
+      "stockFilterLabel": "Filter wishlist by stock",
+      "title": "Wishlist"
+    }
+  }
+}
