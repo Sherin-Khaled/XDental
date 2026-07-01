@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/db.js && node --check src/controllers/auth.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js && node --check src/scripts/doctor.js && node --check src/scripts/smokeMvp.js && node --check src/scripts/validateProductImport.js && node --check src/utils/productImportValidator.js && node --check prisma/seed.js",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/db.js && node --check src/controllers/auth.controller.js && node --check src/controllers/order.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js && node --check src/routes/order.routes.js && node --check src/scripts/doctor.js && node --check src/scripts/smokeMvp.js && node --check src/scripts/validateProductImport.js && node --check src/utils/productImportValidator.js && node --check prisma/seed.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",

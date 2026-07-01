@@ -72,6 +72,7 @@ interface StoreContextType {
   addToCart: (product: Product, quantity: number, selectedOptions?: string) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   toggleWishlist: (productId: string) => void;
   removeFromWishlist: (productId: string) => void;
   clearWishlist: () => void;
@@ -287,6 +288,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const clearCart = () => {
+    setCart([]);
+  };
+
   const toggleWishlist = (productId: string) => {
     setWishlistIds((prev) => {
       if (prev.includes(productId)) {
@@ -328,6 +333,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        clearCart,
         toggleWishlist,
         removeFromWishlist,
         clearWishlist,

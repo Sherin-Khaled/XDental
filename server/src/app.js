@@ -5,6 +5,7 @@ import { getDatabaseHealth } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 import productRequestRoutes from "./routes/productRequest.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 
@@ -51,6 +52,7 @@ export function createApp() {
   app.use("/api/product-requests", productRequestRoutes);
   app.use("/api/support", supportRoutes);
   app.use("/api/notifications", notificationRoutes);
+  app.use("/api/orders", orderRoutes);
   app.use("/api/admin", adminRoutes);
 
   app.use((_request, response) => {

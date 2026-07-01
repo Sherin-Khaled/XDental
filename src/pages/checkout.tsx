@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { Check, ShieldCheck, CreditCard, Wallet, RefreshCw, FileText, Package, ClipboardList } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
+import { ApiError } from "@/services/http";
+import { createOrder } from "@/services/orders";
 
 const CHECKOUT_POINTS_KEY = "x-dental-checkout-points";
 const CHECKOUT_REWARD_KEY = "x-dental-checkout-reward";
@@ -20,6 +22,9 @@ const CHECKOUT_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
 
 const inputClassName =
   "h-12 w-full rounded-[12px] border border-[#050505]/10 bg-white px-4 text-[14px] font-medium text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-bg-soft)] disabled:bg-[#F3F2ED] disabled:text-[#5F5F5F]";
+
+const invalidInputClassName =
+  "border-[#F44336]/60 focus:border-[#F44336] focus:ring-[#F44336]/10";
 
 const textAreaClassName =
   "min-h-[92px] w-full resize-none rounded-[12px] border border-[#050505]/10 bg-white px-4 py-3 text-[14px] font-medium text-[#050505] outline-none transition placeholder:text-[#9FA1AC] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-bg-soft)]";
@@ -91,6 +96,7 @@ function Field({
   label,
   required,
   note,
+  error,
   className,
   children,
 }: {
@@ -98,6 +104,7 @@ function Field({
   label: string;
   required?: boolean;
   note?: string;
+  error?: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -108,6 +115,11 @@ function Field({
         {required && <span className="ml-1 text-[var(--xd-gold-active)]">*</span>}
       </label>
       {children}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
+          {error}
+        </p>
+      )}
       {note && <p className="text-[12px] font-medium leading-5 text-[#8A8D9A]">{note}</p>}
     </div>
   );
@@ -316,12 +328,14 @@ function OrderSummary({
 
 function SelectableOption({
   selected,
+  invalid,
   title,
   description,
   price,
   onClick,
 }: {
   selected: boolean;
+  invalid?: boolean;
   title: string;
   description: string;
   price?: string;
@@ -335,6 +349,8 @@ function SelectableOption({
         "flex w-full items-center justify-between gap-4 rounded-[14px] border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]",
         selected
           ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-active)]/[0.08]"
+          : invalid
+            ? "border-[#F44336]/45 bg-[#F44336]/[0.025] hover:border-[#F44336]/65"
           : "border-[#050505]/[0.08] bg-white hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/[0.04]"
       )}
     >
@@ -356,6 +372,7 @@ function PaymentRadioCard({
   title,
   short,
   selected,
+  invalid,
   onSelect,
   icon: Icon,
   logoSrc,
@@ -364,6 +381,7 @@ function PaymentRadioCard({
   title: string;
   short?: string;
   selected: boolean;
+  invalid?: boolean;
   onSelect: () => void;
   icon?: any;
   logoSrc?: string | string[];
@@ -384,6 +402,8 @@ function PaymentRadioCard({
         "inline-flex items-center gap-2 max-w-max h-12 px-4 rounded-full border bg-white/55 text-[14px] font-semibold transition-colors focus-visible:outline-none",
         selected
           ? "border-[var(--xd-gold-border-hover)] bg-[var(--xd-gold)]/[0.10] text-[#050505]"
+          : invalid
+            ? "border-[#F44336]/45 hover:border-[#F44336]/65 hover:bg-[#F44336]/[0.025]"
           : "border-[#050505]/[0.08] hover:border-[var(--xd-gold-border)] hover:bg-[var(--xd-gold)]/[0.05]"
       )}
     >
@@ -499,47 +519,115 @@ const initialFormState = {
   clinicBranch: "",
 };
 
+type DeliveryFieldId =
+  | "firstName"
+  | "lastName"
+  | "phone"
+  | "email"
+  | "governorate"
+  | "cityArea"
+  | "streetAddress"
+  | "buildingNumber"
+  | "apartmentFloor";
+
+type PaymentFieldId =
+  | "shippingMethod"
+  | "paymentMethod"
+  | "cardNumber"
+  | "cardExpiry"
+  | "cardName"
+  | "cardCvv";
+
+const initialCardState = {
+  cardNumber: "",
+  cardExpiry: "",
+  cardName: "",
+  cardCvv: "",
+};
+
+const deliveryFieldOrder: DeliveryFieldId[] = [
+  "firstName",
+  "lastName",
+  "phone",
+  "email",
+  "governorate",
+  "cityArea",
+  "streetAddress",
+  "buildingNumber",
+  "apartmentFloor",
+];
+
+const paymentFieldOrder: PaymentFieldId[] = [
+  "shippingMethod",
+  "paymentMethod",
+  "cardNumber",
+  "cardExpiry",
+  "cardName",
+  "cardCvv",
+];
+
 function scrollToCheckoutTop() {
   window.requestAnimationFrame(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   });
 }
 
+function focusCheckoutField(id: string) {
+  window.requestAnimationFrame(() => {
+    const field = document.getElementById(id);
+    if (!field) return;
+    field.focus({ preventScroll: true });
+    field.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
 export default function Checkout() {
-  const { cart, cartTotal } = useStore();
+  const { cart, cartTotal, clearCart, currentUser, isAuthenticated, isAuthLoading } = useStore();
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
   const [currentStep, setCurrentStep] = useState<CheckoutStepId>("delivery");
   const [form, setForm] = useState(initialFormState);
   const [sendUpdates, setSendUpdates] = useState(true);
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethodId>("standard");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("cash");
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethodId | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId | null>(null);
   const [points, setPoints] = useState("");
+  const [pointsFeedback, setPointsFeedback] = useState<{ message: string; tone: "error" | "success" } | null>(null);
+  const [deliveryErrors, setDeliveryErrors] = useState<Partial<Record<DeliveryFieldId, string>>>({});
+  const [paymentErrors, setPaymentErrors] = useState<Partial<Record<PaymentFieldId, string>>>({});
+  const [card, setCard] = useState(initialCardState);
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [appliedPoints, setAppliedPoints] = useState<AppliedPoints | null>(null);
   const [appliedReward, setAppliedReward] = useState<AppliedReward | null>(null);
+  const hasCompletedOrder = useRef(false);
   const checkoutItems = cart;
   const subtotal = cartTotal;
+  const availablePoints = Math.max(0, Math.floor(currentUser?.stats?.points ?? 0));
   const selectedShippingMethod =
-    shippingMethods.find((method) => method.id === shippingMethod) ?? shippingMethods[0];
+    shippingMethods.find((method) => method.id === shippingMethod);
   const selectedPaymentMethod =
-    paymentMethods.find((method) => method.id === paymentMethod) ?? paymentMethods[0];
-  const shipping = subtotal > 0 ? selectedShippingMethod.amount : 0;
+    paymentMethods.find((method) => method.id === paymentMethod);
+  const shipping = subtotal > 0 ? selectedShippingMethod?.amount ?? 0 : 0;
 
   useEffect(() => {
+    if (isAuthLoading || hasCompletedOrder.current) return;
+    if (!isAuthenticated) {
+      setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`, { replace: true });
+      return;
+    }
     if (cart.length === 0) {
       setLocation("/cart?checkout=empty", { replace: true });
     }
-  }, [cart.length, setLocation]);
+  }, [cart.length, isAuthenticated, isAuthLoading, setLocation]);
 
   // Read applied points and reward from localStorage on mount (and when URL changes).
   // Only ONE benefit is active at a time. If both keys exist, we keep the
   // one with the newer `createdAt` (falling back to the reward if neither
   // has a timestamp, so legacy data does not double-apply).
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isAuthLoading) return;
 
     const readFromQuery = (): number | null => {
       try {
@@ -560,7 +648,7 @@ export default function Checkout() {
       try {
         const raw = window.localStorage.getItem(CHECKOUT_POINTS_KEY);
         if (!raw) {
-          if (queryPoints) {
+          if (queryPoints && queryPoints <= availablePoints) {
             return {
               type: "points",
               pointsToApply: queryPoints,
@@ -580,6 +668,10 @@ export default function Checkout() {
         const value = queryPoints ?? stored;
         if (!value || value <= 0) return null;
         const safePoints = Math.floor(value);
+        if (safePoints > availablePoints) {
+          window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
+          return null;
+        }
         return {
           type: "points",
           pointsToApply: safePoints,
@@ -647,9 +739,12 @@ export default function Checkout() {
       setAppliedPoints(storedPoints);
       setPoints(String(storedPoints.pointsToApply));
     } else if (storedReward) {
+      setAppliedPoints(null);
       setAppliedReward(storedReward);
+    } else {
+      setAppliedPoints(null);
     }
-  }, []);
+  }, [availablePoints, isAuthLoading]);
 
   // Compute raw discount from points (10 points = EGP 1) and reward.
   const rawPointsDiscountEGP = appliedPoints
@@ -700,9 +795,145 @@ export default function Checkout() {
     form.governorate,
   ].filter(Boolean);
 
+  const validateDeliveryFields = () => {
+    const errors: Partial<Record<DeliveryFieldId, string>> = {};
+    const requiredFields: Array<[DeliveryFieldId, string]> = [
+      ["firstName", "checkout.validation.firstNameRequired"],
+      ["lastName", "checkout.validation.lastNameRequired"],
+      ["phone", "checkout.validation.phoneRequired"],
+      ["email", "checkout.validation.emailRequired"],
+      ["governorate", "checkout.validation.governorateRequired"],
+      ["cityArea", "checkout.validation.cityAreaRequired"],
+      ["streetAddress", "checkout.validation.streetAddressRequired"],
+      ["buildingNumber", "checkout.validation.buildingNumberRequired"],
+      ["apartmentFloor", "checkout.validation.apartmentFloorRequired"],
+    ];
+
+    requiredFields.forEach(([field, messageKey]) => {
+      if (!form[field].trim()) errors[field] = t(messageKey);
+    });
+
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errors.email = t("checkout.validation.emailInvalid");
+    }
+
+    return errors;
+  };
+
+  const validatePaymentFields = () => {
+    const errors: Partial<Record<PaymentFieldId, string>> = {};
+
+    if (!shippingMethod) {
+      errors.shippingMethod = t("checkout.validation.shippingMethodRequired");
+    }
+    if (!paymentMethod) {
+      errors.paymentMethod = t("checkout.validation.paymentMethodRequired");
+    }
+
+    if (paymentMethod === "card") {
+      const cardNumber = card.cardNumber.replace(/\s/g, "");
+      if (!cardNumber) {
+        errors.cardNumber = t("checkout.validation.cardNumberRequired");
+      } else if (!/^\d{12,19}$/.test(cardNumber)) {
+        errors.cardNumber = t("checkout.validation.cardNumberInvalid");
+      }
+
+      if (!card.cardExpiry.trim()) {
+        errors.cardExpiry = t("checkout.validation.cardExpiryRequired");
+      } else if (!/^(0[1-9]|1[0-2])\s?\/\s?\d{2}$/.test(card.cardExpiry.trim())) {
+        errors.cardExpiry = t("checkout.validation.cardExpiryInvalid");
+      }
+
+      if (!card.cardName.trim()) {
+        errors.cardName = t("checkout.validation.cardNameRequired");
+      } else if (card.cardName.trim().length < 2) {
+        errors.cardName = t("checkout.validation.cardNameInvalid");
+      }
+
+      if (!card.cardCvv.trim()) {
+        errors.cardCvv = t("checkout.validation.cardCvvRequired");
+      } else if (!/^\d{3,4}$/.test(card.cardCvv.trim())) {
+        errors.cardCvv = t("checkout.validation.cardCvvInvalid");
+      }
+    }
+
+    return errors;
+  };
+
+  const showValidationErrors = (
+    errors: Partial<Record<DeliveryFieldId | PaymentFieldId, string>>,
+    fieldOrder: Array<DeliveryFieldId | PaymentFieldId>,
+    step: CheckoutStepId
+  ) => {
+    const firstInvalidField = fieldOrder.find((field) => errors[field]);
+    if (!firstInvalidField) return false;
+
+    setCurrentStep(step);
+    setStatusMessage(
+      step === "payment" && !errors.shippingMethod && !errors.paymentMethod
+        ? t("checkout.completeCardFields")
+        : t("checkout.completeRequiredFields")
+    );
+    focusCheckoutField(
+      firstInvalidField === "shippingMethod"
+        ? "shipping-methods"
+        : firstInvalidField === "paymentMethod"
+          ? "payment-methods"
+          : firstInvalidField
+    );
+    return true;
+  };
+
+  const clearDeliveryError = (field: DeliveryFieldId) => {
+    setDeliveryErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const clearPaymentError = (field: PaymentFieldId) => {
+    setPaymentErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+    if (deliveryFieldOrder.includes(name as DeliveryFieldId)) {
+      clearDeliveryError(name as DeliveryFieldId);
+    }
+  };
+
+  const handleCardChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const field = event.target.name as keyof typeof initialCardState;
+    setCard((current) => ({ ...current, [field]: event.target.value }));
+    clearPaymentError(field);
+  };
+
+  const selectShippingMethod = (method: ShippingMethodId) => {
+    setShippingMethod(method);
+    clearPaymentError("shippingMethod");
+  };
+
+  const selectPaymentMethod = (method: PaymentMethodId) => {
+    setPaymentMethod(method);
+    setPaymentErrors((current) => {
+      const next = { ...current };
+      delete next.paymentMethod;
+      if (method !== "card") {
+        delete next.cardNumber;
+        delete next.cardExpiry;
+        delete next.cardName;
+        delete next.cardCvv;
+      }
+      return next;
+    });
   };
 
   const showStep = (step: CheckoutStepId) => {
@@ -713,37 +944,48 @@ export default function Checkout() {
 
   const handleDeliverySubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setStatusMessage(null);
+    const errors = validateDeliveryFields();
+    setDeliveryErrors(errors);
+    if (showValidationErrors(errors, deliveryFieldOrder, "delivery")) return;
     showStep("payment");
   };
 
   const handlePaymentSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setStatusMessage(null);
+    const errors = validatePaymentFields();
+    setPaymentErrors(errors);
+    if (showValidationErrors(errors, paymentFieldOrder, "payment")) return;
     showStep("review");
   };
 
-  const handleInvalidDelivery = () => {
-    setStatusMessage(t("checkout.completeRequiredFields"));
-  };
-
-  const handleInvalidPayment = () => {
-    setStatusMessage(
-      paymentMethod === "card"
-        ? t("checkout.completeCardFields")
-        : t("checkout.completeRequiredFields")
-    );
+  const clearAppliedPoints = () => {
+    setAppliedPoints(null);
+    try {
+      window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
+    } catch {
+      /* storage unavailable */
+    }
   };
 
   const handleApplyPoints = () => {
     const trimmed = points.trim();
-    if (!trimmed) {
-      setStatusMessage(t("checkout.pointsEmpty"));
+    const parsed = Number(trimmed);
+    if (!trimmed || !Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+      clearAppliedPoints();
+      setPointsFeedback({ message: t("checkout.pointsInvalid"), tone: "error" });
       return;
     }
-    const parsed = Number(trimmed);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      setStatusMessage(t("checkout.pointsNoBalance"));
+    if (availablePoints === 0) {
+      clearAppliedPoints();
+      setPointsFeedback({ message: t("checkout.pointsUnavailable"), tone: "error" });
+      return;
+    }
+    if (parsed > availablePoints) {
+      clearAppliedPoints();
+      setPointsFeedback({
+        message: t("checkout.pointsExceeded", { values: { balance: availablePoints.toLocaleString() } }),
+        tone: "error",
+      });
       return;
     }
     // Applying points in-page replaces any active reward. Clear the
@@ -754,17 +996,96 @@ export default function Checkout() {
     } catch {
       /* storage unavailable */
     }
-    const safePoints = Math.floor(parsed);
     setAppliedPoints({
       type: "points",
-      pointsToApply: safePoints,
+      pointsToApply: parsed,
       source: "checkout",
       createdAt: Date.now(),
     });
-    setStatusMessage(
-      `${t("checkout.pointsDiscount") || "Points Discount"}: ${safePoints.toLocaleString()} pts`
-    );
+    setPointsFeedback({
+      message: t("checkout.pointsApplied", { values: { points: parsed.toLocaleString() } }),
+      tone: "success",
+    });
   };
+
+  const handlePlaceOrder = async () => {
+    if (isAuthLoading || isSubmitting) return;
+    if (!isAuthenticated) {
+      setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`);
+      return;
+    }
+    const nextDeliveryErrors = validateDeliveryFields();
+    setDeliveryErrors(nextDeliveryErrors);
+    if (showValidationErrors(nextDeliveryErrors, deliveryFieldOrder, "delivery")) return;
+
+    const nextPaymentErrors = validatePaymentFields();
+    setPaymentErrors(nextPaymentErrors);
+    if (showValidationErrors(nextPaymentErrors, paymentFieldOrder, "payment")) return;
+
+    if (!shippingMethod || !paymentMethod) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatusMessage(null);
+    try {
+      const order = await createOrder({
+        customerName: `${form.firstName} ${form.lastName}`.trim(),
+        customerEmail: form.email,
+        customerPhone: form.phone,
+        country: form.country,
+        governorate: form.governorate,
+        cityArea: form.cityArea,
+        streetAddress: form.streetAddress,
+        buildingNumber: form.buildingNumber,
+        apartmentFloor: form.apartmentFloor,
+        postalCode: form.postalCode,
+        deliveryNotes: form.deliveryNotes,
+        clinicName: form.clinicName,
+        clinicBranch: form.clinicBranch,
+        orderNotes,
+        deliveryMethod: shippingMethod,
+        paymentMethod,
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          sku: item.product.sku ?? undefined,
+          selectedOptions: item.selectedOptions ?? undefined,
+          quantity: item.quantity,
+          unitPrice: item.product.currentPrice,
+        })),
+      });
+
+      hasCompletedOrder.current = true;
+      clearCart();
+      try {
+        window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
+        window.localStorage.removeItem(CHECKOUT_REWARD_KEY);
+      } catch {
+        /* storage unavailable */
+      }
+      setLocation(`/order-confirmed?orderId=${encodeURIComponent(order.id)}`, { replace: true });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`);
+        return;
+      }
+      setStatusMessage(t("checkout.createFailed"));
+      setIsSubmitting(false);
+    }
+  };
+
+  const getDeliveryInputProps = (field: DeliveryFieldId) => ({
+    "aria-describedby": deliveryErrors[field] ? `${field}-error` : undefined,
+    "aria-invalid": Boolean(deliveryErrors[field]),
+    className: cn(inputClassName, deliveryErrors[field] && invalidInputClassName),
+  });
+
+  const getCardInputProps = (field: keyof typeof initialCardState) => ({
+    "aria-describedby": paymentErrors[field] ? `${field}-error` : undefined,
+    "aria-invalid": Boolean(paymentErrors[field]),
+    className: cn(inputClassName, paymentErrors[field] && invalidInputClassName),
+  });
 
   if (cart.length === 0) {
     return (
@@ -802,12 +1123,12 @@ export default function Checkout() {
           {currentStep === "delivery" && (
             <form
               onSubmit={handleDeliverySubmit}
-              onInvalidCapture={handleInvalidDelivery}
+              noValidate
               className="min-w-0 space-y-5"
             >
               <FormCard title={t("checkout.contactDetails")}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field id="firstName" label={t("checkout.firstName")} required>
+                  <Field id="firstName" label={t("checkout.firstName")} required error={deliveryErrors.firstName}>
                     <input
                       id="firstName"
                       name="firstName"
@@ -815,10 +1136,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="given-name"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("firstName")}
                     />
                   </Field>
-                  <Field id="lastName" label={t("checkout.lastName")} required>
+                  <Field id="lastName" label={t("checkout.lastName")} required error={deliveryErrors.lastName}>
                     <input
                       id="lastName"
                       name="lastName"
@@ -826,7 +1147,7 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="family-name"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("lastName")}
                     />
                   </Field>
                   <Field
@@ -834,6 +1155,7 @@ export default function Checkout() {
                     label={t("checkout.phone")}
                     required
                     note={t("checkout.phoneNote")}
+                    error={deliveryErrors.phone}
                     className="sm:col-span-2"
                   >
                     <input
@@ -844,10 +1166,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="tel"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("phone")}
                     />
                   </Field>
-                  <Field id="email" label={t("checkout.email")} required className="sm:col-span-2">
+                  <Field id="email" label={t("checkout.email")} required error={deliveryErrors.email} className="sm:col-span-2">
                     <input
                       id="email"
                       name="email"
@@ -856,7 +1178,7 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="email"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("email")}
                     />
                   </Field>
                 </div>
@@ -874,7 +1196,7 @@ export default function Checkout() {
                       disabled
                     />
                   </Field>
-                  <Field id="governorate" label={t("checkout.governorate")} required>
+                  <Field id="governorate" label={t("checkout.governorate")} required error={deliveryErrors.governorate}>
                     <input
                       id="governorate"
                       name="governorate"
@@ -882,10 +1204,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="address-level1"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("governorate")}
                     />
                   </Field>
-                  <Field id="cityArea" label={t("checkout.cityArea")} required>
+                  <Field id="cityArea" label={t("checkout.cityArea")} required error={deliveryErrors.cityArea}>
                     <input
                       id="cityArea"
                       name="cityArea"
@@ -893,10 +1215,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="address-level2"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("cityArea")}
                     />
                   </Field>
-                  <Field id="streetAddress" label={t("checkout.streetAddress")} required className="sm:col-span-2">
+                  <Field id="streetAddress" label={t("checkout.streetAddress")} required error={deliveryErrors.streetAddress} className="sm:col-span-2">
                     <input
                       id="streetAddress"
                       name="streetAddress"
@@ -904,10 +1226,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="street-address"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("streetAddress")}
                     />
                   </Field>
-                  <Field id="buildingNumber" label={t("checkout.buildingNumber")} required>
+                  <Field id="buildingNumber" label={t("checkout.buildingNumber")} required error={deliveryErrors.buildingNumber}>
                     <input
                       id="buildingNumber"
                       name="buildingNumber"
@@ -915,10 +1237,10 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="address-line2"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("buildingNumber")}
                     />
                   </Field>
-                  <Field id="apartmentFloor" label={t("checkout.apartmentFloor")} required>
+                  <Field id="apartmentFloor" label={t("checkout.apartmentFloor")} required error={deliveryErrors.apartmentFloor}>
                     <input
                       id="apartmentFloor"
                       name="apartmentFloor"
@@ -926,7 +1248,7 @@ export default function Checkout() {
                       onChange={handleFieldChange}
                       required
                       autoComplete="address-line3"
-                      className={inputClassName}
+                      {...getDeliveryInputProps("apartmentFloor")}
                     />
                   </Field>
                   <Field id="postalCode" label={t("checkout.postalCode")} className="sm:col-span-2">
@@ -1010,34 +1332,56 @@ export default function Checkout() {
           {currentStep === "payment" && (
             <form
               onSubmit={handlePaymentSubmit}
-              onInvalidCapture={handleInvalidPayment}
+              noValidate
               className="min-w-0 space-y-5"
             >
               <FormCard title={t("checkout.shippingMethod")}>
-                <div className="space-y-3">
+                <div
+                  id="shipping-methods"
+                  role="radiogroup"
+                  aria-invalid={Boolean(paymentErrors.shippingMethod)}
+                  aria-describedby={paymentErrors.shippingMethod ? "shippingMethod-error" : undefined}
+                  tabIndex={-1}
+                  className="space-y-3 outline-none"
+                >
                   {shippingMethods.map((method) => (
                     <SelectableOption
                       key={method.id}
                       selected={shippingMethod === method.id}
+                      invalid={Boolean(paymentErrors.shippingMethod)}
                       title={t(method.titleKey)}
                       description={t(method.descriptionKey)}
                       price={t(method.priceKey)}
-                      onClick={() => setShippingMethod(method.id)}
+                      onClick={() => selectShippingMethod(method.id)}
                     />
                   ))}
                 </div>
+                {paymentErrors.shippingMethod && (
+                  <p id="shippingMethod-error" role="alert" className="mt-3 text-[12px] font-semibold leading-5 text-[#F44336]">
+                    {paymentErrors.shippingMethod}
+                  </p>
+                )}
               </FormCard>
 
               <FormCard title={t("checkout.usePoints")}>
                 <p className="text-[13px] font-semibold text-[#8A8D9A]">
-                  {t("checkout.currentBalance")} <span className="font-bold text-[#050505]">{t("checkout.points")}</span>
+                  {t("checkout.currentBalance")}{" "}
+                  <span className="font-bold text-[#050505]">
+                    {t("checkout.pointsBalance", { values: { balance: availablePoints.toLocaleString() } })}
+                  </span>
                 </p>
                 <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
                   <input
                     value={points}
-                    onChange={(event) => setPoints(event.target.value)}
+                    onChange={(event) => {
+                      setPoints(event.target.value);
+                      setPointsFeedback(null);
+                    }}
+                    inputMode="numeric"
+                    aria-invalid={pointsFeedback?.tone === "error"}
+                    aria-describedby={pointsFeedback || availablePoints === 0 ? "points-feedback" : undefined}
                     placeholder={t("checkout.pointsPlaceholder")}
-                    className={inputClassName}
+                    className={cn(inputClassName, pointsFeedback?.tone === "error" && invalidInputClassName)}
                   />
                   <Button
                     type="button"
@@ -1047,13 +1391,33 @@ export default function Checkout() {
                     {t("checkout.applyPoints")}
                   </Button>
                 </div>
-                <p className="mt-3 text-[12px] font-medium text-[#8A8D9A]">
-                  {t("checkout.pointsUnavailable")}
-                </p>
+                {(pointsFeedback || availablePoints === 0) && (
+                  <p
+                    id="points-feedback"
+                    role={pointsFeedback?.tone === "error" ? "alert" : "status"}
+                    className={cn(
+                      "mt-3 text-[12px] font-semibold leading-5",
+                      pointsFeedback?.tone === "error"
+                        ? "text-[#F44336]"
+                        : pointsFeedback?.tone === "success"
+                          ? "text-[#16803C]"
+                          : "text-[#8A8D9A]"
+                    )}
+                  >
+                    {pointsFeedback?.message ?? t("checkout.pointsUnavailable")}
+                  </p>
+                )}
               </FormCard>
 
               <FormCard title={t("checkout.paymentMethod")}>
-                <div className="flex flex-wrap items-center gap-3">
+                <div
+                  id="payment-methods"
+                  role="radiogroup"
+                  aria-invalid={Boolean(paymentErrors.paymentMethod)}
+                  aria-describedby={paymentErrors.paymentMethod ? "paymentMethod-error" : undefined}
+                  tabIndex={-1}
+                  className="flex flex-wrap items-center gap-3 outline-none"
+                >
                   {paymentMethods.map((method) => {
                     const base = `${import.meta.env.BASE_URL}payment-logos/`;
                     const LogosMap: Record<PaymentMethodId, { icon?: any; logo?: string | string[] }> = {
@@ -1074,15 +1438,22 @@ export default function Checkout() {
                         title={t(method.titleKey)}
                         short={t(method.shortKey)}
                         selected={paymentMethod === method.id}
-                        onSelect={() => setPaymentMethod(method.id)}
+                        invalid={Boolean(paymentErrors.paymentMethod)}
+                        onSelect={() => selectPaymentMethod(method.id)}
                         icon={meta.icon}
                         logoSrc={meta.logo}
                       />
                     );
                   })}
                 </div>
+                {paymentErrors.paymentMethod && (
+                  <p id="paymentMethod-error" role="alert" className="mt-3 text-[12px] font-semibold leading-5 text-[#F44336]">
+                    {paymentErrors.paymentMethod}
+                  </p>
+                )}
 
-                <div className="mt-4 rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold)]/[0.05] p-4 text-[13px] text-[#050505]">
+                {paymentMethod && (
+                  <div className="mt-4 rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold)]/[0.05] p-4 text-[13px] text-[#050505]">
                   {paymentMethod === "cash" && (
                     <div>
                       <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.cash.title")}</div>
@@ -1098,11 +1469,14 @@ export default function Checkout() {
                       <p className="mt-2 text-[13px] text-[#8A8D9A]">{t("checkout.paymentMethods.card.short")}</p>
 
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <label className="block">
+                        <label className="block space-y-2">
                           <span className="sr-only">{t("checkout.cardNumber")}</span>
                           <input
+                            id="cardNumber"
                             name="cardNumber"
                             type="text"
+                            value={card.cardNumber}
+                            onChange={handleCardChange}
                             inputMode="numeric"
                             autoComplete="cc-number"
                             required
@@ -1111,14 +1485,22 @@ export default function Checkout() {
                             pattern={"[0-9\\s]{12,23}"}
                             title={t("checkout.completeCardFields")}
                             placeholder={t("checkout.cardNumber")}
-                            className={inputClassName}
+                            {...getCardInputProps("cardNumber")}
                           />
+                          {paymentErrors.cardNumber && (
+                            <p id="cardNumber-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
+                              {paymentErrors.cardNumber}
+                            </p>
+                          )}
                         </label>
-                        <label className="block">
+                        <label className="block space-y-2">
                           <span className="sr-only">{t("checkout.cardExpiry")}</span>
                           <input
+                            id="cardExpiry"
                             name="cardExpiry"
                             type="text"
+                            value={card.cardExpiry}
+                            onChange={handleCardChange}
                             inputMode="numeric"
                             autoComplete="cc-exp"
                             required
@@ -1126,27 +1508,43 @@ export default function Checkout() {
                             pattern={"(0[1-9]|1[0-2])\\s?/\\s?[0-9]{2}"}
                             title={t("checkout.completeCardFields")}
                             placeholder={t("checkout.cardExpiry")}
-                            className={inputClassName}
+                            {...getCardInputProps("cardExpiry")}
                           />
+                          {paymentErrors.cardExpiry && (
+                            <p id="cardExpiry-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
+                              {paymentErrors.cardExpiry}
+                            </p>
+                          )}
                         </label>
-                        <label className="block">
+                        <label className="block space-y-2">
                           <span className="sr-only">{t("checkout.cardName")}</span>
                           <input
+                            id="cardName"
                             name="cardName"
                             type="text"
+                            value={card.cardName}
+                            onChange={handleCardChange}
                             autoComplete="cc-name"
                             required
                             minLength={2}
                             title={t("checkout.completeCardFields")}
                             placeholder={t("checkout.cardName")}
-                            className={inputClassName}
+                            {...getCardInputProps("cardName")}
                           />
+                          {paymentErrors.cardName && (
+                            <p id="cardName-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
+                              {paymentErrors.cardName}
+                            </p>
+                          )}
                         </label>
-                        <label className="block">
+                        <label className="block space-y-2">
                           <span className="sr-only">{t("checkout.cardCvv")}</span>
                           <input
+                            id="cardCvv"
                             name="cardCvv"
                             type="password"
+                            value={card.cardCvv}
+                            onChange={handleCardChange}
                             inputMode="numeric"
                             autoComplete="cc-csc"
                             required
@@ -1155,8 +1553,13 @@ export default function Checkout() {
                             pattern="[0-9]{3,4}"
                             title={t("checkout.completeCardFields")}
                             placeholder={t("checkout.cardCvv")}
-                            className={inputClassName}
+                            {...getCardInputProps("cardCvv")}
                           />
+                          {paymentErrors.cardCvv && (
+                            <p id="cardCvv-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
+                              {paymentErrors.cardCvv}
+                            </p>
+                          )}
                         </label>
                       </div>
                     </div>
@@ -1202,7 +1605,8 @@ export default function Checkout() {
                       </div>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </FormCard>
 
               <FormCard title={t("checkout.billingAddress")}>
@@ -1254,8 +1658,8 @@ export default function Checkout() {
 
               <ReviewCard title={t("checkout.shippingMethod")} onEdit={() => showStep("payment")}>
                 <p className="text-[15px] font-medium leading-7 text-[#050505]">
-                  {t(selectedShippingMethod.titleKey)}
-                  {selectedShippingMethod.id !== "pickup" && (
+                  {selectedShippingMethod && t(selectedShippingMethod.titleKey)}
+                  {selectedShippingMethod && selectedShippingMethod.id !== "pickup" && (
                     <span> ({t(selectedShippingMethod.descriptionKey)})</span>
                   )}
                 </p>
@@ -1263,7 +1667,7 @@ export default function Checkout() {
 
               <ReviewCard title={t("checkout.paymentMethod")} onEdit={() => showStep("payment")}>
                 <p className="text-[15px] font-medium leading-7 text-[#050505]">
-                  {t(selectedPaymentMethod.titleKey)}
+                  {selectedPaymentMethod && t(selectedPaymentMethod.titleKey)}
                 </p>
               </ReviewCard>
 
@@ -1292,15 +1696,16 @@ export default function Checkout() {
                     role="status"
                     className="max-w-[420px] text-[12px] font-semibold leading-5 text-[#717182] sm:text-end"
                   >
-                    {t("checkout.backendPending")}
+                    {t("checkout.orderReady")}
                   </p>
                   <Button
                     type="button"
-                    disabled
+                    disabled={isSubmitting}
+                    onClick={handlePlaceOrder}
                     size="lg"
                     className="h-12 min-w-[160px] px-8 text-[14px]"
                   >
-                    {t("checkout.placeOrder")}
+                    {isSubmitting ? t("checkout.placingOrder") : t("checkout.placeOrder")}
                   </Button>
                 </div>
               </div>
