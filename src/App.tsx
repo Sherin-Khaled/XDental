@@ -186,7 +186,7 @@ function RequireAdminAuth({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const role = currentUser?.role?.trim().toLowerCase();
   const isAdmin = role === "admin";
-  const isSupportRoute = location === "/admin/support" || location.startsWith("/admin/support?") || location === "/admin/product-requests" || location.startsWith("/admin/product-requests?");
+  const isSupportRoute = location === "/admin" || location === "/admin/support" || location.startsWith("/admin/support?") || location === "/admin/product-requests" || location.startsWith("/admin/product-requests?");
   const hasAdminAccess = isAdmin || (role === "support" && isSupportRoute);
 
   useEffect(() => {

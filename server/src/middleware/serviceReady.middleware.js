@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import { isDatabaseReady } from "../config/db.js";
 
 export function requireAuthServiceReady(_request, response, next) {
-  if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
     return response.status(503).json({
       message:
-        "Authentication server is not configured. Set MONGO_URI and JWT_SECRET, then restart the backend.",
+        "Authentication server is not configured. Set DATABASE_URL and JWT_SECRET, then restart the backend.",
     });
   }
 
@@ -14,9 +14,9 @@ export function requireAuthServiceReady(_request, response, next) {
     });
   }
 
-  if (mongoose.connection.readyState !== 1) {
+  if (!isDatabaseReady()) {
     return response.status(503).json({
-      message: "Authentication database is unavailable. Check the MongoDB connection and try again.",
+      message: "Authentication database is unavailable. Check the PostgreSQL connection and try again.",
     });
   }
 

@@ -8,6 +8,7 @@ import { useStore, type AuthUser } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { accountT } from "@/lib/accountI18n";
 import { cn } from "@/lib/utils";
+import { formatUserDisplayName } from "@/lib/userDisplayName";
 
 type ProfileForm = {
   firstName: string;
@@ -100,7 +101,7 @@ function TextField({
 export default function AccountDashboard() {
   const [, navigate] = useLocation();
   const { signOut, currentUser, updateCurrentUser } = useStore();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const [profile, setProfile] = useState<ProfileForm>(() => buildProfileFromUser(currentUser));
   const [draftProfile, setDraftProfile] = useState<ProfileForm>(() => buildProfileFromUser(currentUser));
@@ -108,6 +109,10 @@ export default function AccountDashboard() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const fullName = `${draftProfile.firstName} ${draftProfile.lastName}`.trim();
+  const profileDisplayName = formatUserDisplayName(
+    { name: fullName, role: currentUser?.role },
+    language
+  );
   const initials =
     fullName
       .split(/\s+/)
@@ -211,7 +216,7 @@ export default function AccountDashboard() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="break-words text-[19px] font-bold text-[#050505]">{fullName}</h2>
+                      <h2 className="break-words text-[19px] font-bold text-[#050505]">{profileDisplayName}</h2>
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#16803C]/10 px-2.5 py-1 text-[11px] font-bold text-[#16803C]">
                         <CheckCircle2 size={12} />
                         {accountT(t, "profile.verifiedAccount", "Verified Account")}

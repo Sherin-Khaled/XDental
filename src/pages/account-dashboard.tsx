@@ -7,6 +7,7 @@ import {
   MessageSquareText,
   ReceiptText,
   Search,
+  ShieldCheck,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import { accountT } from "@/lib/accountI18n";
 import { formatCurrency } from "@/utils";
+import { formatUserDisplayName } from "@/lib/userDisplayName";
 
 type Shortcut = {
   titleKey: string;
@@ -225,9 +227,11 @@ function ToolRow({ item }: { item: Shortcut }) {
 
 export default function AccountDashboardHome() {
   const { wishlistIds, currentUser } = useStore();
-  const { t } = useLanguage();
-  const displayName = currentUser?.name ?? accountT(t, "profile.dentalProfessional", "Dental Professional");
+  const { t, language } = useLanguage();
+  const displayName = formatUserDisplayName(currentUser, language) || accountT(t, "profile.dentalProfessional", "Dental Professional");
   const profileSubtitle = currentUser?.professionalRole ?? accountT(t, "profile.dentalProfessional", "Dental Professional");
+  const role = currentUser?.role?.trim().toLowerCase();
+  const hasStaffAccess = role === "admin" || role === "support";
   const overviewMetrics = getOverviewMetrics(t, wishlistIds.length, currentUser);
   const quickActions = buildQuickActions(t);
   const accountSupportTools = buildAccountSupportTools(t);
@@ -254,6 +258,15 @@ export default function AccountDashboardHome() {
                 <p className="mt-2 text-[15px] font-semibold text-[#717182] sm:text-[16px]">
                   {profileSubtitle}
                 </p>
+                {hasStaffAccess && (
+                  <Button asChild variant="secondary" size="sm" className="mt-5 gap-2">
+                    <Link href="/admin" data-testid="link-admin-dashboard">
+                      <ShieldCheck size={16} />
+                      {t("account.adminDashboard")}
+                      <DirectionalIcon direction="forward" size={15} />
+                    </Link>
+                  </Button>
+                )}
               </div>
 
               <div className="mt-6 grid gap-3 rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white/[0.48] p-3 sm:grid-cols-2 lg:grid-cols-4">

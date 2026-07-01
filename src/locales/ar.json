@@ -114,6 +114,7 @@
   },
   "account": {
     "dashboard": "لوحة التحكم",
+    "adminDashboard": "لوحة تحكم الإدارة",
     "profile": "الملف الشخصي",
     "myOrders": "طلباتي",
     "orderDetails": "تفاصيل الطلب",
@@ -929,6 +930,8 @@
       "title": "إنشاء حساب",
       "intro": "أنشئ حسابًا آمنًا للوصول إلى مساحة مشتريات عيادتك.",
       "fullName": "الاسم بالكامل",
+      "fullNamePlaceholder": "أدخل اسمك بالكامل",
+      "phonePlaceholder": "+20 100 000 0000",
       "confirmPassword": "تأكيد كلمة المرور",
       "hideConfirmPassword": "إخفاء تأكيد كلمة المرور",
       "showConfirmPassword": "إظهار تأكيد كلمة المرور",

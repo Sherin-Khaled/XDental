@@ -114,6 +114,7 @@
   },
   "account": {
     "dashboard": "Dashboard",
+    "adminDashboard": "Admin Dashboard",
     "profile": "Profile",
     "myOrders": "My Orders",
     "orderDetails": "Order Details",
@@ -929,6 +930,8 @@
       "title": "Create your account",
       "intro": "Create a secure account to access your clinic purchasing workspace.",
       "fullName": "Full name",
+      "fullNamePlaceholder": "Enter your full name",
+      "phonePlaceholder": "+20 100 000 0000",
       "confirmPassword": "Confirm password",
       "hideConfirmPassword": "Hide confirmation password",
       "showConfirmPassword": "Show confirmation password",

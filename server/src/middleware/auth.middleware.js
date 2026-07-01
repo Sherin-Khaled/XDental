@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/User.js";
+import { prisma } from "../config/db.js";
 import { AUTH_COOKIE_NAME } from "../utils/createToken.js";
 
 export async function requireAuth(request, response, next) {
@@ -20,11 +20,23 @@ export async function requireAuth(request, response, next) {
     return response.status(401).json({ message: "Invalid or expired session." });
   }
 
-  const user = await User.findById(payload.sub);
+  const user = await prisma.user.findUnique({
+    where: { id: payload.sub },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      professionalRole: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
   if (!user) {
     return response.status(401).json({ message: "Invalid or expired session." });
   }
 
-  request.user = user;
+  request.user = { ...user, role: user.role.toLowerCase() };
   return next();
 }

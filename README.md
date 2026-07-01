@@ -34,7 +34,8 @@ Copy `.env.example` to `.env` and adjust if needed:
 cp .env.example .env
 ```
 
-All variables are optional for local development — the app runs entirely on mock data by default.
+The product catalog still uses local frontend data. Authentication, product requests,
+support, and notifications require the Express/PostgreSQL backend.
 
 | Variable | Default | Description |
 |---|---|---|
@@ -63,11 +64,11 @@ src/
   index.css            # Design tokens (--xd-* CSS variables) + Tailwind base
 ```
 
-## Connecting a real backend
+## Connecting the product catalog
 
-All data fetching is isolated in `src/services/api.ts`. Each function has a
-`TODO` comment showing which endpoint it maps to. Replace the mock return
-values with `fetch` calls and you're done — no other files need to change.
+Product catalog fetching is isolated in `src/services/api.ts`. Authentication,
+product requests, support, and notifications already use their dedicated HTTP
+service modules in `src/services/`.
 
 ```ts
 // src/services/api.ts  (example swap)
@@ -78,6 +79,97 @@ export async function fetchProducts(params?) {
   return res.json();
 }
 ```
+
+## PostgreSQL backend
+
+The Express API lives in `server/` and uses Prisma with PostgreSQL. Copy
+`server/.env.example` to `server/.env`, replace the database password and JWT
+secret, then create the local database.
+
+With Docker installed:
+
+```bash
+docker run --name xdental-postgres -e POSTGRES_USER=xdental_user -e POSTGRES_PASSWORD=YOUR_PASSWORD -e POSTGRES_DB=xdental_store -p 5432:5432 -d postgres:16
+```
+
+With a native PostgreSQL installation, run the equivalent commands as a
+PostgreSQL administrator:
+
+```sql
+CREATE USER xdental_user WITH PASSWORD 'YOUR_PASSWORD';
+CREATE DATABASE xdental_store OWNER xdental_user;
+```
+
+Install dependencies, generate the client, apply the committed migration, and
+start both applications:
+
+```bash
+npm --prefix server install
+npm --prefix server run prisma:generate
+npm --prefix server run prisma:deploy
+npm --prefix server run seed:admin
+npm --prefix server run doctor
+npm run dev:server
+npm run dev
+```
+
+Run the final two development commands in separate terminals. Then check
+`http://localhost:5000/api/health` before testing signup or login.
+
+For a local MVP smoke test, start the backend and run the test in another terminal:
+
+```bash
+npm run dev:server
+npm --prefix server run smoke:mvp
+```
+
+The smoke test creates local customer, product-request, support-message, and
+notification records. It keeps the session cookie in memory and does not print credentials.
+
+Use `npm --prefix server run prisma:migrate -- --name <change-name>` when making
+a new schema change. Use `prisma:deploy` to apply committed migrations without
+creating a new one.
+
+Customer accounts can be created through `/signup`. Registration always creates
+a `CUSTOMER`. For local admin/support testing, open Prisma Studio and change a
+test user's `role` to `ADMIN` or `SUPPORT`, then sign in with that test account:
+
+```bash
+npm --prefix server run prisma:studio
+```
+
+The owner-system adapters in `server/src/services/productSync.service.js` and
+`server/src/services/orderSync.service.js` are deliberate placeholders. They are
+not scheduled and do not connect to an external system.
+
+### Product import preparation
+
+The dry-run template is `server/templates/product-import-template.csv`. It uses
+these columns:
+
+| Column | Purpose |
+|---|---|
+| `externalProductId` | Owner-system product ID when available. |
+| `name` | Required product name. |
+| `brand` | Product brand. |
+| `sku` | Owner product code/SKU when available. |
+| `category` | Website product category. |
+| `description` | Product description. |
+| `price` | Numeric product price. |
+| `stockQuantity` | Numeric stock level; zero should be treated as unavailable. |
+| `isAvailable` | Availability flag consistent with stock quantity. |
+| `imageUrl` | Optional image URL; leave empty while images are not ready. |
+| `sourceSystem` | Import source, such as `NEWACC` or `EXCEL_IMPORT`. |
+
+Validate the template, or pass another CSV path, without writing to PostgreSQL:
+
+```bash
+npm --prefix server run validate:products
+npm --prefix server run validate:products -- path/to/products.csv
+```
+
+This foundation performs validation only. It is not connected to Prisma, the
+admin UI, image uploads, or an owner system.
 
 ## Design tokens
 

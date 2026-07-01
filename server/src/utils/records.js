@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
-
 export function isValidId(id) {
-  return mongoose.Types.ObjectId.isValid(id);
+  return typeof id === "string" && id.length > 0 && id.length <= 191;
 }
 
 export function cleanText(value, maxLength = 2000) {
@@ -11,7 +9,12 @@ export function cleanText(value, maxLength = 2000) {
 
 export function safeUser(user) {
   if (!user) return null;
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: typeof user.role === "string" ? user.role.toLowerCase() : user.role,
+  };
 }
 
 export function nextPublicNumber(prefix) {

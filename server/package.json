@@ -6,15 +6,27 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/controllers/auth.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/db.js && node --check src/controllers/auth.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js && node --check src/scripts/doctor.js && node --check src/scripts/smokeMvp.js && node --check src/scripts/validateProductImport.js && node --check src/utils/productImportValidator.js && node --check prisma/seed.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "seed:admin": "node prisma/seed.js",
+    "doctor": "node src/scripts/doctor.js",
+    "validate:products": "node src/scripts/validateProductImport.js",
+    "smoke:mvp": "node src/scripts/smokeMvp.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "@workspace/x-dental-store": "file:..",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1"
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.0"
   }
 }

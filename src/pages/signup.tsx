@@ -206,7 +206,7 @@ export default function Signup() {
                       value={formData.fullName}
                       onChange={(event) => updateField("fullName", event.target.value)}
                       className={inputClassName}
-                      placeholder="Sherin Khaled"
+                      placeholder={t("auth.signup.fullNamePlaceholder")}
                       autoComplete="name"
                       data-testid="input-fullname"
                     />
@@ -224,7 +224,7 @@ export default function Signup() {
                       value={formData.phone}
                       onChange={(event) => updateField("phone", event.target.value)}
                       className={inputClassName}
-                      placeholder="+20 100 000 0000"
+                      placeholder={t("auth.signup.phonePlaceholder")}
                       autoComplete="tel"
                       data-testid="input-phone"
                     />

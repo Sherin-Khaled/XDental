@@ -1,0 +1,4 @@
+externalProductId,name,brand,sku,category,description,price,stockQuantity,isAvailable,imageUrl,sourceSystem
+DEMO-1001,Prophy Paste Mint,Demo Dental,DD-PP-001,Prophylaxis,Mint polishing paste sample,125.50,40,true,https://example.com/images/prophy-paste.jpg,EXCEL_IMPORT
+DEMO-1002,Disposable Saliva Ejectors,Sample Supply,SS-SE-100,Disposables,Flexible sample saliva ejectors,89.00,120,yes,,EXCEL_IMPORT
+DEMO-1003,LED Curing Light Sleeve,Example Med,EM-CLS-010,Infection Control,Disposable sample protective sleeve,45.75,0,false,,NEWACC

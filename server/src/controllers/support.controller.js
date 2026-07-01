@@ -1,30 +1,40 @@
-import { SupportMessage } from "../models/SupportMessage.js";
-import { SupportThread } from "../models/SupportThread.js";
+import { prisma } from "../config/db.js";
 import { sendEmailIfConfigured } from "../services/email.service.js";
 import { createNotification, notifyStaff } from "../services/notification.service.js";
 import { cleanText, isValidId, nextPublicNumber, safeUser } from "../utils/records.js";
 
 const THREAD_TYPES = ["PRODUCT_REQUEST", "GENERAL_SUPPORT", "ORDER", "QUOTE"];
-const PRIORITIES = ["Normal", "Urgent"];
+const PRIORITY_TO_DATABASE = { Normal: "NORMAL", Urgent: "URGENT" };
+const PRIORITY_TO_API = { NORMAL: "Normal", URGENT: "Urgent" };
+const STATUS_TO_DATABASE = {
+  Open: "OPEN",
+  "Waiting for Support": "WAITING_FOR_SUPPORT",
+  "Waiting for Customer": "WAITING_FOR_CUSTOMER",
+  Resolved: "RESOLVED",
+};
+const STATUS_TO_API = Object.fromEntries(
+  Object.entries(STATUS_TO_DATABASE).map(([apiStatus, databaseStatus]) => [databaseStatus, apiStatus])
+);
 
 function isStaff(user) {
   return user?.role === "admin" || user?.role === "support";
 }
 
 function serializeThread(thread, latestMessage) {
+  const latest = latestMessage ?? thread.messages?.[0];
   return {
     id: thread.id,
     ticketNumber: thread.ticketNumber,
     user: thread.user?.name ? safeUser(thread.user) : undefined,
-    productRequestId: thread.productRequest ? String(thread.productRequest._id ?? thread.productRequest) : null,
+    productRequestId: thread.productRequestId ?? null,
     subject: thread.subject,
     type: thread.type,
     related: thread.related ?? "",
-    status: thread.status,
-    priority: thread.priority,
+    status: STATUS_TO_API[thread.status] ?? thread.status,
+    priority: PRIORITY_TO_API[thread.priority] ?? thread.priority,
     assignedTo: thread.assignedTo?.name ? safeUser(thread.assignedTo) : null,
     lastMessageAt: thread.lastMessageAt,
-    latestMessage: latestMessage?.body ?? "",
+    latestMessage: latest?.body ?? "",
     createdAt: thread.createdAt,
     updatedAt: thread.updatedAt,
   };
@@ -33,7 +43,7 @@ function serializeThread(thread, latestMessage) {
 function serializeMessage(message) {
   return {
     id: message.id,
-    threadId: message.thread?.id ?? message.thread,
+    threadId: message.threadId,
     sender: message.sender?.name ? safeUser(message.sender) : null,
     senderRole: message.senderRole,
     body: message.body,
@@ -42,139 +52,215 @@ function serializeMessage(message) {
   };
 }
 
-async function withLatestMessages(threads) {
-  if (threads.length === 0) return [];
-  const ids = threads.map((thread) => thread._id);
-  const latest = await SupportMessage.aggregate([
-    { $match: { thread: { $in: ids } } },
-    { $sort: { createdAt: -1 } },
-    { $group: { _id: "$thread", body: { $first: "$body" } } },
-  ]);
-  const latestByThread = new Map(latest.map((message) => [String(message._id), message]));
-  return threads.map((thread) => serializeThread(thread, latestByThread.get(String(thread._id))));
-}
-
-async function findAuthorizedThread(threadId, user, populate = false) {
+async function findAuthorizedThread(threadId, user, database = prisma) {
   if (!isValidId(threadId)) return null;
-  const filter = isStaff(user) ? { _id: threadId } : { _id: threadId, user: user.id };
-  let query = SupportThread.findOne(filter);
-  if (populate) query = query.populate("user").populate("assignedTo");
-  return query;
+  return database.supportThread.findFirst({
+    where: {
+      id: threadId,
+      ...(isStaff(user) ? {} : { userId: user.id }),
+    },
+    include: { user: true, assignedTo: true },
+  });
 }
 
 export async function createSupportThread(request, response) {
   const subject = cleanText(request.body?.subject, 300);
   const body = cleanText(request.body?.message, 2000);
   const type = THREAD_TYPES.includes(request.body?.type) ? request.body.type : "GENERAL_SUPPORT";
-  const priority = PRIORITIES.includes(request.body?.priority) ? request.body.priority : "Normal";
+  const priority = PRIORITY_TO_DATABASE[request.body?.priority] ?? "NORMAL";
   if (!subject) return response.status(400).json({ message: "Subject is required." });
   if (!body) return response.status(400).json({ message: "Message is required." });
 
-  const thread = await SupportThread.create({
-    ticketNumber: nextPublicNumber("ST"),
-    user: request.user.id,
-    subject,
-    type,
-    related: cleanText(request.body?.related, 300) || undefined,
-    status: "Waiting for Support",
-    priority,
-    lastMessageAt: new Date(),
+  const thread = await prisma.$transaction(async (database) => {
+    const createdThread = await database.supportThread.create({
+      data: {
+        ticketNumber: nextPublicNumber("ST"),
+        userId: request.user.id,
+        subject,
+        type,
+        related: cleanText(request.body?.related, 300) || null,
+        status: "WAITING_FOR_SUPPORT",
+        priority,
+        lastMessageAt: new Date(),
+      },
+    });
+    await database.supportMessage.create({
+      data: {
+        threadId: createdThread.id,
+        senderId: request.user.id,
+        senderRole: "CUSTOMER",
+        body,
+      },
+    });
+    await notifyStaff(
+      {
+        type: "SUPPORT_MESSAGE",
+        title: "New support ticket",
+        body: `A customer opened ${createdThread.ticketNumber}.`,
+        link: `/admin/support?thread=${createdThread.id}`,
+        metadata: { threadId: createdThread.id },
+      },
+      database
+    );
+    return createdThread;
   });
-  await SupportMessage.create({ thread: thread.id, sender: request.user.id, senderRole: "CUSTOMER", body });
-  await notifyStaff({
-    type: "SUPPORT_MESSAGE",
-    title: "New support ticket",
-    body: `A customer opened ${thread.ticketNumber}.`,
-    link: `/admin/support?thread=${thread.id}`,
-    metadata: { threadId: thread.id },
-  });
+
   return response.status(201).json({ supportThread: serializeThread(thread, { body }) });
 }
 
 export async function getMyThreads(request, response) {
-  const threads = await SupportThread.find({ user: request.user.id }).sort({ lastMessageAt: -1 });
-  return response.json({ supportThreads: await withLatestMessages(threads) });
+  const threads = await prisma.supportThread.findMany({
+    where: { userId: request.user.id },
+    include: {
+      messages: { orderBy: { createdAt: "desc" }, take: 1, select: { body: true } },
+    },
+    orderBy: { lastMessageAt: "desc" },
+  });
+  return response.json({ supportThreads: threads.map((thread) => serializeThread(thread)) });
 }
 
 export async function getAdminThreads(_request, response) {
-  const threads = await SupportThread.find()
-    .populate("user")
-    .populate("assignedTo")
-    .sort({ lastMessageAt: -1 });
-  return response.json({ supportThreads: await withLatestMessages(threads) });
+  const threads = await prisma.supportThread.findMany({
+    include: {
+      user: true,
+      assignedTo: true,
+      messages: { orderBy: { createdAt: "desc" }, take: 1, select: { body: true } },
+    },
+    orderBy: { lastMessageAt: "desc" },
+  });
+  return response.json({ supportThreads: threads.map((thread) => serializeThread(thread)) });
 }
 
 export async function getThreadMessages(request, response) {
-  const thread = await findAuthorizedThread(request.params.threadId, request.user, true);
+  const thread = await findAuthorizedThread(request.params.threadId, request.user);
   if (!thread) return response.status(404).json({ message: "Support thread not found." });
 
   const unreadRoles = isStaff(request.user) ? ["CUSTOMER"] : ["SUPPORT", "ADMIN", "SYSTEM"];
-  await SupportMessage.updateMany(
-    { thread: thread.id, senderRole: { $in: unreadRoles }, readAt: null },
-    { $set: { readAt: new Date() } }
-  );
-  const messages = await SupportMessage.find({ thread: thread.id }).populate("sender").sort({ createdAt: 1 });
-  return response.json({ supportThread: serializeThread(thread), messages: messages.map(serializeMessage) });
+  await prisma.supportMessage.updateMany({
+    where: { threadId: thread.id, senderRole: { in: unreadRoles }, readAt: null },
+    data: { readAt: new Date() },
+  });
+  const messages = await prisma.supportMessage.findMany({
+    where: { threadId: thread.id },
+    include: { sender: true },
+    orderBy: { createdAt: "asc" },
+  });
+  return response.json({
+    supportThread: serializeThread(thread),
+    messages: messages.map(serializeMessage),
+  });
 }
 
 export async function postThreadMessage(request, response) {
-  const thread = await findAuthorizedThread(request.params.threadId, request.user, true);
+  const thread = await findAuthorizedThread(request.params.threadId, request.user);
   if (!thread) return response.status(404).json({ message: "Support thread not found." });
   const body = cleanText(request.body?.body, 2000);
   if (!body) return response.status(400).json({ message: "Message is required." });
 
   const staff = isStaff(request.user);
   const senderRole = request.user.role === "admin" ? "ADMIN" : request.user.role === "support" ? "SUPPORT" : "CUSTOMER";
-  const message = await SupportMessage.create({ thread: thread.id, sender: request.user.id, senderRole, body });
-  thread.lastMessageAt = new Date();
-  thread.status = staff ? "Waiting for Customer" : "Waiting for Support";
-  if (staff && !thread.assignedTo) thread.assignedTo = request.user.id;
-  await thread.save();
+  const result = await prisma.$transaction(async (database) => {
+    const message = await database.supportMessage.create({
+      data: {
+        threadId: thread.id,
+        senderId: request.user.id,
+        senderRole,
+        body,
+      },
+      include: { sender: true },
+    });
+    const updatedThread = await database.supportThread.update({
+      where: { id: thread.id },
+      data: {
+        lastMessageAt: new Date(),
+        status: staff ? "WAITING_FOR_CUSTOMER" : "WAITING_FOR_SUPPORT",
+        assignedToId: staff && !thread.assignedToId ? request.user.id : thread.assignedToId,
+      },
+      include: { user: true, assignedTo: true },
+    });
+
+    if (staff) {
+      await createNotification(
+        {
+          userId: thread.userId,
+          type: "SUPPORT_MESSAGE",
+          title: "Support replied to your ticket",
+          body: `There is a new reply in ${thread.ticketNumber}.`,
+          link: `/account/support?thread=${thread.id}`,
+          metadata: { threadId: thread.id },
+        },
+        database
+      );
+    } else {
+      await notifyStaff(
+        {
+          type: "SUPPORT_MESSAGE",
+          title: "Customer replied",
+          body: `A customer replied in ${thread.ticketNumber}.`,
+          link: `/admin/support?thread=${thread.id}`,
+          metadata: { threadId: thread.id },
+        },
+        database
+      );
+    }
+
+    return { message, thread: updatedThread };
+  });
 
   if (staff) {
-    await createNotification({
-      user: thread.user.id,
-      type: "SUPPORT_MESSAGE",
-      title: "Support replied to your ticket",
-      body: `There is a new reply in ${thread.ticketNumber}.`,
-      link: `/account/support?thread=${thread.id}`,
-      metadata: { threadId: thread.id },
-    });
     await sendEmailIfConfigured({ event: "SUPPORT_REPLY" }).catch(() => {});
-  } else {
-    await notifyStaff({
-      type: "SUPPORT_MESSAGE",
-      title: "Customer replied",
-      body: `A customer replied in ${thread.ticketNumber}.`,
-      link: `/admin/support?thread=${thread.id}`,
-      metadata: { threadId: thread.id },
-    });
   }
-
-  await message.populate("sender");
-  return response.status(201).json({ message: serializeMessage(message), supportThread: serializeThread(thread, message) });
+  return response.status(201).json({
+    message: serializeMessage(result.message),
+    supportThread: serializeThread(result.thread, result.message),
+  });
 }
 
 export async function updateAdminThreadStatus(request, response) {
-  const allowed = ["Open", "Waiting for Support", "Waiting for Customer", "Resolved"];
-  if (!allowed.includes(request.body?.status)) return response.status(400).json({ message: "Invalid support thread status." });
-  const thread = await findAuthorizedThread(request.params.threadId, request.user, true);
+  const databaseStatus = STATUS_TO_DATABASE[request.body?.status];
+  if (!databaseStatus) {
+    return response.status(400).json({ message: "Invalid support thread status." });
+  }
+  const thread = await findAuthorizedThread(request.params.threadId, request.user);
   if (!thread) return response.status(404).json({ message: "Support thread not found." });
-  const changed = thread.status !== request.body.status;
-  thread.status = request.body.status;
-  await thread.save();
 
-  if (changed && thread.status === "Resolved") {
-    await SupportMessage.create({ thread: thread.id, senderRole: "SYSTEM", body: "This support ticket has been resolved." });
-    await createNotification({
-      user: thread.user.id,
-      type: "SUPPORT_MESSAGE",
-      title: "Support ticket resolved",
-      body: `${thread.ticketNumber} has been resolved.`,
-      link: `/account/support?thread=${thread.id}`,
-      metadata: { threadId: thread.id },
+  if (thread.status === databaseStatus) {
+    return response.json({ supportThread: serializeThread(thread) });
+  }
+
+  const updated = await prisma.$transaction(async (database) => {
+    const updatedThread = await database.supportThread.update({
+      where: { id: thread.id },
+      data: { status: databaseStatus },
+      include: { user: true, assignedTo: true },
     });
+
+    if (databaseStatus === "RESOLVED") {
+      await database.supportMessage.create({
+        data: {
+          threadId: thread.id,
+          senderRole: "SYSTEM",
+          body: "This support ticket has been resolved.",
+        },
+      });
+      await createNotification(
+        {
+          userId: thread.userId,
+          type: "SUPPORT_MESSAGE",
+          title: "Support ticket resolved",
+          body: `${thread.ticketNumber} has been resolved.`,
+          link: `/account/support?thread=${thread.id}`,
+          metadata: { threadId: thread.id },
+        },
+        database
+      );
+    }
+
+    return updatedThread;
+  });
+
+  if (databaseStatus === "RESOLVED") {
     await sendEmailIfConfigured({ event: "TICKET_RESOLVED" }).catch(() => {});
   }
-  return response.json({ supportThread: serializeThread(thread) });
+  return response.json({ supportThread: serializeThread(updated) });
 }

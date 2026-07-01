@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/User.js";
+import { prisma } from "../config/db.js";
 import {
   clearAuthCookie,
   createToken,
@@ -22,7 +22,7 @@ function toSafeUser(user) {
     id: user.id,
     name: user.name,
     email: user.email,
-    role: user.role,
+    role: user.role.toLowerCase(),
     professionalRole: user.professionalRole ?? null,
   };
 }
@@ -67,7 +67,7 @@ export async function register(request, response) {
     return response.status(400).json({ message: "Professional role must be 100 characters or fewer." });
   }
 
-  const existingUser = await User.exists({ email });
+  const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existingUser) {
     return response.status(409).json({ message: "An account with this email already exists." });
   }
@@ -75,18 +75,20 @@ export async function register(request, response) {
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   try {
-    const user = await User.create({
-      name,
-      email,
-      passwordHash,
-      ...(phone ? { phone } : {}),
-      ...(professionalRole ? { professionalRole } : {}),
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        phone: phone || null,
+        professionalRole: professionalRole || null,
+      },
     });
 
     setAuthCookie(response, createToken(user.id));
     return response.status(201).json({ user: toSafeUser(user) });
   } catch (error) {
-    if (error?.code === 11000) {
+    if (error?.code === "P2002") {
       return response.status(409).json({ message: "An account with this email already exists." });
     }
     throw error;
@@ -102,7 +104,7 @@ export async function login(request, response) {
     return response.status(400).json({ message: credentialsError });
   }
 
-  const user = await User.findOne({ email }).select("+passwordHash");
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return response.status(401).json({ message: "Invalid email or password." });
   }

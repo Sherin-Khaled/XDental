@@ -14,6 +14,7 @@ import {
   MessageSquareText,
   Package,
   Settings,
+  ShieldCheck,
   User,
   Wallet,
   type LucideIcon,
@@ -23,6 +24,7 @@ import { useStore } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { formatUserDisplayName } from "@/lib/userDisplayName";
 
 type AccountLink = {
   href: string;
@@ -112,14 +114,25 @@ const accountLinks: AccountLink[] = [
   },
 ];
 
+const staffAccountLink: AccountLink = {
+  href: "/admin",
+  labelKey: "account.adminDashboard",
+  icon: ShieldCheck,
+  isActive: (location) => location === "/admin" || location.startsWith("/admin/"),
+};
+
 export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
   const [location, navigate] = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { signOut } = useStore();
-  const { t } = useLanguage();
+  const { signOut, currentUser } = useStore();
+  const { t, language } = useLanguage();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const activeLink = accountLinks.find((link) => link.isActive(location)) ?? accountLinks[0];
+  const role = currentUser?.role?.trim().toLowerCase();
+  const hasStaffAccess = role === "admin" || role === "support";
+  const visibleAccountLinks = hasStaffAccess ? [...accountLinks, staffAccountLink] : accountLinks;
+  const activeLink = visibleAccountLinks.find((link) => link.isActive(location)) ?? accountLinks[0];
   const ActiveIcon = activeLink.icon;
+  const userDisplayName = formatUserDisplayName(currentUser, language);
 
   useClickOutside(mobileMenuRef, () => setIsMobileOpen(false), {
     enabled: isMobileOpen,
@@ -153,7 +166,7 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
             </span>
             <span className="min-w-0">
               <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--xd-gold-text)]">
-                {t("common.myAccount")}
+                {userDisplayName || t("common.myAccount")}
               </span>
               <span className="block truncate text-[14px] font-bold text-[#050505]">
                 {t(activeLink.labelKey)}
@@ -175,7 +188,7 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
             className="absolute left-0 top-[calc(100%+8px)] z-40 w-full overflow-hidden rounded-[18px] border border-[var(--xd-gold-border-soft)] bg-white shadow-[0_18px_44px_rgba(5,5,5,0.12)] sm:w-[320px]"
           >
             <nav className="max-h-[min(70vh,520px)] overflow-y-auto p-2">
-              {accountLinks.map((link, index) => {
+              {visibleAccountLinks.map((link, index) => {
                 const Icon = link.icon;
                 const isActive = link.isActive(location);
 
@@ -216,12 +229,17 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
       </div>
 
       <div className="hidden rounded-[24px] border border-[var(--xd-gold-active)]/15 bg-white/70 p-4 shadow-[0_12px_34px_rgba(5,5,5,0.04)] backdrop-blur lg:sticky lg:top-28 lg:block">
-        <h2 className="px-3 pb-4 text-[17px] font-bold text-[#050505]">
+        <h2 className="px-3 text-[17px] font-bold text-[#050505]">
           {t("common.myAccount")}
         </h2>
+        {userDisplayName && (
+          <p className="truncate px-3 pb-4 pt-1 text-[12px] font-semibold text-[#717182]">
+            {userDisplayName}
+          </p>
+        )}
 
         <nav className="flex flex-col gap-1">
-          {accountLinks.map((link, index) => {
+          {visibleAccountLinks.map((link, index) => {
             const Icon = link.icon;
             const isActive = link.isActive(location);
 

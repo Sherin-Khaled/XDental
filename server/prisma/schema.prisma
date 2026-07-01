@@ -1,0 +1,277 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPPORT
+}
+
+enum ProductRequestStatus {
+  UNDER_REVIEW
+  AVAILABLE
+  SEARCHING_SUPPLIER
+  NOT_AVAILABLE
+  CANCELED
+}
+
+enum ProductRequestSource {
+  PRODUCT_PAGE
+  ACCOUNT_PAGE
+  CHAT
+}
+
+enum SupportThreadType {
+  PRODUCT_REQUEST
+  GENERAL_SUPPORT
+  ORDER
+  QUOTE
+}
+
+enum SupportThreadStatus {
+  OPEN
+  WAITING_FOR_SUPPORT
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+}
+
+enum SupportPriority {
+  NORMAL
+  URGENT
+}
+
+enum SupportSenderRole {
+  CUSTOMER
+  SUPPORT
+  ADMIN
+  SYSTEM
+}
+
+enum NotificationType {
+  PRODUCT_REQUEST
+  SUPPORT_MESSAGE
+  PRODUCT_AVAILABLE
+  ORDER_UPDATE
+  QUOTE_UPDATE
+  ACCOUNT
+}
+
+enum OrderStatus {
+  PENDING
+  SENT_TO_OWNER_SYSTEM
+  CONFIRMED
+  REJECTED
+  CANCELED
+}
+
+enum SyncDirection {
+  OWNER_TO_WEBSITE
+  WEBSITE_TO_OWNER
+}
+
+enum SyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id                 String           @id @default(cuid())
+  name               String
+  email              String           @unique
+  passwordHash       String
+  phone              String?
+  professionalRole   String?
+  role               UserRole         @default(CUSTOMER)
+  productRequests    ProductRequest[]
+  supportThreads     SupportThread[]   @relation("SupportCustomer")
+  assignedThreads    SupportThread[]   @relation("AssignedSupport")
+  supportMessages    SupportMessage[]
+  notifications      Notification[]
+  orders             Order[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([role])
+}
+
+model Product {
+  id                String      @id @default(cuid())
+  externalProductId String?     @unique
+  name              String
+  brand             String?
+  sku               String?     @unique
+  category          String?
+  description       String?
+  price             Decimal?    @db.Decimal(12, 2)
+  stockQuantity     Int?
+  isAvailable       Boolean     @default(true)
+  imageUrl          String?
+  sourceSystem      String?
+  externalStatus    String?
+  syncStatus        String?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([externalProductId])
+  @@index([brand])
+  @@index([category])
+}
+
+model ProductRequest {
+  id                  String                 @id @default(cuid())
+  requestNumber       String                 @unique
+  userId              String
+  user                User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId           String?
+  externalProductId   String?
+  productName         String
+  brand               String?
+  sku                 String?
+  category            String?
+  quantity            Int?
+  branch              String?
+  message             String?
+  notes               String?
+  status              ProductRequestStatus   @default(UNDER_REVIEW)
+  source              ProductRequestSource   @default(ACCOUNT_PAGE)
+  supportThreadId     String?                 @unique
+  supportThread       SupportThread?          @relation("ProductRequestSupportThread", fields: [supportThreadId], references: [id], onDelete: SetNull)
+  originatingThread   SupportThread?          @relation("SupportThreadProductRequest")
+  teamUpdates         Json                    @default("[]")
+  attachments         Json                    @default("[]")
+  sourceSystem        String?
+  externalStatus      String?
+  syncStatus          String?
+  lastSyncedAt        DateTime?
+  resolvedAt          DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+  @@index([externalProductId])
+}
+
+model SupportThread {
+  id                   String                @id @default(cuid())
+  ticketNumber         String                @unique
+  userId               String
+  user                 User                  @relation("SupportCustomer", fields: [userId], references: [id], onDelete: Cascade)
+  productRequestId     String?               @unique
+  productRequest       ProductRequest?       @relation("SupportThreadProductRequest", fields: [productRequestId], references: [id], onDelete: SetNull)
+  linkedProductRequest ProductRequest?       @relation("ProductRequestSupportThread")
+  subject              String
+  type                 SupportThreadType     @default(GENERAL_SUPPORT)
+  related              String?
+  status               SupportThreadStatus   @default(OPEN)
+  priority             SupportPriority       @default(NORMAL)
+  assignedToId         String?
+  assignedTo           User?                 @relation("AssignedSupport", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages             SupportMessage[]
+  lastMessageAt        DateTime              @default(now())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([userId, lastMessageAt(sort: Desc)])
+  @@index([status])
+  @@index([assignedToId])
+}
+
+model SupportMessage {
+  id         String            @id @default(cuid())
+  threadId   String
+  thread     SupportThread     @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId   String?
+  sender     User?             @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  senderRole SupportSenderRole
+  body       String
+  readAt     DateTime?
+  createdAt  DateTime          @default(now())
+
+  @@index([threadId, createdAt])
+  @@index([senderId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  link      String?
+  metadata  Json             @default("{}")
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderNumber       String      @unique
+  status            OrderStatus @default(PENDING)
+  subtotal          Decimal?    @db.Decimal(12, 2)
+  shipping          Decimal?    @db.Decimal(12, 2)
+  discount          Decimal?    @db.Decimal(12, 2)
+  total             Decimal?    @db.Decimal(12, 2)
+  customerName      String?
+  customerEmail     String?
+  customerPhone     String?
+  shippingAddress   String?
+  paymentMethod     String?
+  sourceSystem      String?
+  externalOrderId   String?     @unique
+  externalStatus    String?
+  syncStatus        String?
+  lastSyncedAt      DateTime?
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+model OrderItem {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId         String?
+  externalProductId String?
+  productName       String
+  sku               String?
+  quantity          Int
+  unitPrice         Decimal? @db.Decimal(12, 2)
+  total             Decimal? @db.Decimal(12, 2)
+  createdAt         DateTime @default(now())
+
+  @@index([orderId])
+  @@index([externalProductId])
+}
+
+model SyncLog {
+  id           String        @id @default(cuid())
+  entityType   String
+  entityId     String?
+  direction    SyncDirection
+  status       SyncStatus    @default(PENDING)
+  sourceSystem String?
+  message      String?
+  createdAt    DateTime      @default(now())
+
+  @@index([entityType, entityId])
+  @@index([status, createdAt])
+}

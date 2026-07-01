@@ -1,13 +1,34 @@
-import { Notification } from "../models/Notification.js";
-import { User } from "../models/User.js";
+import { prisma } from "../config/db.js";
 
-export async function createNotification(input) {
-  return Notification.create(input);
+export async function createNotification(input, database = prisma) {
+  return database.notification.create({
+    data: {
+      userId: input.userId ?? input.user,
+      type: input.type,
+      title: input.title,
+      body: input.body,
+      link: input.link ?? null,
+      metadata: input.metadata ?? {},
+    },
+  });
 }
 
-export async function notifyStaff(input) {
-  const staff = await User.find({ role: { $in: ["admin", "support"] } }).select("_id").lean();
+export async function notifyStaff(input, database = prisma) {
+  const staff = await database.user.findMany({
+    where: { role: { in: ["ADMIN", "SUPPORT"] } },
+    select: { id: true },
+  });
   if (staff.length === 0) return [];
 
-  return Notification.insertMany(staff.map(({ _id }) => ({ ...input, user: _id })));
+  await database.notification.createMany({
+    data: staff.map(({ id }) => ({
+      userId: id,
+      type: input.type,
+      title: input.title,
+      body: input.body,
+      link: input.link ?? null,
+      metadata: input.metadata ?? {},
+    })),
+  });
+  return staff.map(({ id }) => id);
 }
