@@ -15,18 +15,25 @@ import {
   Search,
   User,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/dental/Button";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStore } from "@/context/StoreContext";
+import { useCatalog } from "@/context/CatalogContext";
+import { fetchPublicProducts } from "@/services/catalog";
 import { cn } from "@/lib/utils";
 import {
   buildGlobalSearchIndex,
+  buildProductSearchItem,
   countSearchResults,
+  normalizeSearchQuery,
   searchGlobalIndex,
   type GlobalSearchResult,
+  type GlobalSearchResults,
   type GlobalSearchType,
 } from "@/lib/searchIndex";
+import type { Product } from "@/types/product";
 
 type GlobalSearchProps = {
   open: boolean;
@@ -34,6 +41,10 @@ type GlobalSearchProps = {
 };
 
 const groupOrder: GlobalSearchType[] = ["product", "category", "brand", "page"];
+const PRODUCT_SEARCH_MIN_QUERY_LENGTH = 2;
+const PRODUCT_SEARCH_DEBOUNCE_MS = 250;
+const PRODUCT_SEARCH_FETCH_LIMIT = 10;
+const PRODUCT_SEARCH_DISPLAY_LIMIT = 5;
 
 function getResultIcon(result: GlobalSearchResult) {
   if (result.type === "product") return Package;
@@ -44,6 +55,24 @@ function getResultIcon(result: GlobalSearchResult) {
 
 function getResultId(result: GlobalSearchResult) {
   return `global-search-result-${result.type}-${result.id}`;
+}
+
+function ResultThumbnail({ image, Icon }: { image?: string; Icon: LucideIcon }) {
+  const [hasImageError, setHasImageError] = useState(false);
+
+  return image && !hasImageError ? (
+    <img
+      src={image}
+      alt=""
+      className="h-11 w-11 shrink-0 rounded-[14px] object-cover"
+      loading="lazy"
+      onError={() => setHasImageError(true)}
+    />
+  ) : (
+    <span className="xd-gold-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)]">
+      <Icon size={18} />
+    </span>
+  );
 }
 
 function getHighlightedParts(text: string, matchText?: string) {
@@ -104,15 +133,72 @@ function HighlightedText({
 }
 
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
-  const { direction, isRtl, t } = useLanguage();
+  const { direction, isRtl, language, t } = useLanguage();
   const { isAuthenticated } = useStore();
+  const { categories, brands } = useCatalog();
   const [, navigate] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
+  const [productResults, setProductResults] = useState<Product[]>([]);
+  const normalizedQuery = normalizeSearchQuery(query);
 
-  const index = useMemo(() => buildGlobalSearchIndex(t), [t]);
-  const groupedResults = useMemo(() => searchGlobalIndex(index, query), [index, query]);
+  // Categories/brands/pages are small, already-loaded metadata — they can
+  // stay locally searchable. Products are never included here; they come
+  // from a small, debounced server search below (see productResults).
+  const nonProductIndex = useMemo(
+    () => buildGlobalSearchIndex(t, language, [], categories, brands),
+    [brands, categories, t, language]
+  );
+
+  // A small, bounded "popular products" fetch when the search opens — not a
+  // per-keystroke request, and never the full catalogue.
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    fetchPublicProducts({ featured: true, limit: PRODUCT_SEARCH_FETCH_LIMIT, signal: controller.signal })
+      .then(({ products: results }) => {
+        if (!controller.signal.aborted) setSuggestedProducts(results);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [open]);
+
+  // Small, debounced, cancelable server search for the "product" group —
+  // never a filter over the full catalogue, and never triggered by trivial
+  // (empty/1-character) input.
+  useEffect(() => {
+    if (!open || normalizedQuery.length < PRODUCT_SEARCH_MIN_QUERY_LENGTH) {
+      setProductResults([]);
+      return;
+    }
+    const controller = new AbortController();
+    const debounce = window.setTimeout(() => {
+      fetchPublicProducts({ search: query.trim(), limit: PRODUCT_SEARCH_FETCH_LIMIT, signal: controller.signal })
+        .then(({ products: results }) => {
+          if (!controller.signal.aborted) setProductResults(results);
+        })
+        .catch(() => {});
+    }, PRODUCT_SEARCH_DEBOUNCE_MS);
+    return () => {
+      window.clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [open, normalizedQuery, query]);
+
+  const productGroup = useMemo<GlobalSearchResult[]>(() => {
+    const source = normalizedQuery ? productResults : suggestedProducts;
+    return source.slice(0, PRODUCT_SEARCH_DISPLAY_LIMIT).map((product, index) => {
+      const item = buildProductSearchItem(product, index, t, language);
+      return { ...item, score: item.priority, matchText: normalizedQuery || undefined };
+    });
+  }, [normalizedQuery, productResults, suggestedProducts, t, language]);
+
+  const groupedResults = useMemo<GlobalSearchResults>(() => {
+    const nonProductResults = searchGlobalIndex(nonProductIndex, query);
+    return { ...nonProductResults, product: productGroup };
+  }, [nonProductIndex, query, productGroup]);
   const flatResults = useMemo(
     () => groupOrder.flatMap((group) => groupedResults[group]),
     [groupedResults]
@@ -324,18 +410,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                                     : "border-transparent bg-white/58 hover:border-[var(--xd-gold-border-soft)] hover:bg-white/82"
                                 )}
                               >
-                                {result.image ? (
-                                  <img
-                                    src={result.image}
-                                    alt=""
-                                    className="h-11 w-11 shrink-0 rounded-[14px] object-cover"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
-                                    <Icon size={18} />
-                                  </span>
-                                )}
+                                <ResultThumbnail image={result.image} Icon={Icon} />
 
                                 <span className="min-w-0 flex-1">
                                   <HighlightedText
@@ -359,7 +434,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 </div>
               ) : (
                 <div className="px-4 py-12 text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[16px] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
+                  <div className="xd-gold-icon mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[16px] bg-[var(--xd-gold-bg-soft)]">
                     <Search size={20} />
                   </div>
                   <h3 className="text-[18px] font-semibold text-[#050505]">

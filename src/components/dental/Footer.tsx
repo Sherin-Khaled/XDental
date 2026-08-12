@@ -4,9 +4,8 @@ import {
   Facebook,
   Instagram,
   Linkedin,
-  Mail,
-  MapPin,
   MessageCircle,
+  Phone,
   Twitter,
 } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
@@ -14,6 +13,8 @@ import { BrandLogo } from "@/components/dental/BrandLogo";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
 import { useLanguage } from "@/context/LanguageContext";
+import { subscribeToNewsletter } from "@/services/contact";
+import { ApiError } from "@/services/http";
 
 const FOOTER_LINKS = {
   shop: [
@@ -24,12 +25,13 @@ const FOOTER_LINKS = {
     { labelKey: "footer.links.requestQuote", href: "/contact" },
   ],
   categories: [
+    // Slugs come from the backend category tree (owner Excel).
     { labelKey: "footer.links.endodontics", href: "/products?category=endodontics" },
-    { labelKey: "footer.links.dentalInstruments", href: "/products?category=hand-instruments" },
-    { labelKey: "footer.links.restorativeMaterials", href: "/products?category=composites-bonding" },
-    { labelKey: "footer.links.infectionControl", href: "/products?category=infection-control" },
+    { labelKey: "footer.links.dentalInstruments", href: "/products?category=instruments" },
+    { labelKey: "footer.links.restorativeMaterials", href: "/products?category=restorative" },
+    { labelKey: "footer.links.infectionControl", href: "/products?category=disinfection-steralization" },
     { labelKey: "footer.links.orthodontics", href: "/products?category=orthodontics" },
-    { labelKey: "footer.links.implantology", href: "/products?category=implantology" },
+    { labelKey: "footer.links.implantology", href: "/products?category=implant" },
   ],
   company: [
     { labelKey: "footer.links.aboutUs", href: "/about" },
@@ -39,11 +41,11 @@ const FOOTER_LINKS = {
     { labelKey: "footer.links.contactUs", href: "/contact" },
   ],
   support: [
-    { labelKey: "footer.links.howToOrder", href: "/contact" },
-    { labelKey: "footer.links.shippingDelivery", href: "/contact" },
-    { labelKey: "footer.links.returnsPolicy", href: "/contact" },
+    { labelKey: "footer.links.howToOrder", href: "/how-to-order" },
+    { labelKey: "footer.links.shippingDelivery", href: "/shipping-delivery" },
+    { labelKey: "footer.links.returnsPolicy", href: "/returns-policy" },
     { labelKey: "footer.links.faqs", href: "/faqs" },
-    { labelKey: "footer.links.trackYourOrder", href: "/account/orders" },
+    { labelKey: "footer.links.trackYourOrder", href: "/track-order" },
   ],
 };
 
@@ -54,8 +56,8 @@ const CONTACT = [
     value: "01035777335",
     href: "https://wa.me/201035777335",
   },
-  { Icon: Mail, value: "orders@xdentalstore.com" },
-  { Icon: MapPin, value: "Cairo, Egypt" },
+  { Icon: Phone, labelKey: "footer.contact.mainSupport", value: "01552229405", href: "tel:+201552229405" },
+  { Icon: Phone, labelKey: "footer.contact.branch", value: "01065057035", href: "tel:+201065057035" },
 ];
 
 const SOCIAL = [
@@ -66,16 +68,38 @@ const SOCIAL = [
 ];
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [location] = useLocation();
   const isHomePage = location === "/" || location === "/home";
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  // Stores the subscriber via POST /api/newsletter/subscribe; the "subscribed"
+  // confirmation is only shown after the backend saves the email.
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
-    setEmail("");
+    if (isSubscribing) return;
+    const website = String(new FormData(event.currentTarget).get("website") ?? "").trim();
+
+    setIsSubscribing(true);
+    setSubscribeError(null);
+    try {
+      await subscribeToNewsletter({ email, source: "footer", locale: language, website });
+      setSubmitted(true);
+      setEmail("");
+    } catch (error) {
+      setSubscribeError(
+        error instanceof ApiError && error.status !== 0
+          ? error.message
+          : t("footer.subscribeError", {
+              fallback: "The subscription could not be completed. Please try again.",
+            })
+      );
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -93,7 +117,7 @@ export function Footer() {
               <div className="mt-7 flex flex-col gap-3">
                 {CONTACT.map(({ Icon, labelKey, value, href }) => (
                   <div key={value} className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
+                    <span className="xd-icon-amber xd-icon-card-surface flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--xd-gold-bg-soft)]">
                       <Icon size={15} />
                     </span>
                     {href ? (
@@ -132,24 +156,36 @@ export function Footer() {
                   {t("footer.subscribed")}
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder={t("footer.emailPlaceholder")}
-                    required
-                    className="h-12 min-w-0 flex-1 rounded-[12px] border border-[#050505]/10 bg-[var(--xd-bg)]/80 px-4 text-[14px] text-[#050505] outline-none transition focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
-                  />
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="shrink-0 gap-2 px-5 text-[14px]"
-                  >
-                    {t("common.subscribe")}
-                    <DirectionalIcon direction="forward" size={15} />
-                  </Button>
-                </form>
+                <>
+                  <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-10000px] h-px w-px overflow-hidden" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                        setSubscribeError(null);
+                      }}
+                      placeholder={t("footer.emailPlaceholder")}
+                      required
+                      className="h-12 min-w-0 flex-1 rounded-[12px] border border-[#050505]/10 bg-[var(--xd-bg)]/80 px-4 text-[14px] text-[#050505] outline-none transition focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
+                    />
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      disabled={isSubscribing}
+                      className="shrink-0 gap-2 px-5 text-[14px]"
+                    >
+                      {t("common.subscribe")}
+                      <DirectionalIcon direction="forward" size={15} />
+                    </Button>
+                  </form>
+                  {subscribeError && (
+                    <p role="alert" className="mt-3 text-[13px] font-semibold text-[#B42318]">
+                      {subscribeError}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -210,10 +246,10 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/contact" className="text-[13px] text-[#717182] transition hover:text-[#050505]">
+            <Link href="/privacy" className="text-[13px] text-[#717182] transition hover:text-[#050505]">
               {t("footer.privacy")}
             </Link>
-            <Link href="/contact" className="text-[13px] text-[#717182] transition hover:text-[#050505]">
+            <Link href="/terms" className="text-[13px] text-[#717182] transition hover:text-[#050505]">
               {t("footer.terms")}
             </Link>
           </div>

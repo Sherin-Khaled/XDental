@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
-import { CheckCircle2, Circle, CreditCard, Download, MapPin, Package } from "lucide-react";
+import { CheckCircle2, Circle, CircleX, CreditCard, Download, MapPin, Package } from "lucide-react";
 import { AccountSidebar } from "@/components/dental/AccountSidebar";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
 import { StatusBadge } from "@/components/dental/StatusBadge";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
+import { OrderPricingBreakdown } from "@/components/dental/OrderPricingBreakdown";
 import { useLanguage } from "@/context/LanguageContext";
 import { accountT, accountValue } from "@/lib/accountI18n";
 import {
   getMyOrder,
   getOrderStatusLabel,
+  getPaymentStatusLabel,
   type CustomerOrder,
+  type OrderStatus,
 } from "@/services/orders";
 import { formatCurrency } from "@/utils";
 
 export default function AccountOrderDetail() {
   const { id } = useParams();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [order, setOrder] = useState<CustomerOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -65,25 +68,61 @@ export default function AccountOrderDetail() {
   const statusLabel = getOrderStatusLabel(order.status);
   const deliveryLabel = t(`checkout.shippingMethods.${order.deliveryMethod}.title`, { fallback: order.deliveryMethod });
   const paymentLabel = t(`checkout.paymentMethods.${order.paymentMethod}.title`, { fallback: order.paymentMethod });
-  const isTerminal = order.status === "CONFIRMED" || order.status === "REJECTED" || order.status === "CANCELED";
-  const trackingSteps = [
-    { label: accountT(t, "orders.detail.orderPlaced", "Order Placed"), complete: true, current: false },
-    { label: accountValue(t, statusLabel), complete: isTerminal, current: !isTerminal },
+  const paymentStatusLabel = getPaymentStatusLabel(order.paymentStatus);
+  const isDestructiveStatus = order.status === "REJECTED" || order.status === "CANCELED";
+  const fulfillmentStatuses: OrderStatus[] = [
+    "PENDING_REVIEW",
+    "CONFIRMED",
+    "PREPARING",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
   ];
+  const currentFulfillmentIndex = fulfillmentStatuses.indexOf(order.status);
+  const trackingSteps = isDestructiveStatus
+    ? [
+        { label: accountT(t, "orders.detail.orderPlaced", "Order Placed"), complete: true, current: false, destructive: false },
+        { label: accountValue(t, statusLabel), complete: false, current: true, destructive: true },
+      ]
+    : fulfillmentStatuses.map((status, index) => ({
+        label: accountValue(t, getOrderStatusLabel(status)),
+        complete: index <= currentFulfillmentIndex,
+        current: index === currentFulfillmentIndex,
+        destructive: false,
+      }));
 
   const handleDownloadInvoice = () => {
     const lines = [
       `Order ${order.orderNumber}`,
       `Placed: ${new Date(order.createdAt).toLocaleString()}`,
       `Status: ${statusLabel}`,
-      `Payment: ${paymentLabel}`,
+      `Payment method: ${paymentLabel}`,
+      `Payment status: ${paymentStatusLabel}`,
       "",
       "Items:",
       ...order.items.map((item) => `${item.productName} - Qty ${item.quantity} - ${formatCurrency(item.total)}`),
       "",
+      ...(order.pricing?.productPromotionSavings
+        ? [`Original products subtotal: ${formatCurrency(order.pricing.originalSubtotal)}`, `Flash Sale savings: -${formatCurrency(order.pricing.productPromotionSavings)}`]
+        : []),
       `Subtotal: ${formatCurrency(order.subtotal)}`,
-      `Shipping: ${formatCurrency(order.shipping)}`,
+      ...(order.pricing?.monetaryDiscount
+        ? [`Order promotion: -${formatCurrency(order.pricing.monetaryDiscount)}`]
+        : []),
+      ...(order.pointsRedeemed > 0
+        ? [`Points redeemed (${order.pointsRedeemed}): -${formatCurrency(order.pointsRedemptionValue)}`]
+        : []),
+      ...(order.pricing?.shippingDiscount
+        ? [`Shipping before discount: ${formatCurrency(order.pricing.shippingBeforeDiscount)}`, `Shipping savings: -${formatCurrency(order.pricing.shippingDiscount)}`]
+        : []),
+      `Final shipping: ${formatCurrency(order.shipping)}`,
+      ...(order.pricing?.totalSavings
+        ? [`Total savings: ${formatCurrency(order.pricing.totalSavings)}`]
+        : []),
       `Total: ${formatCurrency(order.total)}`,
+      ...(order.walletCreditUsed > 0
+        ? [`Wallet credit used: -${formatCurrency(order.walletCreditUsed)}`]
+        : []),
+      `Remaining Cash on Delivery: ${formatCurrency(order.remainingCodAmount)}`,
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -114,6 +153,7 @@ export default function AccountOrderDetail() {
                 <div className="mb-2 flex flex-wrap items-center gap-3">
                   <h2 className="text-2xl font-bold text-[#050505]">{order.orderNumber}</h2>
                   <StatusBadge status={statusLabel} />
+                  <StatusBadge status={paymentStatusLabel} />
                 </div>
                 <p className="text-[#7A7A7A]">
                   {accountT(t, "orders.detail.placedOn", "Placed on {date}", {
@@ -145,7 +185,9 @@ export default function AccountOrderDetail() {
                   <div className="space-y-5">
                     {trackingSteps.map((step, index) => (
                       <div key={`${step.label}-${index}`} className="flex items-center gap-4">
-                        {step.complete ? (
+                        {step.destructive ? (
+                          <CircleX size={24} className="text-[#B42318]" />
+                        ) : step.complete ? (
                           <CheckCircle2 size={24} className="text-[#16803C]" />
                         ) : step.current ? (
                           <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--xd-gold-active)]">
@@ -175,6 +217,17 @@ export default function AccountOrderDetail() {
                             {item.sku && <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--xd-gold-text)]">{item.sku}</div>}
                             <h4 className="font-semibold text-[#050505]">{item.productName}</h4>
                             <div className="mt-1 text-sm text-[#7A7A7A]">{accountT(t, "common.qtyValue", "Qty: {quantity}", { quantity: item.quantity })}</div>
+                            {item.promotionDiscount !== null && item.promotionDiscount > 0 && (
+                              <p className="mt-1 text-xs font-semibold text-[#16803C] dark:text-[#7BE39D]">
+                                {(language === "ar" ? item.promotionTitleAr : item.promotionTitleEn)
+                                  || t("admin.orders.productPromotionSavings", { fallback: "Flash Sale savings" })}
+                                {item.originalUnitPrice !== null && (
+                                  <span className="ms-2 font-normal text-[#8A8D9A] line-through">
+                                    {formatCurrency(item.originalUnitPrice * item.quantity)}
+                                  </span>
+                                )}
+                              </p>
+                            )}
                           </div>
                           <div className="shrink-0 font-bold text-[#050505]">{formatCurrency(item.total)}</div>
                         </div>
@@ -203,21 +256,14 @@ export default function AccountOrderDetail() {
                     </h3>
                     <div className="rounded-xl bg-[var(--xd-bg)] p-4 text-sm text-[#5F5F5F]">
                       <p className="mb-1 font-semibold text-[#050505]">{paymentLabel}</p>
-                      <p>{accountT(t, "common.status", "Status")}: <span className="font-semibold text-[var(--xd-gold-text)]">{accountValue(t, statusLabel)}</span></p>
+                      <p>{accountT(t, "orders.detail.paymentStatus", "Payment status")}: <span className="font-semibold text-[var(--xd-gold-text)]">{accountValue(t, paymentStatusLabel)}</span></p>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-[24px] border border-[#050505]/5 bg-white p-6 shadow-sm">
                   <h3 className="mb-4 font-display text-lg font-bold text-[#050505]">{accountT(t, "common.summary", "Summary")}</h3>
-                  <div className="mb-4 space-y-3 text-sm">
-                    <div className="flex justify-between"><span className="text-[#7A7A7A]">{accountT(t, "common.subtotal", "Subtotal")}</span><span className="font-medium text-[#050505]">{formatCurrency(order.subtotal)}</span></div>
-                    <div className="flex justify-between"><span className="text-[#7A7A7A]">{accountT(t, "orders.detail.shippingMethod", "Shipping ({method})", { method: deliveryLabel })}</span><span className="font-medium text-[#050505]">{formatCurrency(order.shipping)}</span></div>
-                  </div>
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                    <span className="font-semibold text-[#050505]">{accountT(t, "common.total", "Total")}</span>
-                    <span className="font-display text-2xl font-bold text-[#050505]">{formatCurrency(order.total)}</span>
-                  </div>
+                  <OrderPricingBreakdown order={order} deliveryLabel={deliveryLabel} />
                 </div>
               </div>
             </div>

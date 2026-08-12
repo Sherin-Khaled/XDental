@@ -1,24 +1,45 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
-import { Link, useLocation } from "wouter";
-import { Check, ShieldCheck, CreditCard, Wallet, RefreshCw, FileText, Package, ClipboardList } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { Link, useLocation, useSearch } from "wouter";
+import { Check, ShieldCheck, Package } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
+import { LowStockNotice } from "@/components/dental/StockAvailability";
 import { useStore } from "@/context/StoreContext";
 import type { CartItem } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils";
+import { DentalSelect } from "@/components/dental/Select";
+import { Money } from "@/components/dental/Money";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
+import { getLocalizedProductName } from "@/lib/catalogTranslations";
 import { ApiError } from "@/services/http";
-import { createOrder } from "@/services/orders";
+import { getCartStockIssues } from "@/lib/cartStock";
+import { useImageFallback } from "@/hooks/use-image-fallback";
+import {
+  createOrder,
+  previewOrderTotals,
+  type CreateOrderInput,
+  type TrustedOrderTotals,
+} from "@/services/orders";
+import {
+  applyEmptyCheckoutContactFields,
+  buildCheckoutContactAutofill,
+  isValidEgyptianMobilePhone,
+  shouldApplyCheckoutContactAutofill,
+  shouldResetCheckoutForAccount,
+} from "@/lib/checkoutAutofill";
+import {
+  clearCheckoutAttempt,
+  completeCheckoutAttemptOnce,
+  fingerprintCheckoutAttempt,
+  invalidateChangedCheckoutAttempt,
+  resolveCheckoutAttempt,
+  runSingleCheckoutSubmission,
+} from "@/lib/checkoutIdempotency";
 
-const CHECKOUT_POINTS_KEY = "x-dental-checkout-points";
-const CHECKOUT_REWARD_KEY = "x-dental-checkout-reward";
-const POINT_VALUE_EGP = 0.1;
-const POINTS_PER_EGP = 10; // 10 points = EGP 1
-
-const CHECKOUT_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
+const CHECKOUT_IMAGE = `${import.meta.env.BASE_URL}toothtools.webp`;
 
 const inputClassName =
   "h-12 w-full rounded-[12px] border border-[#050505]/10 bg-white px-4 text-[14px] font-medium text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-bg-soft)] disabled:bg-[#F3F2ED] disabled:text-[#5F5F5F]";
@@ -31,7 +52,7 @@ const textAreaClassName =
 
 type CheckoutStepId = "delivery" | "payment" | "review";
 type ShippingMethodId = "standard" | "fast" | "pickup";
-type PaymentMethodId = "cash" | "card" | "fawry" | "wallet" | "instapay" | "bank";
+type PaymentMethodId = "cash";
 
 const checkoutSteps: { id: CheckoutStepId; number: number; labelKey: string }[] = [
   { id: "delivery", number: 1, labelKey: "checkout.steps.delivery" },
@@ -75,11 +96,6 @@ const paymentMethods: {
   shortKey: string;
 }[] = [
     { id: "cash", titleKey: "checkout.paymentMethods.cash.title", shortKey: "checkout.paymentMethods.cash.short" },
-    { id: "card", titleKey: "checkout.paymentMethods.card.title", shortKey: "checkout.paymentMethods.card.short" },
-    { id: "fawry", titleKey: "checkout.paymentMethods.fawry.title", shortKey: "checkout.paymentMethods.fawry.short" },
-    { id: "wallet", titleKey: "checkout.paymentMethods.wallet.title", shortKey: "checkout.paymentMethods.wallet.short" },
-    { id: "instapay", titleKey: "checkout.paymentMethods.instapay.title", shortKey: "checkout.paymentMethods.instapay.short" },
-    { id: "bank", titleKey: "checkout.paymentMethods.bank.title", shortKey: "checkout.paymentMethods.bank.short" },
   ];
 
 function FormCard({ title, children }: { title: string; children: ReactNode }) {
@@ -142,7 +158,7 @@ function Stepper({ currentStep }: { currentStep: CheckoutStepId }) {
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-bold",
                   isActive || isComplete
-                    ? "bg-[var(--xd-gold)] text-white"
+                    ? "xd-gradient-gold text-[#050505]"
                     : "bg-[#050505]/[0.08] text-[#8A8D9A]"
                 )}
               >
@@ -167,11 +183,14 @@ function Stepper({ currentStep }: { currentStep: CheckoutStepId }) {
   );
 }
 
-function CheckoutImage({ name }: { name: string }) {
+function CheckoutImage({ image, name }: { image?: string; name: string }) {
+  const checkoutImage = useImageFallback(image, CHECKOUT_IMAGE);
+
   return (
     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-[10px] border border-[var(--xd-gold-border-soft)] bg-white">
       <img
-        src={CHECKOUT_IMAGE}
+        src={checkoutImage.src}
+        onError={checkoutImage.onError}
         alt={name}
         width={2525}
         height={2582}
@@ -183,49 +202,37 @@ function CheckoutImage({ name }: { name: string }) {
   );
 }
 
-type AppliedPoints = {
-  type: "points";
-  pointsToApply: number;
-  source?: string;
-  createdAt: number;
-};
-
-type AppliedReward = {
-  type: "reward";
-  rewardId: string;
-  label: string;
-  discountEGP: number;
-  freeShipping?: boolean;
-  minOrderEGP?: number;
-  source?: string;
-  createdAt: number;
-};
-
 function OrderSummary({
   items,
   subtotal,
   shipping,
-  appliedPoints,
-  appliedReward,
-  pointsDiscountEGP,
-  rewardDiscountEGP,
-  shippingDiscountEGP,
+  discount,
   total,
+  pricing,
 }: {
   items: CartItem[];
   subtotal: number;
   shipping: number;
-  appliedPoints: AppliedPoints | null;
-  appliedReward: AppliedReward | null;
-  pointsDiscountEGP: number;
-  rewardDiscountEGP: number;
-  shippingDiscountEGP: number;
+  discount: number;
   total: number;
+  pricing: TrustedOrderTotals | null;
 }) {
-  const { t } = useLanguage();
-  const hasPointsDiscount = appliedPoints && pointsDiscountEGP > 0;
-  const hasRewardDiscount = appliedReward && rewardDiscountEGP > 0;
-  const hasShippingDiscount = shippingDiscountEGP > 0;
+  const { t, language } = useLanguage();
+  const monetaryLabel = pricing?.winningMonetarySource
+    ? language === "ar"
+      ? pricing.winningMonetarySource.titleAr
+      : pricing.winningMonetarySource.titleEn
+    : t("common.discount", { fallback: "Discount" });
+  const freeShippingLabel = pricing?.freeShippingSource
+    ? language === "ar"
+      ? pricing.freeShippingSource.titleAr
+      : pricing.freeShippingSource.titleEn
+    : null;
+  const vipShippingLabel = pricing?.vipShippingSource
+    ? language === "ar"
+      ? pricing.vipShippingSource.titleAr
+      : pricing.vipShippingSource.titleEn
+    : null;
 
   return (
     <aside className="min-w-0">
@@ -237,20 +244,21 @@ function OrderSummary({
         <div className="mt-7 space-y-4">
           {items.map((item, index) => (
             (() => {
-              const productName = t(`products.items.${item.product.id}.name`, { fallback: item.product.name });
+              const productName = getLocalizedProductName(item.product, language, t);
 
               return (
                 <div
                   key={`${item.product.id}-${item.selectedOptions ?? index}`}
                   className="grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-3"
                 >
-                  <CheckoutImage name={productName} />
+                  <CheckoutImage image={item.product.image} name={productName} />
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-bold text-[#050505]">{productName}</p>
                     <p className="mt-1 text-[12px] font-semibold text-[#8A8D9A]">{t("common.quantity")}: {item.quantity}</p>
+                    <LowStockNotice product={item.product} className="mt-1.5" />
                   </div>
                   <p className="text-[13px] font-bold text-[var(--xd-gold-active)]">
-                    {formatCurrency(item.product.currentPrice * item.quantity)}
+                    <Money amount={item.product.currentPrice * item.quantity} />
                   </p>
                 </div>
               );
@@ -260,49 +268,85 @@ function OrderSummary({
 
         <div className="mt-6 border-t border-[#050505]/[0.07] pt-5">
           <dl className="space-y-4 text-[14px]">
+            {pricing && pricing.productPromotionSavings > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[#8A8D9A]">{t("checkout.originalProductsSubtotal", { fallback: "Original products subtotal" })}</dt>
+                <dd className="font-bold text-[#050505]"><Money amount={pricing.originalSubtotal} /></dd>
+              </div>
+            )}
+            {pricing && pricing.productPromotionSavings > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[var(--xd-gold-text)]">{t("checkout.productPromotionSavings", { fallback: "Product / Flash savings" })}</dt>
+                <dd className="font-bold text-[var(--xd-gold-text)]">−<Money amount={pricing.productPromotionSavings} /></dd>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-4">
               <dt className="text-[#8A8D9A]">{t("checkout.itemsSubtotal")}</dt>
-              <dd className="font-bold text-[#050505]">{formatCurrency(subtotal)}</dd>
+              <dd className="font-bold text-[#050505]"><Money amount={subtotal} /></dd>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-[#8A8D9A]">{t("common.shipping")}</dt>
-              <dd className="font-bold text-[#050505]">{formatCurrency(shipping)}</dd>
-            </div>
-            {hasShippingDiscount && (
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#8A8D9A]">
-                  <span>{t("checkout.freeShipping") || "Free Shipping"}</span>
-                  {appliedReward?.label && (
-                    <span className="mt-1 block text-[12px] font-semibold text-[#717182]">
-                      {appliedReward.label}
-                    </span>
-                  )}
-                </dt>
-                <dd className="font-bold text-[#16803C]">{`-${formatCurrency(shippingDiscountEGP)}`}</dd>
+            {pricing && pricing.shippingDiscount > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[#8A8D9A]">{t("checkout.shippingBeforeDiscount", { fallback: "Shipping before discount" })}</dt>
+                <dd className="font-bold text-[#050505]"><Money amount={pricing.shippingBeforeDiscount} /></dd>
               </div>
             )}
-            {hasPointsDiscount && (
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#8A8D9A]">
-                  <span>{t("checkout.pointsDiscount") || "Points Discount"}</span>
-                  <span className="mt-1 block text-[12px] font-semibold text-[#717182]">
-                    {appliedPoints.pointsToApply.toLocaleString()} {t("checkout.pts") || "pts"}
+            {pricing && pricing.deliveryOfferDiscount > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[var(--xd-gold-text)]">{t("checkout.deliveryOfferDiscount", { fallback: "Delivery Offer discount" })}</dt>
+                <dd className="font-bold text-[var(--xd-gold-text)]">−<Money amount={pricing.deliveryOfferDiscount} /></dd>
+              </div>
+            )}
+            {pricing && pricing.vipShippingDiscount > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="min-w-0 text-[var(--xd-gold-text)]">
+                  {vipShippingLabel || t("checkout.vipShippingDiscount", { fallback: "VIP delivery saving" })}
+                </dt>
+                <dd className="shrink-0 font-bold text-[var(--xd-gold-text)]">−<Money amount={pricing.vipShippingDiscount} /></dd>
+              </div>
+            )}
+            {freeShippingLabel && pricing && pricing.shippingDiscount > pricing.deliveryOfferDiscount + pricing.vipShippingDiscount && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="min-w-0 text-[var(--xd-gold-text)]">{freeShippingLabel}</dt>
+                <dd className="shrink-0 font-bold text-[var(--xd-gold-text)]">{t("checkout.freeShippingApplied", { fallback: "Free shipping" })}</dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-[#8A8D9A]">{t("checkout.finalShipping", { fallback: "Final shipping" })}</dt>
+              <dd className="font-bold text-[#050505]"><Money amount={shipping} /></dd>
+            </div>
+            {discount > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="min-w-0 text-[var(--xd-gold-text)]">{monetaryLabel}</dt>
+                <dd className="font-bold text-[var(--xd-gold-text)]">−<Money amount={discount} /></dd>
+              </div>
+            )}
+            {pricing && pricing.pointsRedeemed > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[var(--xd-gold-text)]">
+                  {t("checkout.rewards.pointsRedeemed", { fallback: "Points redeemed" })}
+                  <span className="ms-1 text-[11px] text-[#8A8D9A]">
+                    ({pricing.pointsRedeemed.toLocaleString("en-US")})
                   </span>
                 </dt>
-                <dd className="font-bold text-[#16803C]">{`-${formatCurrency(pointsDiscountEGP)}`}</dd>
+                <dd className="font-bold text-[var(--xd-gold-text)]">
+                  −<Money amount={pricing.pointsRedemptionValue} />
+                </dd>
               </div>
             )}
-            {hasRewardDiscount && (
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#8A8D9A]">
-                  <span>{t("checkout.rewardDiscount") || "Reward Discount"}</span>
-                  {appliedReward.label && (
-                    <span className="mt-1 block text-[12px] font-semibold text-[#717182]">
-                      {appliedReward.label}
-                    </span>
-                  )}
+            {pricing && pricing.walletCreditUsed > 0 && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[var(--xd-gold-text)]">
+                  {t("checkout.rewards.walletUsed", { fallback: "Wallet credit used" })}
                 </dt>
-                <dd className="font-bold text-[#16803C]">{`-${formatCurrency(rewardDiscountEGP)}`}</dd>
+                <dd className="font-bold text-[var(--xd-gold-text)]">
+                  −<Money amount={pricing.walletCreditUsed} />
+                </dd>
+              </div>
+            )}
+            {pricing && pricing.totalSavings > 0 && (
+              <div className="flex items-center justify-between gap-4 border-t border-[#050505]/[0.06] pt-4">
+                <dt className="font-semibold text-[#8A8D9A]">{t("checkout.totalSavings", { fallback: "Total savings" })}</dt>
+                <dd className="font-bold text-[var(--xd-gold-text)]"><Money amount={pricing.totalSavings} /></dd>
               </div>
             )}
           </dl>
@@ -312,9 +356,19 @@ function OrderSummary({
           <div className="flex items-end justify-between gap-4">
             <span className="text-[17px] font-bold text-[#050505]">{t("common.total")}</span>
             <span className="font-display text-[26px] font-bold text-[var(--xd-gold-active)]">
-              {formatCurrency(total)}
+              <Money amount={total} />
             </span>
           </div>
+          {pricing && (
+            <div className="mt-3 flex items-center justify-between gap-4 rounded-[12px] bg-[var(--xd-gold-bg-soft)] px-3 py-2.5">
+              <span className="text-[13px] font-bold text-[#5F5F5F] dark:text-[#D6D0C3]">
+                {t("checkout.rewards.remainingCod", { fallback: "Remaining Cash on Delivery" })}
+              </span>
+              <span className="font-display text-[18px] font-bold text-[#050505] dark:text-[#F7F2E6]">
+                <Money amount={pricing.remainingCodAmount} />
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="mt-7 flex items-start justify-center gap-2 rounded-[14px] bg-[var(--xd-bg)] px-4 py-3 text-center text-[12px] font-medium leading-5 text-[#8A8D9A]">
@@ -348,7 +402,7 @@ function SelectableOption({
       className={cn(
         "flex w-full items-center justify-between gap-4 rounded-[14px] border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]",
         selected
-          ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-active)]/[0.08]"
+          ? "xd-gradient-gold-border bg-[var(--xd-gold-active)]/[0.08]"
           : invalid
             ? "border-[#F44336]/45 bg-[#F44336]/[0.025] hover:border-[#F44336]/65"
           : "border-[#050505]/[0.08] bg-white hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/[0.04]"
@@ -399,26 +453,34 @@ function PaymentRadioCard({
       }}
       onClick={onSelect}
       className={cn(
-        "inline-flex items-center gap-2 max-w-max h-12 px-4 rounded-full border bg-white/55 text-[14px] font-semibold transition-colors focus-visible:outline-none",
+        "checkout-payment-method inline-flex h-12 max-w-max items-center gap-2 rounded-full border px-4 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--xd-surface)]",
         selected
-          ? "border-[var(--xd-gold-border-hover)] bg-[var(--xd-gold)]/[0.10] text-[#050505]"
+          ? "checkout-payment-method--selected xd-gradient-gold-border bg-[rgba(249,220,92,0.10)] text-[#050505] dark:bg-[#1F1F1B] dark:text-[#F5F1E7] dark:hover:bg-[#25231D]"
           : invalid
-            ? "border-[#F44336]/45 hover:border-[#F44336]/65 hover:bg-[#F44336]/[0.025]"
-          : "border-[#050505]/[0.08] hover:border-[var(--xd-gold-border)] hover:bg-[var(--xd-gold)]/[0.05]"
+            ? "border-[#F44336]/45 bg-white/55 hover:border-[#F44336]/65 hover:bg-[#F44336]/[0.025]"
+          : "border-[#050505]/[0.08] bg-white/55 hover:border-[var(--xd-gold-border)] hover:bg-[var(--xd-gold)]/[0.05]"
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
-          "flex h-4 w-4 items-center justify-center rounded-full border",
-          selected ? "border-[var(--xd-gold-active)] bg-white" : "border-[#050505]/[0.12] bg-white"
+          "checkout-payment-method__indicator flex h-4 w-4 items-center justify-center rounded-full border",
+          selected
+            ? "border-[var(--xd-gold-active)] bg-[var(--xd-surface)] dark:border-[#F2D24B]"
+            : "border-[#050505]/[0.12] bg-[var(--xd-surface)]"
         )}
       >
         {selected ? <span className="h-2 w-2 rounded-full bg-[var(--xd-gold)]" /> : null}
       </span>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center justify-center flex-shrink-0" style={{ width: 40, height: 24 }}>
+        <div
+          className={cn(
+            "checkout-payment-method__icon flex flex-shrink-0 items-center justify-center",
+            selected && "dark:text-[#F2D24B]"
+          )}
+          style={{ width: 40, height: 24 }}
+        >
           {logoSrc ? (
             Array.isArray(logoSrc) ? (
               <div className="flex items-center gap-1">
@@ -440,7 +502,7 @@ function PaymentRadioCard({
             <Package size={20} />
           )}
         </div>
-        <span className="whitespace-nowrap">{title}</span>
+        <span className="checkout-payment-method__label whitespace-nowrap">{title}</span>
       </div>
     </div>
   );
@@ -477,14 +539,14 @@ function ReviewCard({
 }
 
 function ReviewItemRow({ item }: { item: CartItem }) {
-  const { t } = useLanguage();
-  const productName = t(`products.items.${item.product.id}.name`, { fallback: item.product.name });
+  const { t, language } = useLanguage();
+  const productName = getLocalizedProductName(item.product, language, t);
   const optionDetails =
     item.selectedOptions || item.product.options?.join(" - ") || "Pack: 1 pcs";
 
   return (
     <article className="grid gap-4 border-b border-[#050505]/[0.07] py-5 first:pt-0 last:border-b-0 last:pb-0 sm:grid-cols-[76px_minmax(0,1fr)_auto]">
-      <CheckoutImage name={productName} />
+      <CheckoutImage image={item.product.image} name={productName} />
       <div className="min-w-0">
         <h3 className="text-[16px] font-bold leading-6 text-[#050505]">{productName}</h3>
         <div className="mt-2 space-y-1 text-[13px] font-semibold leading-5 text-[#8A8D9A]">
@@ -494,9 +556,14 @@ function ReviewItemRow({ item }: { item: CartItem }) {
           <p>{optionDetails}</p>
           <p>{t("common.quantity")}: {item.quantity}</p>
         </div>
+        <LowStockNotice
+          product={item.product}
+          showAvailabilityNote
+          className="mt-2.5"
+        />
       </div>
       <p className="self-start font-display text-[18px] font-bold text-[var(--xd-gold-active)] sm:text-right">
-        {formatCurrency(item.product.currentPrice * item.quantity)}
+        <Money amount={item.product.currentPrice * item.quantity} />
       </p>
     </article>
   );
@@ -519,6 +586,9 @@ const initialFormState = {
   clinicBranch: "",
 };
 
+type CheckoutFormState = typeof initialFormState;
+type CheckoutFormField = keyof CheckoutFormState;
+
 type DeliveryFieldId =
   | "firstName"
   | "lastName"
@@ -532,18 +602,7 @@ type DeliveryFieldId =
 
 type PaymentFieldId =
   | "shippingMethod"
-  | "paymentMethod"
-  | "cardNumber"
-  | "cardExpiry"
-  | "cardName"
-  | "cardCvv";
-
-const initialCardState = {
-  cardNumber: "",
-  cardExpiry: "",
-  cardName: "",
-  cardCvv: "",
-};
+  | "paymentMethod";
 
 const deliveryFieldOrder: DeliveryFieldId[] = [
   "firstName",
@@ -560,10 +619,6 @@ const deliveryFieldOrder: DeliveryFieldId[] = [
 const paymentFieldOrder: PaymentFieldId[] = [
   "shippingMethod",
   "paymentMethod",
-  "cardNumber",
-  "cardExpiry",
-  "cardName",
-  "cardCvv",
 ];
 
 function scrollToCheckoutTop() {
@@ -582,211 +637,265 @@ function focusCheckoutField(id: string) {
 }
 
 export default function Checkout() {
-  const { cart, cartTotal, clearCart, currentUser, isAuthenticated, isAuthLoading } = useStore();
+  const {
+    cart,
+    cartTotal,
+    clearCart,
+    currentUser,
+    isAuthenticated,
+    isAuthLoading,
+    waitForCartSync,
+  } = useStore();
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const promoCode = new URLSearchParams(search).get("coupon")?.trim().toUpperCase() || undefined;
+  const checkoutPath = promoCode ? `/checkout?coupon=${encodeURIComponent(promoCode)}` : "/checkout";
   const [currentStep, setCurrentStep] = useState<CheckoutStepId>("delivery");
   const [form, setForm] = useState(initialFormState);
   const [sendUpdates, setSendUpdates] = useState(true);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethodId | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId | null>(null);
-  const [points, setPoints] = useState("");
-  const [pointsFeedback, setPointsFeedback] = useState<{ message: string; tone: "error" | "success" } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("cash");
+  const [selectedClinicLocationId, setSelectedClinicLocationId] = useState<string>("");
+  const [requestedPoints, setRequestedPoints] = useState(0);
+  const [requestedWalletAmount, setRequestedWalletAmount] = useState("0");
   const [deliveryErrors, setDeliveryErrors] = useState<Partial<Record<DeliveryFieldId, string>>>({});
   const [paymentErrors, setPaymentErrors] = useState<Partial<Record<PaymentFieldId, string>>>({});
-  const [card, setCard] = useState(initialCardState);
-  const [billingSameAsShipping, setBillingSameAsShipping] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [appliedPoints, setAppliedPoints] = useState<AppliedPoints | null>(null);
-  const [appliedReward, setAppliedReward] = useState<AppliedReward | null>(null);
+  const [trustedTotals, setTrustedTotals] = useState<TrustedOrderTotals | null>(null);
   const hasCompletedOrder = useRef(false);
+  const activeSubmission = useRef<Promise<void> | null>(null);
+  const editedCheckoutFields = useRef<Set<CheckoutFormField>>(new Set());
+  const autofilledUserId = useRef<string | null>(null);
+  const previousCheckoutUserId = useRef<string | null | undefined>(undefined);
   const checkoutItems = cart;
+  const cartStockIssues = useMemo(() => getCartStockIssues(cart), [cart]);
   const subtotal = cartTotal;
-  const availablePoints = Math.max(0, Math.floor(currentUser?.stats?.points ?? 0));
   const selectedShippingMethod =
     shippingMethods.find((method) => method.id === shippingMethod);
   const selectedPaymentMethod =
     paymentMethods.find((method) => method.id === paymentMethod);
   const shipping = subtotal > 0 ? selectedShippingMethod?.amount ?? 0 : 0;
+  const checkoutOrderInput = useMemo<CreateOrderInput>(
+    () => ({
+      customerName: `${form.firstName} ${form.lastName}`.trim(),
+      customerEmail: form.email,
+      customerPhone: form.phone,
+      country: form.country,
+      governorate: form.governorate,
+      cityArea: form.cityArea,
+      streetAddress: form.streetAddress,
+      buildingNumber: form.buildingNumber,
+      apartmentFloor: form.apartmentFloor,
+      postalCode: form.postalCode,
+      deliveryNotes: form.deliveryNotes,
+      clinicName: form.clinicName,
+      clinicBranch: form.clinicBranch,
+      orderNotes,
+      deliveryMethod: shippingMethod ?? "",
+      paymentMethod,
+      promoCode,
+      requestedPoints,
+      requestedWalletAmount,
+      clinicLocationId: selectedClinicLocationId || null,
+      items: cart.map((item) => ({
+        productId: item.product.id,
+        sku: item.product.sku ?? undefined,
+        slug: item.product.slug ?? undefined,
+        selectedOptions: item.selectedOptions ?? undefined,
+        quantity: item.quantity,
+      })),
+    }),
+    [cart, form, orderNotes, paymentMethod, promoCode, requestedPoints, requestedWalletAmount, selectedClinicLocationId, shippingMethod]
+  );
+  const checkoutFingerprint = useMemo(
+    () => fingerprintCheckoutAttempt(checkoutOrderInput),
+    [checkoutOrderInput]
+  );
+
+  useEffect(() => {
+    const activeUserId =
+      isAuthenticated && currentUser ? currentUser.id : null;
+    const previousUserId = previousCheckoutUserId.current;
+
+    if (isAuthLoading && previousUserId === undefined && !activeUserId) {
+      return;
+    }
+
+    const accountChanged = shouldResetCheckoutForAccount(
+      previousUserId,
+      activeUserId
+    );
+    previousCheckoutUserId.current = activeUserId;
+
+    if (!activeUserId || !currentUser) {
+      if (accountChanged) {
+        editedCheckoutFields.current.clear();
+        setForm({ ...initialFormState });
+        setCurrentStep("delivery");
+        setDeliveryErrors({});
+        setPaymentErrors({});
+        setOrderNotes("");
+        setStatusMessage(null);
+        setSendUpdates(true);
+        setShippingMethod(null);
+        setPaymentMethod("cash");
+        setSelectedClinicLocationId("");
+        setRequestedPoints(0);
+        setRequestedWalletAmount("0");
+      }
+      autofilledUserId.current = null;
+      return;
+    }
+
+    if (
+      !shouldApplyCheckoutContactAutofill(
+        autofilledUserId.current,
+        activeUserId,
+        accountChanged
+      )
+    ) {
+      return;
+    }
+
+    const contactAutofill = buildCheckoutContactAutofill(currentUser);
+
+    if (accountChanged) {
+      editedCheckoutFields.current.clear();
+      setForm(
+        applyEmptyCheckoutContactFields(
+          { ...initialFormState },
+          contactAutofill,
+          editedCheckoutFields.current
+        )
+      );
+      setCurrentStep("delivery");
+      setDeliveryErrors({});
+      setPaymentErrors({});
+      setOrderNotes("");
+      setStatusMessage(null);
+      setSendUpdates(true);
+      setShippingMethod(null);
+      setPaymentMethod("cash");
+      setSelectedClinicLocationId("");
+      setRequestedPoints(0);
+      setRequestedWalletAmount("0");
+    } else {
+      setForm((current) =>
+        applyEmptyCheckoutContactFields(
+          current,
+          contactAutofill,
+          editedCheckoutFields.current
+        )
+      );
+    }
+
+    autofilledUserId.current = activeUserId;
+  }, [currentUser, isAuthenticated, isAuthLoading]);
 
   useEffect(() => {
     if (isAuthLoading || hasCompletedOrder.current) return;
     if (!isAuthenticated) {
-      setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`, { replace: true });
+      setLocation(`/signin?redirect=${encodeURIComponent(checkoutPath)}`, { replace: true });
       return;
     }
     if (cart.length === 0) {
       setLocation("/cart?checkout=empty", { replace: true });
     }
-  }, [cart.length, isAuthenticated, isAuthLoading, setLocation]);
+  }, [cart.length, checkoutPath, isAuthenticated, isAuthLoading, setLocation]);
 
-  // Read applied points and reward from localStorage on mount (and when URL changes).
-  // Only ONE benefit is active at a time. If both keys exist, we keep the
-  // one with the newer `createdAt` (falling back to the reward if neither
-  // has a timestamp, so legacy data does not double-apply).
   useEffect(() => {
-    if (typeof window === "undefined" || isAuthLoading) return;
-
-    const readFromQuery = (): number | null => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const raw = params.get("applyPoints");
-        if (!raw) return null;
-        const parsed = Number(raw);
-        if (!Number.isFinite(parsed) || parsed <= 0) return null;
-        return Math.floor(parsed);
-      } catch {
-        return null;
-      }
-    };
-
-    const queryPoints = readFromQuery();
-
-    const readPoints = (): AppliedPoints | null => {
-      try {
-        const raw = window.localStorage.getItem(CHECKOUT_POINTS_KEY);
-        if (!raw) {
-          if (queryPoints && queryPoints <= availablePoints) {
-            return {
-              type: "points",
-              pointsToApply: queryPoints,
-              source: "url",
-              createdAt: Date.now(),
-            };
-          }
-          return null;
-        }
-        const parsed = JSON.parse(raw) as Partial<AppliedPoints> | null;
-        const stored =
-          typeof parsed?.pointsToApply === "number"
-            ? parsed.pointsToApply
-            : typeof (parsed as { points?: number } | null)?.points === "number"
-              ? (parsed as { points?: number }).points
-              : null;
-        const value = queryPoints ?? stored;
-        if (!value || value <= 0) return null;
-        const safePoints = Math.floor(value);
-        if (safePoints > availablePoints) {
-          window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
-          return null;
-        }
-        return {
-          type: "points",
-          pointsToApply: safePoints,
-          source: parsed?.source ?? (queryPoints ? "url" : "wallet"),
-          createdAt:
-            typeof parsed?.createdAt === "number" ? parsed.createdAt : Date.now(),
-        };
-      } catch {
-        return null;
-      }
-    };
-
-    const readReward = (): AppliedReward | null => {
-      try {
-        const raw = window.localStorage.getItem(CHECKOUT_REWARD_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw) as Partial<AppliedReward> | null;
-        if (!parsed || typeof parsed.rewardId !== "string") return null;
-        return {
-          type: "reward",
-          rewardId: parsed.rewardId,
-          label: typeof parsed.label === "string" ? parsed.label : "",
-          discountEGP:
-            typeof parsed.discountEGP === "number" ? parsed.discountEGP : 0,
-          freeShipping: Boolean(parsed.freeShipping),
-          minOrderEGP:
-            typeof parsed.minOrderEGP === "number" ? parsed.minOrderEGP : 0,
-          source: parsed.source,
-          createdAt:
-            typeof parsed.createdAt === "number" ? parsed.createdAt : Date.now(),
-        };
-      } catch {
-        return null;
-      }
-    };
-
-    const storedPoints = readPoints();
-    const storedReward = readReward();
-
-    // Resolve which benefit is active. Newer createdAt wins; if either
-    // is missing a timestamp, prefer the reward (legacy fallback) so
-    // both keys can't double-apply on first load.
-    if (storedPoints && storedReward) {
-      if (storedReward.createdAt >= storedPoints.createdAt) {
-        setAppliedReward(storedReward);
-        setAppliedPoints(null);
-        setPoints("");
-        // Drop the stale points key so the wallet reads as clean later.
-        try {
-          window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
-        } catch {
-          /* storage unavailable */
-        }
-      } else {
-        setAppliedPoints(storedPoints);
-        setAppliedReward(null);
-        setPoints(String(storedPoints.pointsToApply));
-        try {
-          window.localStorage.removeItem(CHECKOUT_REWARD_KEY);
-        } catch {
-          /* storage unavailable */
-        }
-      }
-    } else if (storedPoints) {
-      setAppliedPoints(storedPoints);
-      setPoints(String(storedPoints.pointsToApply));
-    } else if (storedReward) {
-      setAppliedPoints(null);
-      setAppliedReward(storedReward);
-    } else {
-      setAppliedPoints(null);
+    if (
+      isAuthLoading ||
+      hasCompletedOrder.current ||
+      cart.length === 0 ||
+      cartStockIssues.length === 0
+    ) {
+      return;
     }
-  }, [availablePoints, isAuthLoading]);
+    setStatusMessage(
+      t("cart.availableQuantityChanged", {
+        fallback: "The available quantity changed. Update this item before checkout.",
+      })
+    );
+    setLocation("/cart?checkout=stock", { replace: true });
+  }, [cart.length, cartStockIssues.length, isAuthLoading, setLocation, t]);
 
-  // Compute raw discount from points (10 points = EGP 1) and reward.
-  const rawPointsDiscountEGP = appliedPoints
-    ? appliedPoints.pointsToApply * POINT_VALUE_EGP
-    : 0;
-  const rawRewardDiscountEGP = appliedReward ? Math.max(0, appliedReward.discountEGP) : 0;
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser || isSubmitting || hasCompletedOrder.current) return;
+    try {
+      invalidateChangedCheckoutAttempt(
+        window.sessionStorage,
+        currentUser.id,
+        checkoutFingerprint
+      );
+    } catch {
+      // Storage availability is checked again before submission so checkout
+      // can show a safe, localized error without sending an unprotected retry.
+    }
+  }, [checkoutFingerprint, currentUser, isAuthenticated, isSubmitting]);
 
-  // Determine whether the applied reward is eligible for this order.
-  // (Used to gate the discount + free-shipping modifier.)
-  const rewardMinOrder = appliedReward?.minOrderEGP ?? 0;
-  const rewardEligible = appliedReward
-    ? subtotal >= rewardMinOrder
-    : false;
+  useEffect(() => {
+    if (!isAuthenticated || !shippingMethod || cart.length === 0) {
+      setTrustedTotals(null);
+      return;
+    }
+    const controller = new AbortController();
+    previewOrderTotals(
+      {
+        deliveryMethod: shippingMethod,
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          sku: item.product.sku ?? undefined,
+          slug: item.product.slug ?? undefined,
+          selectedOptions: item.selectedOptions ?? undefined,
+          quantity: item.quantity,
+        })),
+        promoCode,
+        requestedPoints,
+        requestedWalletAmount,
+        clinicLocationId: selectedClinicLocationId || null,
+      },
+      controller.signal
+    )
+      .then((totals) => {
+        setTrustedTotals(totals);
+        if (requestedPoints > 0 || Number(requestedWalletAmount) > 0) {
+          setStatusMessage(null);
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setTrustedTotals(null);
+          if (
+            error instanceof ApiError &&
+            (error.code === "INSUFFICIENT_STOCK" ||
+              error.code === "PRODUCT_UNAVAILABLE")
+          ) {
+            setStatusMessage(
+              t("cart.availableQuantityChanged", {
+                fallback: "The available quantity changed. Update this item before checkout.",
+              })
+            );
+            setLocation("/cart?checkout=stock", { replace: true });
+            return;
+          }
+          if (promoCode || requestedPoints > 0 || Number(requestedWalletAmount) > 0) {
+            setStatusMessage(
+              error instanceof ApiError ? error.message : t("cart.couponInvalid")
+            );
+          }
+        }
+      });
+    return () => controller.abort();
+  }, [cart, isAuthenticated, promoCode, requestedPoints, requestedWalletAmount, selectedClinicLocationId, shippingMethod, t]);
 
-  // Free-shipping modifier: capped to actual shipping cost, and only
-  // applied when the order is eligible for the reward and a paid shipping
-  // method is selected (pickup is already free).
-  const paidShipping = shippingMethod !== "pickup" ? shipping : 0;
-  const freeShippingActive = Boolean(
-    appliedReward?.freeShipping && rewardEligible && paidShipping > 0
-  );
-  const shippingDiscountEGP = freeShippingActive ? paidShipping : 0;
-
-  // The reward monetary discount only applies if the order meets its
-  // minimum requirement; otherwise the reward is ignored entirely.
-  const effectiveRewardDiscountEGP = rewardEligible ? rawRewardDiscountEGP : 0;
-
-  // Cap combined discount so it never exceeds the eligible order total
-  // (subtotal + shipping - shippingDiscount). Discount is taken from the
-  // pre-shipping total first.
-  const maxDiscountBase = Math.max(0, subtotal + shipping - shippingDiscountEGP);
-  const totalRawDiscount = rawPointsDiscountEGP + effectiveRewardDiscountEGP;
-  const discountScale =
-    totalRawDiscount > 0 && totalRawDiscount > maxDiscountBase && maxDiscountBase > 0
-      ? maxDiscountBase / totalRawDiscount
-      : 1;
-  const pointsDiscountEGP = Math.max(0, Math.floor(rawPointsDiscountEGP * discountScale));
-  const rewardDiscountEGP = Math.max(0, Math.floor(effectiveRewardDiscountEGP * discountScale));
-  const total = Math.max(
-    0,
-    subtotal + shipping - pointsDiscountEGP - rewardDiscountEGP - shippingDiscountEGP
-  );
+  const displayedSubtotal = trustedTotals?.subtotal ?? subtotal;
+  const displayedShipping = trustedTotals?.shipping ?? shipping;
+  const displayedDiscount = trustedTotals?.discount ?? 0;
+  const total = trustedTotals?.total ?? subtotal + shipping;
 
   const addressLines = [
     form.buildingNumber,
@@ -816,6 +925,9 @@ export default function Checkout() {
     if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       errors.email = t("checkout.validation.emailInvalid");
     }
+    if (form.phone.trim() && !isValidEgyptianMobilePhone(form.phone)) {
+      errors.phone = t("checkout.validation.phoneInvalid");
+    }
 
     return errors;
   };
@@ -828,33 +940,6 @@ export default function Checkout() {
     }
     if (!paymentMethod) {
       errors.paymentMethod = t("checkout.validation.paymentMethodRequired");
-    }
-
-    if (paymentMethod === "card") {
-      const cardNumber = card.cardNumber.replace(/\s/g, "");
-      if (!cardNumber) {
-        errors.cardNumber = t("checkout.validation.cardNumberRequired");
-      } else if (!/^\d{12,19}$/.test(cardNumber)) {
-        errors.cardNumber = t("checkout.validation.cardNumberInvalid");
-      }
-
-      if (!card.cardExpiry.trim()) {
-        errors.cardExpiry = t("checkout.validation.cardExpiryRequired");
-      } else if (!/^(0[1-9]|1[0-2])\s?\/\s?\d{2}$/.test(card.cardExpiry.trim())) {
-        errors.cardExpiry = t("checkout.validation.cardExpiryInvalid");
-      }
-
-      if (!card.cardName.trim()) {
-        errors.cardName = t("checkout.validation.cardNameRequired");
-      } else if (card.cardName.trim().length < 2) {
-        errors.cardName = t("checkout.validation.cardNameInvalid");
-      }
-
-      if (!card.cardCvv.trim()) {
-        errors.cardCvv = t("checkout.validation.cardCvvRequired");
-      } else if (!/^\d{3,4}$/.test(card.cardCvv.trim())) {
-        errors.cardCvv = t("checkout.validation.cardCvvInvalid");
-      }
     }
 
     return errors;
@@ -870,9 +955,7 @@ export default function Checkout() {
 
     setCurrentStep(step);
     setStatusMessage(
-      step === "payment" && !errors.shippingMethod && !errors.paymentMethod
-        ? t("checkout.completeCardFields")
-        : t("checkout.completeRequiredFields")
+      t("checkout.completeRequiredFields")
     );
     focusCheckoutField(
       firstInvalidField === "shippingMethod"
@@ -904,16 +987,11 @@ export default function Checkout() {
 
   const handleFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
+    editedCheckoutFields.current.add(name as CheckoutFormField);
     setForm((current) => ({ ...current, [name]: value }));
     if (deliveryFieldOrder.includes(name as DeliveryFieldId)) {
       clearDeliveryError(name as DeliveryFieldId);
     }
-  };
-
-  const handleCardChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const field = event.target.name as keyof typeof initialCardState;
-    setCard((current) => ({ ...current, [field]: event.target.value }));
-    clearPaymentError(field);
   };
 
   const selectShippingMethod = (method: ShippingMethodId) => {
@@ -926,12 +1004,6 @@ export default function Checkout() {
     setPaymentErrors((current) => {
       const next = { ...current };
       delete next.paymentMethod;
-      if (method !== "card") {
-        delete next.cardNumber;
-        delete next.cardExpiry;
-        delete next.cardName;
-        delete next.cardCvv;
-      }
       return next;
     });
   };
@@ -958,60 +1030,11 @@ export default function Checkout() {
     showStep("review");
   };
 
-  const clearAppliedPoints = () => {
-    setAppliedPoints(null);
-    try {
-      window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
-    } catch {
-      /* storage unavailable */
-    }
-  };
-
-  const handleApplyPoints = () => {
-    const trimmed = points.trim();
-    const parsed = Number(trimmed);
-    if (!trimmed || !Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
-      clearAppliedPoints();
-      setPointsFeedback({ message: t("checkout.pointsInvalid"), tone: "error" });
-      return;
-    }
-    if (availablePoints === 0) {
-      clearAppliedPoints();
-      setPointsFeedback({ message: t("checkout.pointsUnavailable"), tone: "error" });
-      return;
-    }
-    if (parsed > availablePoints) {
-      clearAppliedPoints();
-      setPointsFeedback({
-        message: t("checkout.pointsExceeded", { values: { balance: availablePoints.toLocaleString() } }),
-        tone: "error",
-      });
-      return;
-    }
-    // Applying points in-page replaces any active reward. Clear the
-    // reward key + state so checkout never double-applies.
-    setAppliedReward(null);
-    try {
-      window.localStorage.removeItem(CHECKOUT_REWARD_KEY);
-    } catch {
-      /* storage unavailable */
-    }
-    setAppliedPoints({
-      type: "points",
-      pointsToApply: parsed,
-      source: "checkout",
-      createdAt: Date.now(),
-    });
-    setPointsFeedback({
-      message: t("checkout.pointsApplied", { values: { points: parsed.toLocaleString() } }),
-      tone: "success",
-    });
-  };
-
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = () => {
+    if (activeSubmission.current) return activeSubmission.current;
     if (isAuthLoading || isSubmitting) return;
     if (!isAuthenticated) {
-      setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`);
+      setLocation(`/signin?redirect=${encodeURIComponent(checkoutPath)}`);
       return;
     }
     const nextDeliveryErrors = validateDeliveryFields();
@@ -1028,63 +1051,113 @@ export default function Checkout() {
 
     setIsSubmitting(true);
     setStatusMessage(null);
-    try {
-      const order = await createOrder({
-        customerName: `${form.firstName} ${form.lastName}`.trim(),
-        customerEmail: form.email,
-        customerPhone: form.phone,
-        country: form.country,
-        governorate: form.governorate,
-        cityArea: form.cityArea,
-        streetAddress: form.streetAddress,
-        buildingNumber: form.buildingNumber,
-        apartmentFloor: form.apartmentFloor,
-        postalCode: form.postalCode,
-        deliveryNotes: form.deliveryNotes,
-        clinicName: form.clinicName,
-        clinicBranch: form.clinicBranch,
-        orderNotes,
-        deliveryMethod: shippingMethod,
-        paymentMethod,
-        items: cart.map((item) => ({
-          productId: item.product.id,
-          productName: item.product.name,
-          sku: item.product.sku ?? undefined,
-          selectedOptions: item.selectedOptions ?? undefined,
-          quantity: item.quantity,
-          unitPrice: item.product.currentPrice,
-        })),
-      });
-
-      hasCompletedOrder.current = true;
-      clearCart();
+    return runSingleCheckoutSubmission(activeSubmission, async () => {
+      let attemptKey: string | undefined;
       try {
-        window.localStorage.removeItem(CHECKOUT_POINTS_KEY);
-        window.localStorage.removeItem(CHECKOUT_REWARD_KEY);
-      } catch {
-        /* storage unavailable */
+        await waitForCartSync();
+        if (!currentUser) {
+          setLocation(`/signin?redirect=${encodeURIComponent(checkoutPath)}`);
+          return;
+        }
+        const attempt = resolveCheckoutAttempt(
+          window.sessionStorage,
+          currentUser.id,
+          checkoutFingerprint
+        );
+        attemptKey = attempt.idempotencyKey;
+        if (!trustedTotals?.pricingQuoteToken) {
+          setStatusMessage(t("checkout.pricingReviewUnavailable", { fallback: "Reviewing the latest price. Please try again in a moment." }));
+          return;
+        }
+        const { order } = await createOrder(
+          { ...checkoutOrderInput, pricingQuoteToken: trustedTotals.pricingQuoteToken },
+          attempt.idempotencyKey
+        );
+
+        completeCheckoutAttemptOnce(hasCompletedOrder, () => {
+          try {
+            clearCheckoutAttempt(window.sessionStorage, currentUser.id, attempt.idempotencyKey);
+          } catch {
+            // The order is already confirmed by the server, so local storage
+            // cleanup must never block cart cleanup or confirmation routing.
+          }
+          clearCart();
+          setLocation(`/order-confirmed?orderId=${encodeURIComponent(order.id)}`, { replace: true });
+        });
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          setLocation(`/signin?redirect=${encodeURIComponent(checkoutPath)}`);
+          return;
+        }
+        if (
+          error instanceof ApiError &&
+          (error.code === "INSUFFICIENT_STOCK" ||
+            error.code === "PRODUCT_UNAVAILABLE")
+        ) {
+          setStatusMessage(
+            t("cart.availableQuantityChanged", {
+              fallback: "The available quantity changed. Update this item before checkout.",
+            })
+          );
+          setLocation("/cart?checkout=stock", { replace: true });
+          return;
+        }
+        if (
+          error instanceof ApiError &&
+          error.code === "PRICE_CHANGED_REVIEW_REQUIRED" &&
+          currentUser
+        ) {
+          const refreshedTotals = (error.payload as { totals?: TrustedOrderTotals } | undefined)?.totals;
+          if (refreshedTotals?.pricingQuoteToken) {
+            setTrustedTotals(refreshedTotals);
+          }
+          try {
+            clearCheckoutAttempt(window.sessionStorage, currentUser.id, attemptKey);
+          } catch {
+            // A new logical attempt is still created when secure storage is available.
+          }
+          setStatusMessage(t("checkout.priceChangedReview", { fallback: "Pricing changed. Review the updated totals, then press Place Order again." }));
+          return;
+        }
+        if (
+          error instanceof ApiError &&
+          error.code === "IDEMPOTENCY_KEY_REUSED" &&
+          currentUser
+        ) {
+          try {
+            clearCheckoutAttempt(window.sessionStorage, currentUser.id, attemptKey);
+          } catch {
+            // The server rejected the reused key; no order data is changed by
+            // a storage cleanup failure.
+          }
+          setStatusMessage(t("checkout.idempotencyConflict"));
+          return;
+        }
+        if (
+          error instanceof ApiError &&
+          (error.code === "IDEMPOTENCY_KEY_REQUIRED" ||
+            error.code === "INVALID_IDEMPOTENCY_KEY")
+        ) {
+          setStatusMessage(t("checkout.idempotencyUnavailable"));
+          return;
+        }
+        if (error instanceof ApiError && error.status === 0) {
+          setStatusMessage(t("checkout.networkResultUnknown"));
+          return;
+        }
+        setStatusMessage(
+          error instanceof ApiError ? error.message : t("checkout.idempotencyUnavailable")
+        );
+      } finally {
+        if (!hasCompletedOrder.current) setIsSubmitting(false);
       }
-      setLocation(`/order-confirmed?orderId=${encodeURIComponent(order.id)}`, { replace: true });
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
-        setLocation(`/signin?redirect=${encodeURIComponent("/checkout")}`);
-        return;
-      }
-      setStatusMessage(t("checkout.createFailed"));
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const getDeliveryInputProps = (field: DeliveryFieldId) => ({
     "aria-describedby": deliveryErrors[field] ? `${field}-error` : undefined,
     "aria-invalid": Boolean(deliveryErrors[field]),
     className: cn(inputClassName, deliveryErrors[field] && invalidInputClassName),
-  });
-
-  const getCardInputProps = (field: keyof typeof initialCardState) => ({
-    "aria-describedby": paymentErrors[field] ? `${field}-error` : undefined,
-    "aria-invalid": Boolean(paymentErrors[field]),
-    className: cn(inputClassName, paymentErrors[field] && invalidInputClassName),
   });
 
   if (cart.length === 0) {
@@ -1274,6 +1347,34 @@ export default function Checkout() {
                 </div>
               </FormCard>
 
+              {currentUser && currentUser.clinicLocations.length > 0 && (
+                <FormCard title={t("checkout.deliveryOfferLocationTitle", { fallback: "Delivery offer location" })}>
+                  <p className="mb-3 text-[12px] leading-5 text-[#717182] dark:text-[#C6BEAE]">
+                    {t("checkout.deliveryOfferLocationHelp", { fallback: "Select a saved clinic location to check location-based delivery offers, or use your manual delivery address without a zone-based offer." })}
+                  </p>
+                  <DentalSelect
+                    label={t("checkout.deliveryOfferLocationLabel", { fallback: "Delivery offer location" })}
+                    value={selectedClinicLocationId || "manual"}
+                    onChange={(value) => setSelectedClinicLocationId(value === "manual" ? "" : value)}
+                    placeholder={t("checkout.manualAddressNoZoneOffer", { fallback: "Use manual delivery address" })}
+                    triggerClassName="dark:border-white/10 dark:bg-white/[0.04] dark:text-[#F7F2E6]"
+                    contentClassName="max-h-[min(320px,calc(100vh-180px))] overflow-y-auto"
+                    options={[
+                      { value: "manual", label: t("checkout.manualAddressNoZoneOffer", { fallback: "Use manual delivery address" }) },
+                      ...currentUser.clinicLocations.map((location) => ({
+                        value: location.id,
+                        label: `${location.customArea || (language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn)} · ${language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn}`,
+                      })),
+                    ]}
+                  />
+                  <p className="mt-3 text-[12px] leading-5 text-[#8A8D9A] dark:text-[#BDB6A8]">
+                    {selectedClinicLocationId
+                      ? t("checkout.savedLocationZoneStatus", { fallback: "The selected saved location and its delivery zone are verified securely at checkout." })
+                      : t("checkout.manualAddressNoZoneOfferHelp", { fallback: "Location-based delivery offers are not applied to manual addresses." })}
+                  </p>
+                </FormCard>
+              )}
+
               <FormCard title={t("checkout.clinicDetails")}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field id="clinicName" label={t("checkout.clinicName")}>
@@ -1363,52 +1464,6 @@ export default function Checkout() {
                 )}
               </FormCard>
 
-              <FormCard title={t("checkout.usePoints")}>
-                <p className="text-[13px] font-semibold text-[#8A8D9A]">
-                  {t("checkout.currentBalance")}{" "}
-                  <span className="font-bold text-[#050505]">
-                    {t("checkout.pointsBalance", { values: { balance: availablePoints.toLocaleString() } })}
-                  </span>
-                </p>
-                <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
-                  <input
-                    value={points}
-                    onChange={(event) => {
-                      setPoints(event.target.value);
-                      setPointsFeedback(null);
-                    }}
-                    inputMode="numeric"
-                    aria-invalid={pointsFeedback?.tone === "error"}
-                    aria-describedby={pointsFeedback || availablePoints === 0 ? "points-feedback" : undefined}
-                    placeholder={t("checkout.pointsPlaceholder")}
-                    className={cn(inputClassName, pointsFeedback?.tone === "error" && invalidInputClassName)}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleApplyPoints}
-                    className="h-12 px-5 text-[13px]"
-                  >
-                    {t("checkout.applyPoints")}
-                  </Button>
-                </div>
-                {(pointsFeedback || availablePoints === 0) && (
-                  <p
-                    id="points-feedback"
-                    role={pointsFeedback?.tone === "error" ? "alert" : "status"}
-                    className={cn(
-                      "mt-3 text-[12px] font-semibold leading-5",
-                      pointsFeedback?.tone === "error"
-                        ? "text-[#F44336]"
-                        : pointsFeedback?.tone === "success"
-                          ? "text-[#16803C]"
-                          : "text-[#8A8D9A]"
-                    )}
-                  >
-                    {pointsFeedback?.message ?? t("checkout.pointsUnavailable")}
-                  </p>
-                )}
-              </FormCard>
-
               <FormCard title={t("checkout.paymentMethod")}>
                 <div
                   id="payment-methods"
@@ -1418,33 +1473,18 @@ export default function Checkout() {
                   tabIndex={-1}
                   className="flex flex-wrap items-center gap-3 outline-none"
                 >
-                  {paymentMethods.map((method) => {
-                    const base = `${import.meta.env.BASE_URL}payment-logos/`;
-                    const LogosMap: Record<PaymentMethodId, { icon?: any; logo?: string | string[] }> = {
-                      cash: { icon: Package },
-                      card: { icon: CreditCard, logo: [base + "visa.svg", base + "mastercard.svg"] },
-                      fawry: { icon: FileText, logo: base + "fawry.svg" },
-                      wallet: { icon: Wallet },
-                      instapay: { icon: RefreshCw, logo: base + "instapay.svg" },
-                      bank: { icon: ClipboardList },
-                    };
-
-                    const meta = LogosMap[method.id] ?? {};
-
-                    return (
-                      <PaymentRadioCard
-                        key={method.id}
-                        id={method.id}
-                        title={t(method.titleKey)}
-                        short={t(method.shortKey)}
-                        selected={paymentMethod === method.id}
-                        invalid={Boolean(paymentErrors.paymentMethod)}
-                        onSelect={() => selectPaymentMethod(method.id)}
-                        icon={meta.icon}
-                        logoSrc={meta.logo}
-                      />
-                    );
-                  })}
+                  {paymentMethods.map((method) => (
+                    <PaymentRadioCard
+                      key={method.id}
+                      id={method.id}
+                      title={t(method.titleKey)}
+                      short={t(method.shortKey)}
+                      selected={paymentMethod === method.id}
+                      invalid={Boolean(paymentErrors.paymentMethod)}
+                      onSelect={() => selectPaymentMethod(method.id)}
+                      icon={Package}
+                    />
+                  ))}
                 </div>
                 {paymentErrors.paymentMethod && (
                   <p id="paymentMethod-error" role="alert" className="mt-3 text-[12px] font-semibold leading-5 text-[#F44336]">
@@ -1452,176 +1492,132 @@ export default function Checkout() {
                   </p>
                 )}
 
-                {paymentMethod && (
-                  <div className="mt-4 rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold)]/[0.05] p-4 text-[13px] text-[#050505]">
-                  {paymentMethod === "cash" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.cash.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">
-                        {t("checkout.cashNote")}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentMethod === "card" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.card.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">{t("checkout.paymentMethods.card.short")}</p>
-
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <label className="block space-y-2">
-                          <span className="sr-only">{t("checkout.cardNumber")}</span>
-                          <input
-                            id="cardNumber"
-                            name="cardNumber"
-                            type="text"
-                            value={card.cardNumber}
-                            onChange={handleCardChange}
-                            inputMode="numeric"
-                            autoComplete="cc-number"
-                            required
-                            minLength={12}
-                            maxLength={23}
-                            pattern={"[0-9\\s]{12,23}"}
-                            title={t("checkout.completeCardFields")}
-                            placeholder={t("checkout.cardNumber")}
-                            {...getCardInputProps("cardNumber")}
-                          />
-                          {paymentErrors.cardNumber && (
-                            <p id="cardNumber-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
-                              {paymentErrors.cardNumber}
-                            </p>
-                          )}
-                        </label>
-                        <label className="block space-y-2">
-                          <span className="sr-only">{t("checkout.cardExpiry")}</span>
-                          <input
-                            id="cardExpiry"
-                            name="cardExpiry"
-                            type="text"
-                            value={card.cardExpiry}
-                            onChange={handleCardChange}
-                            inputMode="numeric"
-                            autoComplete="cc-exp"
-                            required
-                            maxLength={7}
-                            pattern={"(0[1-9]|1[0-2])\\s?/\\s?[0-9]{2}"}
-                            title={t("checkout.completeCardFields")}
-                            placeholder={t("checkout.cardExpiry")}
-                            {...getCardInputProps("cardExpiry")}
-                          />
-                          {paymentErrors.cardExpiry && (
-                            <p id="cardExpiry-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
-                              {paymentErrors.cardExpiry}
-                            </p>
-                          )}
-                        </label>
-                        <label className="block space-y-2">
-                          <span className="sr-only">{t("checkout.cardName")}</span>
-                          <input
-                            id="cardName"
-                            name="cardName"
-                            type="text"
-                            value={card.cardName}
-                            onChange={handleCardChange}
-                            autoComplete="cc-name"
-                            required
-                            minLength={2}
-                            title={t("checkout.completeCardFields")}
-                            placeholder={t("checkout.cardName")}
-                            {...getCardInputProps("cardName")}
-                          />
-                          {paymentErrors.cardName && (
-                            <p id="cardName-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
-                              {paymentErrors.cardName}
-                            </p>
-                          )}
-                        </label>
-                        <label className="block space-y-2">
-                          <span className="sr-only">{t("checkout.cardCvv")}</span>
-                          <input
-                            id="cardCvv"
-                            name="cardCvv"
-                            type="password"
-                            value={card.cardCvv}
-                            onChange={handleCardChange}
-                            inputMode="numeric"
-                            autoComplete="cc-csc"
-                            required
-                            minLength={3}
-                            maxLength={4}
-                            pattern="[0-9]{3,4}"
-                            title={t("checkout.completeCardFields")}
-                            placeholder={t("checkout.cardCvv")}
-                            {...getCardInputProps("cardCvv")}
-                          />
-                          {paymentErrors.cardCvv && (
-                            <p id="cardCvv-error" role="alert" className="text-[12px] font-semibold leading-5 text-[#F44336]">
-                              {paymentErrors.cardCvv}
-                            </p>
-                          )}
-                        </label>
-                      </div>
-                    </div>
-                  )}
-
-                  {paymentMethod === "fawry" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.fawry.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">
-                        {t("checkout.fawryNote")}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentMethod === "wallet" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.wallet.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">
-                        {t("checkout.walletNote")}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentMethod === "instapay" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.instapay.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">
-                        {t("checkout.instapayNote")}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentMethod === "bank" && (
-                    <div>
-                      <div className="text-[14px] font-semibold">{t("checkout.paymentMethods.bank.title")}</div>
-                      <p className="mt-2 text-[13px] text-[#8A8D9A]">
-                        {t("checkout.bankNote")}
-                      </p>
-
-                      <div className="mt-3 space-y-2">
-                        <div className="text-[13px] font-semibold">{t("checkout.accountName")}</div>
-                        <div className="text-[13px] font-semibold">{t("checkout.iban")}</div>
-                      </div>
-                    </div>
-                  )}
+                <div className="checkout-payment-info mt-4 rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[rgba(249,220,92,0.05)] p-4 text-[13px] text-[#050505] dark:border-[var(--xd-gold-border)] dark:bg-[#1F1F1B] dark:text-[#F5F1E7]">
+                  <div className="checkout-payment-info__title text-[14px] font-semibold text-[#050505] dark:text-[#F5F1E7]">{t("checkout.paymentMethods.cash.title")}</div>
+                  <p className="checkout-payment-info__description mt-2 text-[13px] leading-5 text-[#8A8D9A] dark:text-[#CEC8BA]">
+                    {t("checkout.cashNote")}
+                  </p>
+                  <p className="checkout-payment-info__description mt-2 text-[13px] leading-5 text-[#8A8D9A] dark:text-[#CEC8BA]">
+                    {t("checkout.internalDeliveryNote")}
+                  </p>
                   </div>
-                )}
               </FormCard>
 
-              <FormCard title={t("checkout.billingAddress")}>
-                <label className="flex cursor-pointer items-center gap-3 text-[13px] font-bold text-[#050505]">
-                  <input
-                    type="checkbox"
-                    checked={billingSameAsShipping}
-                    onChange={(event) => setBillingSameAsShipping(event.target.checked)}
-                    className="h-4 w-4 rounded-[4px] border-[#050505]/10 text-[var(--xd-gold-active)] focus:ring-[var(--xd-gold-active)]/35"
-                  />
-                  {t("checkout.billingSame")}
-                </label>
+              <FormCard
+                title={t("checkout.rewards.title", {
+                  fallback: "Rewards & Wallet",
+                })}
+              >
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)]/40 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <label htmlFor="requestedPoints" className="text-[13px] font-bold text-[#050505] dark:text-[#F7F2E6]">
+                          {t("checkout.rewards.pointsLabel", { fallback: "Redeem reward points" })}
+                        </label>
+                        <p className="mt-1 text-[12px] leading-5 text-[#717182] dark:text-[#C6BEAE]">
+                          {t("checkout.rewards.pointsAvailable", {
+                            fallback: "{points} available · maximum {maximum}",
+                            values: {
+                              points: trustedTotals?.availablePoints?.toLocaleString("en-US") ?? "0",
+                              maximum: trustedTotals?.maximumRedeemablePoints?.toLocaleString("en-US") ?? "0",
+                            },
+                          })}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="shrink-0 text-[12px] font-bold text-[var(--xd-gold-text)] hover:text-[#050505] dark:hover:text-[#F7F2E6]"
+                        disabled={!trustedTotals?.maximumRedeemablePoints}
+                        onClick={() => setRequestedPoints(trustedTotals?.maximumRedeemablePoints ?? 0)}
+                      >
+                        {t("checkout.rewards.useMaximum", { fallback: "Use maximum" })}
+                      </button>
+                    </div>
+                    {trustedTotals?.maximumRedeemablePoints ? <input
+                      id="requestedPoints"
+                      type="number"
+                      min={0}
+                      max={trustedTotals?.maximumRedeemablePoints ?? 0}
+                      step={trustedTotals?.pointsPerRedemptionUnit ?? 100}
+                      value={requestedPoints}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        setRequestedPoints(Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0);
+                      }}
+                      className={`mt-3 ${inputClassName}`}
+                    /> : <p className="mt-3 rounded-[12px] bg-white/60 px-3 py-2.5 text-[12px] font-semibold text-[#717182] dark:bg-white/[0.04] dark:text-[#C6BEAE]">{t("checkout.rewards.pointsUnavailable", { fallback: "No reward points are usable for this checkout yet." })}</p>}
+                      <p className="mt-2 text-[11px] leading-4 text-[#8A8D9A] dark:text-[#BDB6A8]">
+                        {t("checkout.rewards.pointsRule", {
+                          fallback: "100 points = EGP 10. Points apply to products only and cannot pay shipping.",
+                        })}
+                      </p>
+                      {trustedTotals && trustedTotals.welcomePointsAvailable > 0 && (
+                        <p className="mt-1 text-[11px] leading-4 text-[#8A8D9A] dark:text-[#BDB6A8]">
+                          {t("checkout.rewards.welcomeMinimumRule", {
+                            fallback: "Welcome points require at least EGP {minimum} of eligible products and expire after {days} days.",
+                            values: {
+                              minimum: trustedTotals.welcomeMinimumSubtotal,
+                              days: trustedTotals.welcomeExpiryDays,
+                            },
+                          })}
+                        </p>
+                      )}
+                  </div>
+
+                  <div className="rounded-[16px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)]/40 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <label htmlFor="requestedWalletAmount" className="text-[13px] font-bold text-[#050505] dark:text-[#F7F2E6]">
+                          {t("checkout.rewards.walletLabel", { fallback: "Use store credit" })}
+                        </label>
+                        <p className="mt-1 text-[12px] leading-5 text-[#717182] dark:text-[#C6BEAE]">
+                          {t("checkout.rewards.walletAvailable", {
+                            fallback: "Available: {amount}",
+                            values: { amount: formatCurrency(trustedTotals?.walletBalance ?? 0) },
+                          })}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="shrink-0 text-[12px] font-bold text-[var(--xd-gold-text)] hover:text-[#050505] dark:hover:text-[#F7F2E6]"
+                        disabled={!trustedTotals?.walletBalance}
+                        onClick={() =>
+                          setRequestedWalletAmount(
+                            Math.min(
+                              trustedTotals?.walletBalance ?? 0,
+                              trustedTotals?.total ?? 0
+                            ).toFixed(2)
+                          )
+                        }
+                      >
+                        {t("checkout.rewards.useMaximum", { fallback: "Use maximum" })}
+                      </button>
+                    </div>
+                    {trustedTotals?.walletBalance ? <input
+                      id="requestedWalletAmount"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      max={Math.min(
+                        trustedTotals?.walletBalance ?? 0,
+                        trustedTotals?.total ?? 0
+                      )}
+                      step="0.01"
+                      value={requestedWalletAmount}
+                      onChange={(event) => setRequestedWalletAmount(event.target.value || "0")}
+                      className={`mt-3 ${inputClassName}`}
+                    /> : <p className="mt-3 rounded-[12px] bg-white/60 px-3 py-2.5 text-[12px] font-semibold text-[#717182] dark:bg-white/[0.04] dark:text-[#C6BEAE]">{t("checkout.rewards.walletUnavailable", { fallback: "No store credit is available for this checkout." })}</p>}
+                    <p className="mt-2 text-[11px] leading-4 text-[#8A8D9A] dark:text-[#BDB6A8]">
+                      {t("checkout.rewards.walletRule", {
+                        fallback: "Store credit can cover products and shipping. Any remainder stays Cash on Delivery.",
+                      })}
+                    </p>
+                  </div>
+                </div>
               </FormCard>
 
-              <FormCard title={t("checkout.orderNotes")}>
+              <FormCard title={t("checkout.orderNotes")}> 
                 <textarea
                   value={orderNotes}
                   onChange={(event) => setOrderNotes(event.target.value)}
@@ -1714,14 +1710,11 @@ export default function Checkout() {
 
           <OrderSummary
             items={checkoutItems}
-            subtotal={subtotal}
-            shipping={shipping}
-            appliedPoints={appliedPoints}
-            appliedReward={appliedReward}
-            pointsDiscountEGP={pointsDiscountEGP}
-            rewardDiscountEGP={rewardDiscountEGP}
-            shippingDiscountEGP={shippingDiscountEGP}
+            subtotal={displayedSubtotal}
+            shipping={displayedShipping}
+            discount={displayedDiscount}
             total={total}
+            pricing={trustedTotals}
           />
         </div>
       </Container>

@@ -3,30 +3,68 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
+  },
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/config/db.js && node --check src/controllers/auth.controller.js && node --check src/controllers/order.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js && node --check src/routes/order.routes.js && node --check src/scripts/doctor.js && node --check src/scripts/smokeMvp.js && node --check src/scripts/validateProductImport.js && node --check src/utils/productImportValidator.js && node --check prisma/seed.js",
+    "precheck": "node --check src/config/uploadStorage.js && node --check src/config/push.js && node --check src/services/imageStorage.service.js && node --check src/services/orderIdempotency.service.js && node --check src/services/pricingQuote.service.js && node --check src/services/orderPricing.service.js && node --check src/services/coupon.service.js && node --check src/services/deliveryOffer.service.js && node --check src/services/pushSubscription.service.js && node --check src/services/pushNotification.service.js && node --check src/scripts/setupLocalPush.js && node --check src/controllers/cart.controller.js && node --check src/services/cart.service.js && node --check src/routes/cart.routes.js && node --check src/controllers/supplyList.controller.js && node --check src/services/supplyList.service.js && node --check src/routes/supplyList.routes.js && node --check src/routes/notification.routes.js && node --check src/controllers/scheduledPromotion.controller.js && node --check src/services/scheduledPromotion.service.js && node --check src/routes/promotion.routes.js && node --check src/controllers/adminProductImage.controller.js && node --check src/services/productImageStorage.service.js && node --check src/controllers/adminHeroSlide.controller.js && node --check src/controllers/heroSlide.controller.js && node --check src/services/heroImageStorage.service.js && node --check src/middleware/permission.middleware.js && node --check src/services/permission.service.js && node --check src/services/customerBenefit.service.js && node --check prisma/seedPermissions.js && node --check prisma/seedHeroSlides.js",
+    "check": "node --check src/server.js && node --check src/serverRuntime.js && node --check src/app.js && node --check src/config/server.js && node --check src/config/db.js && node --check src/config/mail.js && node --check src/config/uploadStorage.js && node --check src/services/imageStorage.service.js && node --check src/services/accountPreference.service.js && node --check src/services/authSession.service.js && node --check src/services/accountActionRequest.service.js && node --check src/services/accountActionCommunication.service.js && node --check src/services/loyalty.service.js && node --check src/middleware/auth.middleware.js && node --check src/middleware/rateLimit.middleware.js && node --check src/middleware/security.middleware.js && node --check src/controllers/account.controller.js && node --check src/controllers/accountActionRequest.controller.js && node --check src/controllers/loyalty.controller.js && node --check src/controllers/auth.controller.js && node --check src/controllers/session.controller.js && node --check src/controllers/delivery.controller.js && node --check src/controllers/adminDelivery.controller.js && node --check src/controllers/contact.controller.js && node --check src/controllers/newsletter.controller.js && node --check src/controllers/emailDelivery.controller.js && node --check src/routes/account.routes.js && node --check src/routes/auth.routes.js && node --check src/routes/delivery.routes.js && node --check src/routes/contact.routes.js && node --check src/routes/newsletter.routes.js && node --check src/controllers/adminBrand.controller.js && node --check src/controllers/adminCatalog.controller.js && node --check src/controllers/adminUser.controller.js && node --check src/controllers/catalog.controller.js && node --check src/controllers/adminVariantCatalog.controller.js && node --check src/services/variantCatalog.service.js && node --check src/services/stockAvailability.service.js && node --check src/services/catalogImport.contract.js && node --check src/services/catalogImport.service.js && node --check src/services/orderStock.service.js && node --check src/controllers/flashSale.controller.js && node --check src/controllers/adminFlashSale.controller.js && node --check src/controllers/integration.controller.js && node --check src/controllers/order.controller.js && node --check src/controllers/productRequest.controller.js && node --check src/controllers/quote.controller.js && node --check src/controllers/support.controller.js && node --check src/controllers/notification.controller.js && node --check src/services/email.service.js && node --check src/services/emailTemplates.js && node --check src/services/deliveryOffer.service.js && node --check src/services/integrations/csvCatalog.adapter.js && node --check src/services/integrations/orderExport.adapter.js && node --check src/services/integrations/ownerSystem.adapter.js && node --check src/services/integrations/syncLog.service.js && node --check src/services/orderSync.service.js && node --check src/services/productSync.service.js && node --check src/services/supportAcknowledgement.service.js && node --check src/services/testDataCleanup.service.js && node --check src/routes/admin.routes.js && node --check src/routes/catalog.routes.js && node --check src/routes/order.routes.js && node --check src/routes/quote.routes.js && node --check src/scripts/cleanupTestData.js && node --check src/scripts/doctor.js && node --check src/scripts/smokeMvp.js && node --check src/scripts/smokeOrderSecurity.js && node --check src/scripts/smokeSupplyListSecurity.js && node --check src/scripts/smokeOwnerIntegration.js && node --check src/scripts/smokeSecurity.js && node --check src/scripts/validateProductImport.js && node --check src/utils/csv.js && node --check src/utils/productImportValidator.js && node --check prisma/seed.js && node --check prisma/seedTaxonomy.js && node --check prisma/taxonomySeedData.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
+    "push:setup-local": "node src/scripts/setupLocalPush.js",
     "seed:admin": "node prisma/seed.js",
+    "seed:taxonomy": "node prisma/seedTaxonomy.js",
+    "seed:permissions": "node prisma/seedPermissions.js",
+    "seed:hero-slides": "node prisma/seedHeroSlides.js",
+    "test:account-management": "node --test src/services/customerBenefit.service.test.js src/services/accountActionRequest.service.test.js src/middleware/permission.middleware.test.js",
+    "test:email": "node --test src/services/email.service.test.js",
+    "test": "node --test src/services/*.test.js src/middleware/*.test.js src/controllers/*.test.js",
     "doctor": "node src/scripts/doctor.js",
     "validate:products": "node src/scripts/validateProductImport.js",
-    "smoke:mvp": "node src/scripts/smokeMvp.js"
+    "cleanup:test-data": "node src/scripts/cleanupTestData.js",
+    "cleanup:test-data:dry": "node src/scripts/cleanupTestData.js --dry-run",
+    "smoke:mvp": "node src/scripts/smokeMvp.js",
+    "smoke:order-security": "node src/scripts/smokeOrderSecurity.js",
+    "smoke:supply-list-security": "node src/scripts/smokeSupplyListSecurity.js",
+    "smoke:owner-integration": "node src/scripts/smokeOwnerIntegration.js",
+    "smoke:security": "node src/scripts/smokeSecurity.js",
+    "test:image-acquisition": "node --test src/scripts/imageAcquisition/*.test.js",
+    "images:acquire": "node src/scripts/imageAcquisition/downloadImages.mjs",
+    "images:build-manifest": "node src/scripts/imageAcquisition/buildMasterManifest.mjs",
+    "images:audit-coverage": "node src/scripts/imageAcquisition/auditLaunchCoverage.mjs",
+    "images:upload": "node src/scripts/imageAcquisition/uploadToProductionStorage.mjs",
+    "images:apply-db-update": "node src/scripts/imageAcquisition/updateProductImagesFromStorage.mjs",
+    "audit:category-snapshot-drift": "node src/scripts/imageAcquisition/buildCategoryComparison.mjs",
+    "audit:category-comparison": "node src/scripts/imageAcquisition/buildClientCategoryComparison.mjs",
+    "audit:external-image-input": "node src/scripts/imageAcquisition/buildExternalImageInput.mjs",
+    "audit:image-brand-summary": "node src/scripts/imageAcquisition/buildImageBrandSummary.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
+    "@aws-sdk/client-s3": "^3.1096.0",
+    "@prisma/client": "^6.19.3",
     "@workspace/x-dental-store": "file:..",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^9.0.3",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
-    "prisma": "^6.19.0"
+    "csv-parse": "^7.0.2",
+    "csv-stringify": "^6.8.3",
+    "prisma": "^6.19.3",
+    "sharp": "^0.35.3"
+  },
+  "overrides": {
+    "effect": "3.20.0"
   }
 }

@@ -7,13 +7,14 @@ import { Container } from "@/components/dental/Container";
 import { DentalSelect, type DentalSelectOption } from "@/components/dental/Select";
 import { useStore } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { mockProducts } from "@/data/products";
+import { fetchPublicProductsByIds } from "@/services/catalog";
+import type { SupplyList } from "@/data/supplyLists";
 import {
-  getSupplyLists,
-  saveSupplyLists,
-  summarizeSupplyList,
-  type SupplyList,
-} from "@/data/supplyLists";
+  createSupplyList,
+  deleteSupplyList,
+  duplicateSupplyList,
+  fetchSupplyLists,
+} from "@/services/supplyLists";
 import { accountT, accountValue } from "@/lib/accountI18n";
 import { cn } from "@/lib/utils";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -152,16 +153,12 @@ function ProductPreview({ list }: { list: SupplyList }) {
     <div className="flex items-center gap-2">
       {Array.from({ length: visibleSlotCount }).map((_, index) => {
         const detailItem = list.detailItems[index];
-        const productId = detailItem?.productId ?? list.items[index]?.productId;
-        const product =
-          mockProducts.find((candidate) => candidate.id === productId) ??
-          mockProducts.find((candidate) => candidate.id === list.items[index]?.productId);
 
         return (
           <ProductPreviewTile
-            key={detailItem?.id ?? product?.id ?? `preview-${index}`}
-            image={detailItem?.image ?? product?.image}
-            label={detailItem?.name ?? product?.name ?? "Supply list product"}
+            key={detailItem?.id ?? `preview-${index}`}
+            image={detailItem?.image}
+            label={detailItem?.name ?? "Supply list product"}
           />
         );
       })}
@@ -309,7 +306,7 @@ function CreateSupplyListCard({ onCreate }: { onCreate: () => void }) {
       <span className="mt-3 max-w-[360px] text-[14px] leading-6 text-[#8A8D9A]">
         {accountT(t, "supplyLists.createNewSupplyListDescription", "Build a reusable list for monthly orders, repeat items, or branch needs.")}
       </span>
-      <span className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[var(--xd-gold)] px-[22px] text-[13px] font-bold text-[#050505] transition-colors hover:bg-[var(--xd-gold-hover)]">
+      <span className="xd-gradient-gold mt-6 inline-flex h-11 items-center justify-center rounded-full px-[22px] text-[13px] font-bold text-[#050505]">
         {accountT(t, "supplyLists.createList", "Create List")}
       </span>
     </button>
@@ -466,7 +463,9 @@ export default function AccountSupplyLists() {
   const { addToCart } = useStore();
   const { t } = useLanguage();
   const [, navigate] = useLocation();
-  const [lists, setLists] = useState<SupplyList[]>(() => getSupplyLists());
+  const [lists, setLists] = useState<SupplyList[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [listForm, setListForm] = useState<SupplyListForm>(emptyListForm);
@@ -474,6 +473,30 @@ export default function AccountSupplyLists() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [createdListAction, setCreatedListAction] = useState<SupplyList | null>(null);
   const displayedLists = lists.filter((list) => list.status !== "Archived");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setIsLoading(true);
+    void fetchSupplyLists(controller.signal)
+      .then((records) => {
+        setLists(records);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setStatusMessage(
+            accountT(
+              t,
+              "supplyLists.messages.unableToLoad",
+              "Unable to load your supply lists."
+            )
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
+  }, [t]);
 
   const openCreateModal = () => {
     setStatusMessage(null);
@@ -486,39 +509,58 @@ export default function AccountSupplyLists() {
     setListForm(emptyListForm);
   };
 
-  const handleCreateList = (event: FormEvent<HTMLFormElement>) => {
+  const handleCreateList = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const createdList = summarizeSupplyList({
-      id: `list-${Date.now()}`,
-      name: listForm.name.trim(),
-      branch: listForm.branch,
-      description: listForm.description.trim() || accountT(t, "supplyLists.emptyListDescription", "Empty list ready for products."),
-      status: "Active",
-      items: [],
-      productCount: 0,
-      estimatedTotal: 0,
-      updatedDaysAgo: 0,
-      availableCount: 0,
-      outOfStockCount: 0,
-      needsOptionsCount: 0,
-      detailItems: [],
-    });
-
-    setLists((current) => saveSupplyLists([createdList, ...current]));
-    closeCreateModal();
-    setCreatedListAction(createdList);
-    setStatusMessage(accountT(t, "supplyLists.messages.created", "{name} created.", { name: createdList.name }));
+    if (isMutating) return;
+    setIsMutating(true);
+    setStatusMessage(null);
+    try {
+      const createdList = await createSupplyList({
+        name: listForm.name,
+        branch: listForm.branch,
+        description:
+          listForm.description.trim() ||
+          accountT(
+            t,
+            "supplyLists.emptyListDescription",
+            "Empty list ready for products."
+          ),
+      });
+      setLists((current) => [createdList, ...current]);
+      closeCreateModal();
+      setCreatedListAction(createdList);
+      setStatusMessage(
+        accountT(t, "supplyLists.messages.created", "{name} created.", {
+          name: createdList.name,
+        })
+      );
+    } catch {
+      setStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.unableToSave",
+          "Unable to save this list."
+        )
+      );
+    } finally {
+      setIsMutating(false);
+    }
   };
 
-  const handleAddAllToCart = (list: SupplyList) => {
+  const handleAddAllToCart = async (list: SupplyList) => {
+    const products = await fetchPublicProductsByIds(list.items.map((item) => item.productId));
+    const productsById = new Map(products.map((product) => [product.id, product]));
     let addedCount = 0;
 
     list.items.forEach((item) => {
-      const product = mockProducts.find((candidate) => candidate.id === item.productId);
+      const product = productsById.get(item.productId);
       if (!product || product.stockStatus === "Out of Stock") return;
-      addToCart(product, item.quantity, product.options?.[0]);
-      addedCount += item.quantity;
+      const result = addToCart(
+        product,
+        item.quantity,
+        item.selectedOption ?? product.options?.[0]
+      );
+      if (result.ok) addedCount += item.quantity;
     });
 
     setOpenMenuId(null);
@@ -526,28 +568,65 @@ export default function AccountSupplyLists() {
     setStatusMessage(accountT(t, "supplyLists.messages.addedToCart", "{count} products from {name} added to cart.", { count: addedCount, name: list.name }));
   };
 
-  const handleDuplicateList = (list: SupplyList) => {
-    const duplicate = summarizeSupplyList({
-      ...list,
-      id: `list-${Date.now()}`,
-      name: accountT(t, "supplyLists.copyName", "{name} Copy", { name: list.name }),
-      updatedDaysAgo: 0,
-    });
-
-    setLists((current) => saveSupplyLists([duplicate, ...current]));
+  const handleDuplicateList = async (list: SupplyList) => {
+    if (isMutating) return;
+    setIsMutating(true);
     setOpenMenuId(null);
-    setCreatedListAction(null);
-    setStatusMessage(accountT(t, "supplyLists.messages.created", "{name} created.", { name: duplicate.name }));
+    try {
+      const duplicate = await duplicateSupplyList(
+        list.id,
+        accountT(t, "supplyLists.copyName", "{name} Copy", {
+          name: list.name,
+        })
+      );
+      setLists((current) => [duplicate, ...current]);
+      setCreatedListAction(null);
+      setStatusMessage(
+        accountT(t, "supplyLists.messages.created", "{name} created.", {
+          name: duplicate.name,
+        })
+      );
+    } catch {
+      setStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.unableToSave",
+          "Unable to save this list."
+        )
+      );
+    } finally {
+      setIsMutating(false);
+    }
   };
 
-  const handleDeleteList = () => {
-    if (!listToDelete) return;
-
-    setLists((current) => saveSupplyLists(current.filter((list) => list.id !== listToDelete.id)));
-    setStatusMessage(accountT(t, "supplyLists.messages.deleted", "{name} deleted.", { name: listToDelete.name }));
-    setCreatedListAction(null);
-    setOpenMenuId(null);
-    setListToDelete(null);
+  const handleDeleteList = async () => {
+    if (!listToDelete || isMutating) return;
+    const deleting = listToDelete;
+    setIsMutating(true);
+    try {
+      await deleteSupplyList(deleting.id);
+      setLists((current) =>
+        current.filter((list) => list.id !== deleting.id)
+      );
+      setStatusMessage(
+        accountT(t, "supplyLists.messages.deleted", "{name} deleted.", {
+          name: deleting.name,
+        })
+      );
+      setCreatedListAction(null);
+      setOpenMenuId(null);
+      setListToDelete(null);
+    } catch {
+      setStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.unableToSave",
+          "Unable to save this list."
+        )
+      );
+    } finally {
+      setIsMutating(false);
+    }
   };
 
   return (
@@ -602,7 +681,13 @@ export default function AccountSupplyLists() {
             )}
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {displayedLists.length > 0 ? (
+              {isLoading ? (
+                <Card className="p-10 text-center md:col-span-2">
+                  <p className="text-[14px] font-semibold text-[#8A8D9A]">
+                    {accountT(t, "common.loading", "Loading...")}
+                  </p>
+                </Card>
+              ) : displayedLists.length > 0 ? (
                 <>
                   {displayedLists.map((list) => (
                     <SupplyListCard
@@ -616,8 +701,8 @@ export default function AccountSupplyLists() {
                         navigate(`/account/supply-lists/${list.id}`);
                         setOpenMenuId(null);
                       }}
-                      onAddAll={() => handleAddAllToCart(list)}
-                      onDuplicate={() => handleDuplicateList(list)}
+                      onAddAll={() => void handleAddAllToCart(list)}
+                      onDuplicate={() => void handleDuplicateList(list)}
                       onDelete={() => {
                         setListToDelete(list);
                         setOpenMenuId(null);
@@ -655,7 +740,7 @@ export default function AccountSupplyLists() {
         <DeleteListModal
           list={listToDelete}
           onCancel={() => setListToDelete(null)}
-          onConfirm={handleDeleteList}
+          onConfirm={() => void handleDeleteList()}
         />
       )}
     </div>

@@ -8,7 +8,7 @@ export default function AdminNotFound() {
       <div className="space-y-6">
         <AdminPageHeader
           title="Admin Page Not Found"
-          description="The admin route you opened does not exist in this scaffold."
+          description="The admin route you opened does not exist."
         />
         <Link
           href="/admin"

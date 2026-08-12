@@ -1,25 +1,29 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { Search } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { SectionReveal } from "@/components/dental/SectionReveal";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCatalog } from "@/context/CatalogContext";
 
 type BrandPreview = {
   id: string;
   name: string;
   slug: string;
   initials?: string;
+  logoUrl?: string | null;
 };
 
-const ASSET_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
+const BRANDS_PER_PAGE = 20;
 
-const FEATURED_BRANDS: BrandPreview[] = Array.from({ length: 88 }, (_, index) => ({
-  id: `meta-biomed-${index + 1}`,
-  name: "Meta Biomed",
-  slug: "meta-biomed",
-  initials: "MB",
-}));
+const FULL_BLEED_BRAND_LOGO_SLUGS = new Set([
+  "aditek",
+  "alliedstar",
+  "amanngirrbach",
+  "amd-lasers",
+]);
+
+const ASSET_IMAGE = `${import.meta.env.BASE_URL}toothtools.webp`;
 
 const LEFT_PARTNER_BRANDS: BrandPreview[] = [
   { id: "kerr-left", name: "Kerr", slug: "kerr", initials: "KR" },
@@ -33,7 +37,61 @@ const RIGHT_PARTNER_BRANDS: BrandPreview[] = [
   { id: "coltene", name: "Coltene", slug: "coltene", initials: "CO" },
 ];
 
-const HERO_BRAND_MARKS = ["3M", "MB", "KR", "PD", "CO", "DM"];
+const HERO_BRAND_COUNT = 6;
+
+// Most recognizable dental brands in the catalog, strongest first. The hero
+// picks the first ones that exist in the live data with a usable logo.
+const HERO_PRIORITY_SLUGS = [
+  "3m",
+  "dentsply-sirona",
+  "kerr",
+  "gc",
+  "nsk",
+  "ivoclar-vivadent",
+  "woodpecker",
+  "coltene",
+  "ultradent",
+  "shofu",
+  "voco",
+  "meta-biomed",
+];
+
+// Shown while the catalog is loading or unavailable so the hero never renders
+// empty squares.
+const HERO_FALLBACK_BRANDS: BrandPreview[] = [
+  { id: "hero-dentsply-sirona", name: "Dentsply Sirona", slug: "dentsply-sirona", initials: "DS" },
+  { id: "hero-kerr", name: "Kerr", slug: "kerr", initials: "KR" },
+  { id: "hero-gc", name: "GC", slug: "gc", initials: "GC" },
+  { id: "hero-nsk", name: "NSK", slug: "nsk", initials: "NS" },
+  { id: "hero-ivoclar-vivadent", name: "Ivoclar Vivadent", slug: "ivoclar-vivadent", initials: "IV" },
+  { id: "hero-woodpecker", name: "Woodpecker", slug: "woodpecker", initials: "WP" },
+];
+
+function selectHeroBrands(brands: BrandPreview[]): BrandPreview[] {
+  const bySlug = new Map(brands.map((brand) => [brand.slug, brand]));
+  const selected: BrandPreview[] = [];
+  const taken = new Set<string>();
+  const add = (brand?: BrandPreview) => {
+    if (brand && !taken.has(brand.id) && selected.length < HERO_BRAND_COUNT) {
+      selected.push(brand);
+      taken.add(brand.id);
+    }
+  };
+
+  for (const slug of HERO_PRIORITY_SLUGS) {
+    const brand = bySlug.get(slug);
+    if (brand?.logoUrl) add(brand);
+  }
+  for (const brand of brands) {
+    if (selected.length === HERO_BRAND_COUNT) break;
+    if (brand.logoUrl) add(brand);
+  }
+  for (const brand of brands) {
+    if (selected.length === HERO_BRAND_COUNT) break;
+    add(brand);
+  }
+  return selected;
+}
 
 function getInitials(name: string) {
   return name
@@ -47,34 +105,59 @@ function getInitials(name: string) {
 
 export default function Brands() {
   const { t } = useLanguage();
+  const { brands, isLoading, error, refresh } = useCatalog();
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const gridTopRef = useRef<HTMLDivElement>(null);
+  const catalogBrands = useMemo<BrandPreview[]>(() => brands.map((brand) => ({
+    id: brand.id,
+    name: brand.name,
+    slug: brand.slug,
+    initials: getInitials(brand.name),
+    logoUrl: brand.logoUrl,
+  })), [brands]);
+
+  const heroBrands = useMemo(() => selectHeroBrands(catalogBrands), [catalogBrands]);
 
   const visibleBrands = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return !query
-      ? FEATURED_BRANDS
-      : FEATURED_BRANDS.filter((brand) =>
+      ? catalogBrands
+      : catalogBrands.filter((brand) =>
           [brand.name, brand.initials, brand.slug].filter(Boolean).join(" ").toLowerCase().includes(query)
         );
-  }, [searchQuery]);
+  }, [catalogBrands, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleBrands.length / BRANDS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedBrands = useMemo(
+    () => visibleBrands.slice((currentPage - 1) * BRANDS_PER_PAGE, currentPage * BRANDS_PER_PAGE),
+    [visibleBrands, currentPage]
+  );
+
+  const goToPage = (nextPage: number) => {
+    setPage(Math.min(Math.max(nextPage, 1), totalPages));
+    gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="min-h-screen bg-[var(--xd-bg)]">
       <SEO page="brands" />
-      <HeroSection />
+      <HeroSection brands={heroBrands.length > 0 ? heroBrands : HERO_FALLBACK_BRANDS} />
 
       <section className="px-5 pb-16 pt-12 sm:px-8 lg:px-12 lg:pb-20 lg:pt-16">
         <div className="mx-auto flex max-w-[1344px] flex-col items-center gap-14">
-          <SectionReveal className="max-w-[780px] text-center">
+          <SectionReveal className="max-w-[680px] text-center">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8D8D9A]">
               {t("brandsPage.featuredEyebrow")}
             </p>
-            <h2 className="font-display text-[34px] font-light leading-[1.18] tracking-[-0.035em] text-[#050505] sm:text-[48px] lg:text-[64px]">
+            <h2 className="font-display text-[34px] font-light leading-[1.18] tracking-[-0.035em] text-[#050505] sm:text-[44px] lg:text-[52px]">
               {t("brandsPage.featuredTitle")}
             </h2>
           </SectionReveal>
 
           <SectionReveal delay={0.06} className="w-full max-w-[720px]">
+            <div ref={gridTopRef} className="scroll-mt-28" />
             <label className="relative block h-12 min-w-0">
               <Search
                 size={15}
@@ -83,21 +166,51 @@ export default function Brands() {
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setPage(1);
+                }}
                 placeholder={t("brandsPage.searchPlaceholder")}
                 className="h-full w-full rounded-[16px] border border-[#050505]/[0.08] bg-white px-11 text-[14px] text-[#050505] outline-none transition focus:border-[var(--xd-gold-active)]/60 focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
               />
             </label>
           </SectionReveal>
 
-          <SectionReveal
-            delay={0.1}
-            className="grid w-full grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
-          >
-            {visibleBrands.map((brand) => (
-              <BrandTile key={brand.id} brand={brand} />
-            ))}
-          </SectionReveal>
+          {isLoading ? <div className="grid w-full grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-6">{Array.from({ length: 10 }, (_, index) => <div key={index} className="h-[172px] animate-pulse rounded-[22px] bg-white/65" />)}</div> : error ? <div role="alert" className="w-full max-w-[720px] rounded-[20px] border border-[#F2C8C8] bg-[#FFF3F3] p-6 text-center text-sm text-[#B42318]">{error}<button type="button" onClick={() => void refresh()} className="ms-3 font-bold underline">{t("common.retry", { fallback: "Retry" })}</button></div> : (
+            <SectionReveal
+              delay={0.1}
+              // amount must be 0 so the reveal fires even when the paged grid
+              // is taller than the viewport on small screens.
+              amount={0}
+              className="flex w-full flex-col gap-12"
+            >
+              {visibleBrands.length === 0 ? (
+                <div className="mx-auto w-full max-w-[520px] rounded-[22px] border border-[#050505]/[0.06] bg-white/80 px-8 py-14 text-center shadow-[0_8px_22px_rgba(5,5,5,0.04)]">
+                  <p className="text-[16px] font-semibold text-[#050505]">
+                    {t("brandsPage.noResultsTitle", { fallback: "No brands found." })}
+                  </p>
+                  <p className="mt-2 text-[13px] leading-[22px] text-[#717182]">
+                    {t("brandsPage.noResultsBody", { fallback: "Try a different brand name or check the spelling." })}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid w-full grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-6">
+                    {pagedBrands.map((brand) => (
+                      <BrandTile key={brand.id} brand={brand} />
+                    ))}
+                  </div>
+                  {totalPages > 1 && (
+                    <BrandsPagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={goToPage}
+                    />
+                  )}
+                </>
+              )}
+            </SectionReveal>
+          )}
         </div>
       </section>
 
@@ -106,8 +219,8 @@ export default function Brands() {
   );
 }
 
-function HeroSection() {
-  const { t } = useLanguage();
+function HeroSection({ brands }: { brands: BrandPreview[] }) {
+  const { isRtl, t } = useLanguage();
 
   return (
     <section className="px-5 pt-10 sm:px-8 sm:pt-12 lg:px-12">
@@ -121,50 +234,52 @@ function HeroSection() {
 
           <div className="relative z-10 flex flex-col justify-between gap-10">
             <div>
-              <h1 className="font-display text-[34px] font-bold leading-[1.02] tracking-[-0.045em] text-[#050505] sm:text-[56px] sm:leading-[0.98] sm:tracking-[-0.055em] lg:text-[68px]">
+              <h1
+                className={`font-display font-bold tracking-[-0.045em] text-[#050505] ${
+                  isRtl
+                    ? "text-[30px] leading-[1.08] sm:text-[clamp(2.7rem,4.2vw,3.625rem)] sm:tracking-[-0.055em]"
+                    : "text-[34px] leading-[1.02] sm:text-[56px] sm:leading-[0.98] sm:tracking-[-0.055em] lg:text-[68px]"
+                }`}
+              >
                 {t("brandsPage.heroTitleLine1")}
                 <br />
                 {t("brandsPage.heroTitleLine2")}
               </h1>
               <p className="mt-6 max-w-[300px] text-[14px] leading-[24px] text-[#717182]">
-                {t("brandsPage.heroBody", {
-                  fallback:
-                    "Explore dental suppliers and manufacturers by brand, specialty, and product category.",
-                })}
+                {t("brandsPage.heroBody")}
               </p>
             </div>
 
             <p className="w-fit rounded-full border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--xd-gold-text)]">
-              {t("brandsPage.brandCount", { fallback: "50+ trusted dental brands" })}
+              {t("brandsPage.brandCount")}
             </p>
           </div>
 
           <div className="relative z-10 flex min-h-[260px] items-center justify-center sm:min-h-[300px] lg:min-h-[430px]">
             <div className="absolute inset-0 m-auto h-[280px] w-[280px] rounded-full bg-[var(--xd-info-bg)]/40 blur-3xl" />
-            <div className="relative z-10 grid w-full max-w-[360px] grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-              {HERO_BRAND_MARKS.map((mark) => (
-                <div
-                  key={mark}
-                  className="flex aspect-square items-center justify-center rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white/82 font-display text-[30px] font-bold text-[#050505] shadow-[0_12px_30px_rgba(5,5,5,0.055)]"
-                >
-                  {mark}
-                </div>
+            <div className="relative z-10 grid w-full max-w-[396px] grid-cols-3 gap-3 sm:gap-4">
+              {brands.slice(0, HERO_BRAND_COUNT).map((brand) => (
+                <HeroBrandCard key={brand.id} brand={brand} />
               ))}
             </div>
           </div>
 
           <div className="relative z-10 flex flex-col justify-between gap-12 lg:items-end lg:text-right">
-            <h2 className="font-display text-[34px] font-bold leading-[1.02] tracking-[-0.045em] text-[#050505] sm:text-[56px] sm:leading-[0.98] sm:tracking-[-0.055em] lg:mt-28 lg:text-[68px]">
-              {t("brandsPage.supplierTitleLine1", { fallback: "Suppliers &" })}
-              <br />
-              {t("brandsPage.supplierTitleLine2", { fallback: "manufacturers" })}
+            <h2
+              className={`font-display font-bold tracking-[-0.045em] text-[#050505] lg:mt-28 ${
+                isRtl
+                  ? "max-w-full text-balance text-[28px] leading-[1.08] sm:text-[clamp(2.4rem,3.7vw,3.5rem)] sm:tracking-[-0.055em]"
+                  : "text-[34px] leading-[1.02] sm:text-[56px] sm:leading-[0.98] sm:tracking-[-0.055em] lg:text-[68px]"
+              }`}
+            >
+              {t("brandsPage.supplierTitleLine1")}
+              {" "}
+              <br className={isRtl ? "hidden" : undefined} />
+              {t("brandsPage.supplierTitleLine2")}
             </h2>
 
             <p className="max-w-[310px] text-[14px] leading-[24px] text-[#717182]">
-              {t("brandsPage.supplierBody", {
-                fallback:
-                  "Find products from reliable dental brands and compare options within the catalog.",
-              })}
+              {t("brandsPage.supplierBody")}
             </p>
           </div>
         </div>
@@ -173,19 +288,170 @@ function HeroSection() {
   );
 }
 
-function BrandTile({ brand }: { brand: BrandPreview }) {
+// Per-asset fitting for the hero logos, in two families:
+// - "block" assets (Dentsply Sirona, NSK) are full-bleed colored tiles, so
+//   they cover the whole card interior without a white inset.
+// - "wordmark" assets are short, wide marks with baked-in padding; each gets
+//   a contain fit plus a scale chosen from its measured artwork bounds so it
+//   reads large without ever cropping the artwork (only blank padding).
+const HERO_LOGO_CLASS_BY_SLUG: Record<string, string> = {
+  "dentsply-sirona": "h-full w-full object-cover",
+  nsk: "h-full w-full object-cover",
+  kerr: "h-full w-full scale-[1.3] object-contain mix-blend-multiply",
+  gc: "h-full w-full scale-[1.08] object-contain mix-blend-multiply",
+  "ivoclar-vivadent": "h-full w-full scale-[1.08] object-contain mix-blend-multiply",
+  woodpecker: "h-[88%] w-[88%] object-contain mix-blend-multiply",
+};
+
+const HERO_LOGO_CLASS_DEFAULT = "h-[80%] w-[80%] object-contain mix-blend-multiply";
+
+function HeroBrandCard({ brand }: { brand: BrandPreview }) {
+  const [logoFailed, setLogoFailed] = useState(false);
   const initials = brand.initials ?? getInitials(brand.name);
+  const showLogo = Boolean(brand.logoUrl) && !logoFailed;
 
   return (
     <Link
       href={`/products?brand=${brand.slug}`}
-      className="flex h-[118px] min-w-0 flex-col items-center justify-center gap-3 rounded-[20px] border border-[var(--xd-gold-border-soft)] bg-white/80 p-4 text-center shadow-[0_8px_22px_rgba(5,5,5,0.045)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-[2px] hover:border-[var(--xd-gold-border-hover)] hover:shadow-[0_14px_30px_rgba(5,5,5,0.07)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:h-[124px] sm:p-5"
+      aria-label={brand.name}
+      title={brand.name}
+      // bg-[#FEFEFE] instead of bg-white on purpose: the dark-theme compat
+      // layer remaps bg-white to a dark surface, and these cards must stay
+      // white in both themes so the logos remain legible.
+      className="group flex aspect-square items-center justify-center overflow-hidden rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-[#FEFEFE] shadow-[0_10px_26px_rgba(5,5,5,0.05)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:border-[var(--xd-gold-border-hover)] hover:shadow-[0_16px_34px_rgba(5,5,5,0.085)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <span className="flex h-9 min-w-9 items-center justify-center rounded-[12px] border border-[#050505]/[0.06] bg-[#050505]/[0.04] px-2 font-display text-[11px] font-bold tracking-[0.02em] text-[#3A3A3A]">
-        {initials}
-      </span>
-      <span className="text-[11px] font-medium leading-tight text-[#717182]">{brand.name}</span>
+      {showLogo ? (
+        <img
+          src={brand.logoUrl ?? undefined}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          onError={() => setLogoFailed(true)}
+          className={HERO_LOGO_CLASS_BY_SLUG[brand.slug] ?? HERO_LOGO_CLASS_DEFAULT}
+        />
+      ) : (
+        <span className="font-display text-[26px] font-bold tracking-[0.02em] text-[#2A2A2A] sm:text-[30px]">
+          {initials}
+        </span>
+      )}
     </Link>
+  );
+}
+
+function BrandTile({ brand }: { brand: BrandPreview }) {
+  return (
+    <Link
+      href={`/products?brand=${brand.slug}`}
+      className="flex min-h-[172px] min-w-0 flex-col items-center justify-center gap-4 rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white/80 p-5 text-center shadow-[0_8px_22px_rgba(5,5,5,0.045)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-[2px] hover:border-[var(--xd-gold-border-hover)] hover:shadow-[0_14px_30px_rgba(5,5,5,0.07)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:min-h-[184px] sm:p-6"
+    >
+      <BrandMark brand={brand} />
+      <span className="line-clamp-2 text-[13px] font-semibold leading-snug text-[#2B2B33] dark:text-[var(--xd-text-muted)] sm:text-[14px]">
+        {brand.name}
+      </span>
+    </Link>
+  );
+}
+
+function BrandMark({ brand }: { brand: BrandPreview }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const initials = brand.initials ?? getInitials(brand.name);
+  const showLogo = Boolean(brand.logoUrl) && !logoFailed;
+  const isFullBleed = FULL_BLEED_BRAND_LOGO_SLUGS.has(brand.slug);
+
+  return (
+    <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-[var(--xd-gold-border-soft)] bg-[#FEFEFE] shadow-[0_4px_12px_rgba(5,5,5,0.04)] sm:h-24 sm:w-24">
+      {showLogo ? (
+        <img
+          src={brand.logoUrl ?? undefined}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          onError={() => setLogoFailed(true)}
+          className={isFullBleed ? "block h-full w-full object-cover" : "h-[78%] w-[78%] object-contain"}
+        />
+      ) : (
+        <span className="font-display text-[20px] font-bold tracking-[0.02em] text-[#2A2A2A] sm:text-[22px]">
+          {initials}
+        </span>
+      )}
+    </span>
+  );
+}
+
+type PageItem = number | "ellipsis-start" | "ellipsis-end";
+
+function getPageItems(current: number, total: number): PageItem[] {
+  if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+  const middleStart = Math.max(2, current - 1);
+  const middleEnd = Math.min(total - 1, current + 1);
+  const items: PageItem[] = [1];
+  if (middleStart > 2) items.push("ellipsis-start");
+  for (let pageNumber = middleStart; pageNumber <= middleEnd; pageNumber += 1) items.push(pageNumber);
+  if (middleEnd < total - 1) items.push("ellipsis-end");
+  items.push(total);
+  return items;
+}
+
+function BrandsPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const { t } = useLanguage();
+  const navButtonClass =
+    "flex h-10 items-center justify-center rounded-[12px] border border-[#050505]/[0.08] bg-white px-4 text-[13px] font-semibold text-[#3A3A3A] transition hover:border-[var(--xd-gold-border-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] disabled:pointer-events-none disabled:opacity-40";
+
+  return (
+    <nav
+      aria-label={t("brandsPage.paginationLabel", { fallback: "Brands pagination" })}
+      className="flex flex-wrap items-center justify-center gap-2"
+    >
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={navButtonClass}
+      >
+        {t("brandsPage.previousPage", { fallback: "Previous" })}
+      </button>
+
+      {getPageItems(currentPage, totalPages).map((item) =>
+        typeof item === "number" ? (
+          <button
+            key={item}
+            type="button"
+            onClick={() => onPageChange(item)}
+            aria-current={item === currentPage ? "page" : undefined}
+            className={
+              item === currentPage
+                ? "flex h-10 min-w-10 items-center justify-center rounded-[12px] border border-transparent bg-[var(--xd-gold-active)] px-3 text-[13px] font-bold text-[#050505] shadow-[0_6px_16px_rgba(5,5,5,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] focus-visible:ring-offset-2"
+                : "flex h-10 min-w-10 items-center justify-center rounded-[12px] border border-[#050505]/[0.08] bg-white px-3 text-[13px] font-semibold text-[#3A3A3A] transition hover:border-[var(--xd-gold-border-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
+            }
+          >
+            {item}
+          </button>
+        ) : (
+          <span key={item} aria-hidden="true" className="px-1 text-[13px] font-semibold text-[#9A9A9A]">
+            …
+          </span>
+        )
+      )}
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={navButtonClass}
+      >
+        {t("brandsPage.nextPage", { fallback: "Next" })}
+      </button>
+    </nav>
   );
 }
 

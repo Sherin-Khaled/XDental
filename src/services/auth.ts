@@ -1,9 +1,32 @@
+import type {
+  ClinicLocation,
+  ClinicLocationInput,
+} from "@/services/delivery";
+import { API_BASE_URL } from "./apiConfig";
+
 export type AuthApiUser = {
   id: string;
   name: string;
   email: string;
   role: string;
+  customerTier: "standard" | "vip";
+  isActive: boolean;
+  permissions: string[];
+  phone?: string | null;
   professionalRole: string | null;
+  clinicSpecialty: string | null;
+  clinicName: string | null;
+  profileImageUrl: string | null;
+  clinicLocations: ClinicLocation[];
+};
+
+export type ProfileUpdateRequest = {
+  name?: string;
+  phone?: string;
+  professionalRole?: string;
+  clinicSpecialty?: string;
+  clinicName?: string;
+  clinicLocations?: ClinicLocationInput[];
 };
 
 export type RegisterRequest = {
@@ -12,15 +35,13 @@ export type RegisterRequest = {
   password: string;
   phone?: string;
   professionalRole?: string;
+  clinicSpecialty: string;
+  clinicLocations: ClinicLocationInput[];
 };
 
 type AuthResponse = {
   user: AuthApiUser;
 };
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ?? "http://localhost:5000/api"
-).replace(/\/$/, "");
 
 const AUTH_SERVICE_UNAVAILABLE_MESSAGE =
   "Authentication service is currently unavailable. Please try again later.";
@@ -34,6 +55,18 @@ export class AuthApiError extends Error {
     super(message);
     this.name = "AuthApiError";
     this.status = status;
+  }
+}
+
+export function resolveAuthAssetUrl(value?: string | null) {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (!/^https?:\/\//i.test(API_BASE_URL)) return value;
+
+  try {
+    return new URL(value, new URL(API_BASE_URL).origin).toString();
+  } catch {
+    return value;
   }
 }
 
@@ -115,4 +148,31 @@ export async function logoutUser() {
 export async function getCurrentUser(signal?: AbortSignal) {
   const response = await authRequest<AuthResponse>("/auth/me", { signal });
   return response.user;
+}
+
+/** Persists profile changes; resolves with the server-confirmed user. */
+export async function updateProfile(input: ProfileUpdateRequest) {
+  const response = await authRequest<AuthResponse>("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+  return response.user;
+}
+
+/** Uploads one validated profile image and resolves with the refreshed user. */
+export async function uploadProfileImage(file: File) {
+  const response = await authRequest<AuthResponse>("/auth/me/profile-image", {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  return response.user;
+}
+
+/** Changes the account password; rejects with AuthApiError(401) when the current password is wrong. */
+export async function changePassword(currentPassword: string, newPassword: string) {
+  return authRequest<{ message: string; signedOutOtherSessions: number }>("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 }

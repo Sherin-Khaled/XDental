@@ -3,6 +3,7 @@ import type { Product } from "@/types/product";
 export const mockProducts: Product[] = [
   {
     id: "prod-1",
+    slug: "wk-flex-k-file",
     name: "WK-Flex K-File",
     brand: "Meta Biomed",
     category: "Endodontics",
@@ -26,6 +27,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-2",
+    slug: "protaper-gold",
     name: "ProTaper Gold",
     brand: "Dentsply Sirona",
     category: "Endodontics",
@@ -44,6 +46,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-3",
+    slug: "filtek-z350-xt",
     name: "Filtek Z350 XT",
     brand: "3M",
     category: "Composites & Bonding",
@@ -53,7 +56,7 @@ export const mockProducts: Product[] = [
     discountPercentage: 10,
     rating: 4.7,
     reviewCount: 512,
-    stockStatus: "In Stock",
+    stockStatus: "Out of Stock",
     deliveryLabel: "Fast Delivery",
     options: ["A1", "A2", "A3", "A3.5", "B1"],
     isWeeklyOffer: true,
@@ -65,6 +68,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-4",
+    slug: "articaine-4",
     name: "Articaine 4%",
     brand: "Septodont",
     category: "Anesthesia",
@@ -83,6 +87,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-5",
+    slug: "aquasil-ultra",
     name: "Aquasil Ultra",
     brand: "Dentsply",
     category: "Impression Materials",
@@ -101,6 +106,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-6",
+    slug: "gracey-curette-7-8",
     name: "Gracey Curette 7/8",
     brand: "Hu-Friedy",
     category: "Hand Instruments",
@@ -110,7 +116,7 @@ export const mockProducts: Product[] = [
     discountPercentage: 8,
     rating: 4.9,
     reviewCount: 156,
-    stockStatus: "In Stock",
+    stockStatus: "Out of Stock",
     options: ["Standard", "Rigid"],
     isWeeklyOffer: true,
     isBestSeller: true,
@@ -121,6 +127,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-7",
+    slug: "opalescence-pf-35",
     name: "Opalescence PF 35%",
     brand: "Ultradent",
     category: "Whitening",
@@ -139,6 +146,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-8",
+    slug: "metal-brackets-roth-22",
     name: "Metal Brackets Roth 22",
     brand: "Forestadent",
     category: "Orthodontics",
@@ -157,6 +165,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-9",
+    slug: "sterilization-pouches",
     name: "Sterilization Pouches",
     brand: "X Dental",
     category: "Infection Control",
@@ -178,6 +187,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: "prod-10",
+    slug: "disposable-micro-applicators",
     name: "Disposable Micro Applicators",
     brand: "X Dental",
     category: "Consumables",
@@ -187,7 +197,7 @@ export const mockProducts: Product[] = [
     discountPercentage: 18,
     rating: 4.6,
     reviewCount: 143,
-    stockStatus: "In Stock",
+    stockStatus: "Out of Stock",
     deliveryLabel: "Fast Delivery",
     options: ["Fine", "Regular"],
     isWeeklyOffer: false,

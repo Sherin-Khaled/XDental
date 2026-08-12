@@ -4,6 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
 import { SEO } from "@/components/SEO";
+import { OrderPricingBreakdown } from "@/components/dental/OrderPricingBreakdown";
 import { useLanguage } from "@/context/LanguageContext";
 import { getMyOrder, type CustomerOrder } from "@/services/orders";
 
@@ -80,6 +81,15 @@ export default function OrderConfirmed() {
               {t("orderConfirmation.orderNumber")}
             </p>
             <p className="mt-1 font-display text-[22px] font-bold text-[#050505]">{order.orderNumber}</p>
+          </div>
+          <div className="mx-auto mt-6 max-w-[440px] rounded-[18px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-bg)] p-5 text-start">
+            <h2 className="mb-4 font-display text-lg font-bold text-[#050505] dark:text-[#F7F2E6]">
+              {t("orderConfirmation.pricingTitle")}
+            </h2>
+            <OrderPricingBreakdown
+              order={order}
+              deliveryLabel={t(`checkout.shippingMethods.${order.deliveryMethod}.title`, { fallback: order.deliveryMethod })}
+            />
           </div>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild>

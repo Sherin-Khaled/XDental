@@ -1,49 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseCsv } from "../utils/csv.js";
 import { validateProductRows } from "../utils/productImportValidator.js";
-
-function parseCsv(text) {
-  const records = [];
-  let record = [];
-  let field = "";
-  let quoted = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    const next = text[index + 1];
-
-    if (character === '"' && quoted && next === '"') {
-      field += '"';
-      index += 1;
-    } else if (character === '"') {
-      quoted = !quoted;
-    } else if (character === "," && !quoted) {
-      record.push(field);
-      field = "";
-    } else if ((character === "\n" || character === "\r") && !quoted) {
-      if (character === "\r" && next === "\n") index += 1;
-      record.push(field);
-      if (record.some((value) => value.trim())) records.push(record);
-      record = [];
-      field = "";
-    } else {
-      field += character;
-    }
-  }
-
-  record.push(field);
-  if (record.some((value) => value.trim())) records.push(record);
-  if (quoted) throw new Error("CSV contains an unclosed quoted field.");
-  if (records.length === 0) return [];
-
-  const headers = records[0].map((value, index) =>
-    (index === 0 ? value.replace(/^\uFEFF/, "") : value).trim()
-  );
-  return records.slice(1).map((values) =>
-    Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]))
-  );
-}
 
 const serverRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const inputPath = process.argv[2]

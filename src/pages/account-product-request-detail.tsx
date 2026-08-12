@@ -130,9 +130,9 @@ function StatusStep({
         className={cn(
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white",
           isCurrent
-            ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-active)] text-white shadow-[0_8px_18px_var(--xd-gold-border-soft)]"
+            ? "xd-account-selected-gold-control xd-gradient-gold border-transparent shadow-[var(--xd-gold-gradient-shadow)]"
             : isCompleted
-              ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]"
+              ? "xd-gradient-gold-border bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]"
               : "border-[#050505]/12 bg-[var(--xd-bg)] text-[#9B9B9B]"
         )}
       >

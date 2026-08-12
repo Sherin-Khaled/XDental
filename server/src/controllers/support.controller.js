@@ -1,6 +1,14 @@
 import { prisma } from "../config/db.js";
-import { sendEmailIfConfigured } from "../services/email.service.js";
-import { createNotification, notifyStaff } from "../services/notification.service.js";
+import {
+  createSubmissionEmailDelivery,
+  getEmailDeliveryMap,
+} from "../services/email.service.js";
+import {
+  createNotification,
+  deliverNotificationPush,
+  notifyStaff,
+} from "../services/notification.service.js";
+import { createFirstMessageAcknowledgement } from "../services/supportAcknowledgement.service.js";
 import { cleanText, isValidId, nextPublicNumber, safeUser } from "../utils/records.js";
 
 const THREAD_TYPES = ["PRODUCT_REQUEST", "GENERAL_SUPPORT", "ORDER", "QUOTE"];
@@ -37,6 +45,7 @@ function serializeThread(thread, latestMessage) {
     latestMessage: latest?.body ?? "",
     createdAt: thread.createdAt,
     updatedAt: thread.updatedAt,
+    emailDelivery: thread.emailDelivery ?? null,
   };
 }
 
@@ -92,6 +101,7 @@ export async function createSupportThread(request, response) {
         body,
       },
     });
+    await createFirstMessageAcknowledgement(database, createdThread.id);
     await notifyStaff(
       {
         type: "SUPPORT_MESSAGE",
@@ -103,6 +113,21 @@ export async function createSupportThread(request, response) {
       database
     );
     return createdThread;
+  });
+
+  await createSubmissionEmailDelivery({
+    category: "SUPPORT",
+    entityId: thread.id,
+    replyTo: request.user.email,
+    payload: {
+      reference: thread.ticketNumber,
+      name: request.user.name,
+      email: request.user.email,
+      phone: request.user.phone,
+      subject,
+      message: body,
+      adminPath: `/admin/support?thread=${thread.id}`,
+    },
   });
 
   return response.status(201).json({ supportThread: serializeThread(thread, { body }) });
@@ -128,7 +153,12 @@ export async function getAdminThreads(_request, response) {
     },
     orderBy: { lastMessageAt: "desc" },
   });
-  return response.json({ supportThreads: threads.map((thread) => serializeThread(thread)) });
+  const deliveries = await getEmailDeliveryMap("SUPPORT", threads.map((thread) => thread.id));
+  return response.json({
+    supportThreads: threads.map((thread) =>
+      serializeThread({ ...thread, emailDelivery: deliveries.get(thread.id) ?? null })
+    ),
+  });
 }
 
 export async function getThreadMessages(request, response) {
@@ -169,6 +199,9 @@ export async function postThreadMessage(request, response) {
       },
       include: { sender: true },
     });
+    const autoResponse = staff
+      ? null
+      : await createFirstMessageAcknowledgement(database, thread.id);
     const updatedThread = await database.supportThread.update({
       where: { id: thread.id },
       data: {
@@ -179,8 +212,9 @@ export async function postThreadMessage(request, response) {
       include: { user: true, assignedTo: true },
     });
 
+    let notification = null;
     if (staff) {
-      await createNotification(
+      notification = await createNotification(
         {
           userId: thread.userId,
           type: "SUPPORT_MESSAGE",
@@ -204,14 +238,29 @@ export async function postThreadMessage(request, response) {
       );
     }
 
-    return { message, thread: updatedThread };
+    return { message, autoResponse, thread: updatedThread, notification };
   });
 
-  if (staff) {
-    await sendEmailIfConfigured({ event: "SUPPORT_REPLY" }).catch(() => {});
+  await deliverNotificationPush(result.notification);
+  if (!staff) {
+    await createSubmissionEmailDelivery({
+      category: "SUPPORT",
+      entityId: result.message.id,
+      replyTo: thread.user?.email,
+      payload: {
+        reference: thread.ticketNumber,
+        name: thread.user?.name,
+        email: thread.user?.email,
+        phone: thread.user?.phone,
+        subject: thread.subject,
+        message: body,
+        adminPath: `/admin/support?thread=${thread.id}`,
+      },
+    });
   }
   return response.status(201).json({
     message: serializeMessage(result.message),
+    autoResponse: result.autoResponse ? serializeMessage(result.autoResponse) : null,
     supportThread: serializeThread(result.thread, result.message),
   });
 }
@@ -235,6 +284,7 @@ export async function updateAdminThreadStatus(request, response) {
       include: { user: true, assignedTo: true },
     });
 
+    let notification = null;
     if (databaseStatus === "RESOLVED") {
       await database.supportMessage.create({
         data: {
@@ -243,7 +293,7 @@ export async function updateAdminThreadStatus(request, response) {
           body: "This support ticket has been resolved.",
         },
       });
-      await createNotification(
+      notification = await createNotification(
         {
           userId: thread.userId,
           type: "SUPPORT_MESSAGE",
@@ -256,11 +306,11 @@ export async function updateAdminThreadStatus(request, response) {
       );
     }
 
-    return updatedThread;
+    return { supportThread: updatedThread, notification };
   });
 
-  if (databaseStatus === "RESOLVED") {
-    await sendEmailIfConfigured({ event: "TICKET_RESOLVED" }).catch(() => {});
-  }
-  return response.json({ supportThread: serializeThread(updated) });
+  await deliverNotificationPush(updated.notification);
+  return response.json({
+    supportThread: serializeThread(updated.supportThread),
+  });
 }

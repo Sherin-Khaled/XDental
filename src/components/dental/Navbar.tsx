@@ -5,6 +5,14 @@ import { Heart, ShoppingCart, Search, Menu, X, Globe, User } from "lucide-react"
 import { BrandLogo } from "@/components/dental/BrandLogo";
 import { Button } from "@/components/dental/Button";
 import { GlobalSearch } from "@/components/dental/GlobalSearch";
+import {
+  NAVBAR_ICON_SIZE,
+  NAVBAR_ICON_STROKE_WIDTH,
+  NavbarCountBadge,
+  navbarIconControlClassName,
+} from "@/components/dental/NavbarIconControl";
+import { NotificationDropdown } from "@/components/dental/NotificationDropdown";
+import { ThemeToggle } from "@/components/dental/ThemeToggle";
 import { useStore } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -20,8 +28,11 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
-  const { cartCount, wishlistIds, isAuthenticated, isAuthLoading, currentUser } = useStore();
-  const { t, toggleLanguage, language } = useLanguage();
+  const { cartCount, wishlistIds, isAuthenticated, isAuthLoading, currentUser, changeLanguage } = useStore();
+  const { t, language } = useLanguage();
+  const toggleLanguage = () => {
+    void changeLanguage(language === "en" ? "ar" : "en");
+  };
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -29,13 +40,16 @@ export function Navbar() {
   useClickOutside(mobileNavRef, () => setMobileOpen(false), {
     enabled: mobileOpen,
   });
-  const badgeClassName =
-    "absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--xd-gold)] px-1 text-[9px] font-bold leading-none text-[#050505]";
-  const compactActionClassName =
-    "h-10 w-10 rounded-full text-[#050505] hover:bg-[var(--xd-gold-bg-soft)]";
   const mobileMenuItemClassName =
     "flex h-11 items-center justify-between rounded-xl px-3 text-[15px] font-medium text-[#050505] transition-colors hover:bg-[var(--xd-gold-bg-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]";
   const userDisplayName = formatUserDisplayName(currentUser, language);
+  const userRole = currentUser?.role?.trim().toLowerCase();
+  const staffUserLabel = userRole === "admin"
+    ? t("staffAccount.adminUser")
+    : userRole === "support"
+      ? t("staffAccount.supportUser")
+      : null;
+  const accountLabel = staffUserLabel ?? (userDisplayName || t("nav.account"));
   const userInitials =
     currentUser?.name
       ?.split(/\s+/)
@@ -50,10 +64,10 @@ export function Navbar() {
       ref={mobileNavRef}
       className="sticky top-0 z-50 w-full"
       style={{
-        background: "rgba(251,250,247,0.8)",
+        background: "var(--xd-navbar-bg)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(5,5,5,0.06)",
+        borderBottom: "1px solid var(--xd-border-soft)",
       }}
     >
       <div className="px-5 sm:px-8 lg:px-12">
@@ -64,7 +78,7 @@ export function Navbar() {
           <BrandLogo textClassName="font-semibold tracking-tight leading-none text-[var(--xd-text)]" />
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-5 lg:flex xl:gap-8">
+          <nav className="hidden items-center gap-5 xl:flex xl:gap-8">
             {NAV_LINKS.map(({ labelKey, href }) => {
               const isActive = href === "/" ? location === "/" : location.startsWith(href) && href !== "/";
               return (
@@ -72,7 +86,7 @@ export function Navbar() {
                   key={labelKey}
                   href={href}
                   className="relative text-[14px] font-medium transition-colors focus-visible:outline-none"
-                  style={{ color: isActive ? "var(--xd-text)" : "#5A5A5A" }}
+                  style={{ color: isActive ? "var(--xd-text)" : "var(--xd-text-muted)" }}
                 >
                   {t(labelKey)}
                   {isActive && (
@@ -87,7 +101,7 @@ export function Navbar() {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 xl:gap-2.5 2xl:gap-3">
             {/* Search icon button */}
             <Button
               type="button"
@@ -97,11 +111,12 @@ export function Navbar() {
               }}
               variant="tertiary"
               size="icon"
-              className={`${compactActionClassName} text-[#5A5A5A]`}
+              className={navbarIconControlClassName}
               aria-label={t("nav.search")}
+              aria-expanded={searchOpen}
               data-testid="button-search"
             >
-              <Search size={18} strokeWidth={1.75} />
+              <Search size={NAVBAR_ICON_SIZE} strokeWidth={NAVBAR_ICON_STROKE_WIDTH} className="xd-premium-icon" />
             </Button>
 
             {/* Language toggle */}
@@ -110,26 +125,24 @@ export function Navbar() {
               onClick={toggleLanguage}
               variant="tertiary"
               size="sm"
-              className="hidden h-10 rounded-full border-0 bg-transparent px-2.5 text-[14px] font-semibold text-[#050505] shadow-none hover:bg-[var(--xd-gold-bg-soft)] hover:text-[#050505] lg:inline-flex"
+              className="hidden h-11 shrink-0 rounded-[12px] border border-transparent bg-transparent px-2.5 text-[14px] font-semibold text-[var(--xd-text)] shadow-none hover:border-[var(--xd-gold-border-soft)] hover:bg-[var(--xd-gold-bg-soft)] hover:text-[var(--xd-text)] xl:inline-flex"
               data-testid="button-language"
               aria-label="Toggle language"
             >
               {t("nav.language")}
             </Button>
 
+            <ThemeToggle />
+
             <Button
               asChild
               variant="tertiary"
               size="icon"
-              className={`relative hidden ${compactActionClassName} lg:inline-flex`}
+              className={`${navbarIconControlClassName} hidden xl:inline-flex`}
             >
               <Link href="/account/wishlist" data-testid="link-wishlist" aria-label={t("nav.wishlist")}>
-                <Heart size={18} strokeWidth={1.75} />
-                {wishlistIds.length > 0 && (
-                  <span className={badgeClassName}>
-                    {wishlistIds.length}
-                  </span>
-                )}
+                <Heart size={NAVBAR_ICON_SIZE} strokeWidth={NAVBAR_ICON_STROKE_WIDTH} className="xd-premium-icon" />
+                <NavbarCountBadge count={wishlistIds.length} />
               </Link>
             </Button>
 
@@ -138,23 +151,23 @@ export function Navbar() {
               asChild
               variant="tertiary"
               size="icon"
-              className={`relative ${compactActionClassName}`}
+              className={navbarIconControlClassName}
             >
-              <Link href="/cart" data-testid="link-cart">
-                <ShoppingCart size={19} strokeWidth={1.75} />
-                {cartCount > 0 && (
-                  <span className={badgeClassName}>
-                    {cartCount}
-                  </span>
-                )}
+              <Link href="/cart" data-testid="link-cart" aria-label={t("nav.cart")}>
+                <ShoppingCart size={NAVBAR_ICON_SIZE} strokeWidth={NAVBAR_ICON_STROKE_WIDTH} className="xd-premium-icon" />
+                <NavbarCountBadge count={cartCount} />
               </Link>
             </Button>
 
+            {!isAuthLoading && isAuthenticated && (
+              <NotificationDropdown />
+            )}
+
             {/* Auth/account action */}
-            <div className="hidden h-10 w-[82px] items-center justify-end lg:flex">
+            <div className="hidden shrink-0 items-center justify-end xl:flex">
               {isAuthLoading ? (
                 <span
-                  className="h-10 w-10 animate-pulse rounded-full bg-[#050505]/[0.07]"
+                  className="h-11 w-11 animate-pulse rounded-[12px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)]"
                   aria-hidden="true"
                   data-testid="auth-loading-placeholder"
                 />
@@ -163,14 +176,15 @@ export function Navbar() {
                   asChild
                   variant="tertiary"
                   size="icon"
-                  className={compactActionClassName}
+                  className={navbarIconControlClassName}
                 >
                   <Link
                     href="/account/dashboard"
                     data-testid="link-account"
-                    aria-label={userDisplayName || t("nav.account")}
+                    aria-label={accountLabel}
+                    title={accountLabel}
                   >
-                    <User size={20} strokeWidth={1.75} />
+                    <User size={NAVBAR_ICON_SIZE} strokeWidth={NAVBAR_ICON_STROKE_WIDTH} className="xd-premium-icon" />
                   </Link>
                 </Button>
               ) : (
@@ -178,7 +192,7 @@ export function Navbar() {
                   asChild
                   variant="primary"
                   size="sm"
-                  className="h-10 px-4 text-[13px]"
+                  className="h-11 shrink-0 px-4 text-[13px]"
                 >
                   <Link href="/signin" data-testid="link-sign-in">{t("nav.signIn")}</Link>
                 </Button>
@@ -191,7 +205,7 @@ export function Navbar() {
               onClick={() => setMobileOpen(o => !o)}
               variant="tertiary"
               size="icon"
-              className={`${compactActionClassName} lg:hidden`}
+              className={`${navbarIconControlClassName} xl:hidden`}
               data-testid="button-mobile-menu"
               aria-label={t("nav.toggleMenu")}
             >
@@ -210,8 +224,8 @@ export function Navbar() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="px-5 pb-6 pt-2 sm:px-8 lg:hidden"
-          style={{ borderTop: "1px solid rgba(5,5,5,0.06)" }}
+          className="px-5 pb-6 pt-2 sm:px-8 xl:hidden"
+          style={{ borderTop: "1px solid var(--xd-border-soft)" }}
         >
           <nav className="mx-auto flex max-w-[1344px] flex-col gap-1">
             {NAV_LINKS.map(({ labelKey, href }) => (
@@ -230,7 +244,7 @@ export function Navbar() {
               className={mobileMenuItemClassName}
             >
               <span className="inline-flex items-center gap-3">
-                <Heart size={17} strokeWidth={1.75} />
+                <Heart size={17} strokeWidth={1.75} className="xd-premium-icon" />
                 {t("nav.wishlist")}
               </span>
               {wishlistIds.length > 0 && (
@@ -258,10 +272,10 @@ export function Navbar() {
                       {userInitials}
                     </span>
                   ) : (
-                    <User size={17} strokeWidth={1.75} />
+                    <User size={17} strokeWidth={1.75} className="xd-premium-icon" />
                   )}
                   <span className="truncate">
-                    {isAuthenticated ? userDisplayName || t("nav.account") : t("nav.signIn")}
+                    {isAuthenticated ? accountLabel : t("nav.signIn")}
                   </span>
                 </span>
               </Link>
@@ -273,7 +287,7 @@ export function Navbar() {
               size="sm"
               className="mt-2 h-11 justify-start gap-3 rounded-xl border-0 bg-transparent px-3 text-[15px] font-semibold text-[#050505] shadow-none hover:bg-[var(--xd-gold-bg-soft)] hover:text-[#050505]"
             >
-              <Globe size={16} />
+              <Globe size={16} className="xd-premium-icon" />
               {t("nav.language")}
             </Button>
           </nav>

@@ -52,7 +52,8 @@
     "surgery": "Surgery",
     "implantology": "Implantology",
     "infectionControl": "Infection Control",
-    "clinicEssentials": "Clinic Essentials"
+    "clinicEssentials": "Clinic Essentials",
+    "viewAll": "View all"
   },
   "common": {
     "brand": "Brand",
@@ -65,11 +66,26 @@
     "total": "Total",
     "free": "Free",
     "edit": "Edit",
+    "cancel": "Cancel",
+    "close": "Close",
     "apply": "Apply",
     "clearAll": "Clear All",
     "clearFilters": "Clear Filters",
     "filters": "Filters",
     "viewAll": "View All",
+    "previous": "Previous",
+    "next": "Next",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "previousProducts": "Previous products",
+    "nextProducts": "Next products",
+    "previousCard": "Previous card",
+    "nextCard": "Next card",
+    "previousFeature": "Previous feature cards",
+    "nextFeature": "Next feature cards",
+    "pagination": "Pagination",
     "viewDetails": "View Details",
     "loadMoreProducts": "Load More Products",
     "continueShopping": "Continue Shopping",
@@ -100,6 +116,8 @@
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",
     "lowStock": "Low Stock",
+    "lowStockWithCount": "Low stock · Only {count} left",
+    "availabilityConfirmedWhenProcessed": "Availability is confirmed when the order is processed.",
     "discounted": "Discounted",
     "min": "Min",
     "max": "Max",
@@ -110,7 +128,9 @@
     "last6Months": "Last 6 months",
     "last30Days": "Last 30 days",
     "allTime": "All time",
-    "newestFirst": "Newest First"
+    "newestFirst": "Newest First",
+    "saving": "Saving...",
+    "comingSoon": "Coming soon"
   },
   "account": {
     "dashboard": "Dashboard",
@@ -132,11 +152,1038 @@
     "supportTicketDetails": "Support Ticket Details",
     "settings": "Settings"
   },
+  "staffAccount": {
+    "adminAccount": "Admin Account",
+    "staffAccount": "Staff Account",
+    "staffTools": "Staff Tools",
+    "personalAccount": "Personal Account",
+    "manageOperations": "Manage store operations, orders, requests, and support conversations.",
+    "staffToolsDescription": "Open the operational tools available for your staff role.",
+    "adminDashboard": "Admin Dashboard",
+    "ordersManagement": "Orders Management",
+    "quotesManagement": "Quotes Management",
+    "productRequestsManagement": "Product Requests Management",
+    "supportInbox": "Support Inbox",
+    "users": "Users",
+    "settings": "Settings",
+    "adminUser": "Admin user",
+    "supportUser": "Support user",
+    "roles": {
+      "admin": "Admin",
+      "support": "Support"
+    },
+    "actions": {
+      "adminDashboardDescription": "Open the store operations overview.",
+      "ordersDescription": "Review and update customer orders.",
+      "quotesDescription": "Review and respond to customer quote requests.",
+      "productRequestsDescription": "Review customer product requests.",
+      "supportDescription": "Manage support conversations and follow-ups.",
+      "usersDescription": "Open admin user management.",
+      "settingsDescription": "Review store administration settings."
+    }
+  },
+  "admin": {
+    "backToAccount": "Back to Account",
+    "shell": {
+      "admin": "Admin",
+      "dashboard": "Admin Dashboard",
+      "navigation": "Admin navigation",
+      "openNavigation": "Open admin navigation",
+      "closeNavigation": "Close admin navigation",
+      "overview": "Overview",
+      "products": "Products",
+      "catalogImport": "Catalog Import",
+      "catalogImportHistory": "Import History",
+      "flashSale": "Flash Sale",
+      "coupons": "Coupons",
+      "categories": "Categories",
+      "brands": "Brands",
+      "orders": "Orders",
+      "quotes": "Quotes",
+      "productRequests": "Product Requests",
+      "supportInbox": "Support Inbox",
+      "accountRequests": "Account Requests",
+      "loyalty": "Loyalty & Wallet",
+      "users": "Users",
+      "settings": "Settings"
+    },
+    "accountRequests": {
+      "title": "Account Requests",
+      "description": "Review and safely process customer deactivation and deletion requests.",
+      "searchPlaceholder": "Search by request number, customer, or email",
+      "allTypes": "All request types",
+      "allStatuses": "All statuses",
+      "loading": "Loading account requests...",
+      "loadError": "Account requests could not be loaded.",
+      "empty": "No account requests match these filters.",
+      "request": "Request",
+      "customer": "Customer",
+      "type": "Type",
+      "status": "Status",
+      "submitted": "Submitted",
+      "openDetails": "Open request details",
+      "closeDetails": "Close request details",
+      "reason": "Customer reason",
+      "details": "Additional details",
+      "reviewerResponse": "Customer-visible response",
+      "customerVisibleHelp": "This response is visible to the customer in their account request.",
+      "privateNote": "Private admin note",
+      "privateNoteHelp": "Visible only to authorized staff and the audit trail.",
+      "history": "Audit history",
+      "noValue": "Not provided",
+      "reviewedBy": "Reviewed by",
+      "lifecycle": "Account lifecycle",
+      "actionSuccess": "The account request was updated.",
+      "actionError": "The account request could not be updated.",
+      "actionDialogTitle": "Confirm account-request action",
+      "confirmationLabel": "Type {token} to confirm",
+      "approvalExplanation": "Approval does not deactivate or delete the account. After approval, a separate completion action is required to execute the request.",
+      "approvedStateExplanation": "This request is approved and awaiting completion. The customer remains active and can continue to sign in and place orders until completion.",
+      "underReviewAction": "Mark Under Review",
+      "approveAction": "Approve",
+      "rejectAction": "Reject",
+      "completeAction": "Complete",
+      "completeDeactivationAction": "Complete Deactivation",
+      "completeDeletionAction": "Complete Deletion and Anonymize",
+      "deactivationCompletionTitle": "Complete account deactivation",
+      "deactivationCompletionDescription": "This high-risk action will deactivate the customer, revoke every active session, and block login. Orders and operational records will be preserved, and an administrator can reactivate the account later.",
+      "deletionCompletionTitle": "Complete deletion and anonymization",
+      "deletionCompletionDescription": "This irreversible action will revoke every session, permanently block the previous login, anonymize the customer profile, and remove saved personal profile information. The account cannot be restored or reactivated. Required order and operational records will remain preserved.",
+      "reactivateAction": "Reactivate Account",
+      "reactivationTitle": "Restore customer account access",
+      "reactivationDescription": "Reactivation will restore account access while preserving orders and operational records. Old sessions will not be restored; the customer must sign in again.",
+      "permanentlyDeleted": "Permanently Deleted and Anonymized",
+      "submitAction": "Confirm action",
+      "cancelAction": "Cancel",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "deepLinkUnavailable": "The requested account request is unavailable or you do not have access to it.",
+      "attentionBadgeLabel": "{count} account requests need attention",
+      "viewAccountRequests": "View account requests",
+      "types": {
+        "deactivation": "Deactivation",
+        "deletion": "Deletion"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "underReview": "Under Review",
+        "approved": "Approved — Awaiting Completion",
+        "rejected": "Rejected",
+        "canceled": "Canceled",
+        "completed": "Completed"
+      },
+      "lifecycles": {
+        "active": "Active",
+        "deletionRequested": "Deletion requested",
+        "deactivated": "Deactivated",
+        "deleted": "Deleted / anonymized"
+      },
+      "events": {
+        "statusChange": "Status changed",
+        "reactivated": "Account reactivated"
+      }
+    },
+    "loyalty": {
+      "eyebrow": "Admin",
+      "title": "Loyalty & Wallet",
+    "description": "Inspect immutable ledgers and create authorized, audited adjustments.",
+    "tabs": { "customers": "Customers", "transactions": "Transactions", "settings": "Program Settings" },
+    "transactions": "Transactions",
+    "transactionsHelp": "Select a customer in Customers to inspect their authorized points and store-credit history.",
+    "pointsAdjustmentHelp": "Add or remove loyalty points. Every adjustment is recorded in the customer ledger.",
+    "walletAdjustmentHelp": "Add or remove EGP-denominated store credit. This is separate from loyalty points.",
+    "adjustmentType": "Adjustment type",
+    "pointsAmount": "Points amount",
+    "add": "Add points",
+    "remove": "Remove points",
+      "loadError": "Loyalty data could not be loaded.",
+      "search": "Search customers",
+      "availablePoints": "Available points",
+      "pendingPoints": "Pending points",
+      "walletBalance": "Wallet balance",
+      "pointsAdjustment": "Points adjustment",
+      "walletAdjustment": "Wallet adjustment",
+      "signedPoints": "Signed points (+ or -)",
+      "reason": "Reason",
+      "type": "Type",
+      "walletTypes": {
+        "adminCredit": "Admin credit",
+        "promotionalCredit": "Promotional credit",
+        "adminDebit": "Admin debit",
+        "refundCredit": "Approved refund credit"
+      },
+      "amount": "Amount (EGP)",
+      "approvalReference": "Approved refund reference",
+      "confirmAudit": "I confirm this audited adjustment.",
+      "adjustmentSaved": "Audited adjustment saved.",
+      "saveError": "The change could not be saved.",
+      "viewOnly": "You have view-only loyalty access. A separate management permission is required for adjustments.",
+      "immutableHistory": "Immutable transaction history",
+      "date": "Date",
+      "descriptionLabel": "Description",
+      "value": "Value",
+      "selectCustomer": "Select a customer to inspect balances and history.",
+      "settings": "Loyalty Program Settings",
+      "programEnabled": "Program enabled",
+      "standardRate": "Standard points / EGP 10",
+      "vipRate": "VIP points / EGP 10",
+      "pointsUnit": "Points per redemption unit",
+      "redemptionValue": "Redemption unit value (EGP)",
+      "welcomePoints": "Welcome points",
+      "welcomeMinimumSubtotal": "Welcome minimum product subtotal (EGP)",
+      "welcomeExpiryDays": "Welcome expiry (days)",
+      "minimumPoints": "Minimum redemption points",
+      "maximumPercent": "Maximum redemption (%)",
+      "expiryMonths": "Expiry (months)",
+      "confirmSettings": "I confirm these program-rule changes.",
+      "settingsSaved": "Loyalty settings saved."
+    },
+    "delivery": {
+      "nav": "Delivery Offers",
+      "title": "Delivery Zones & Offers",
+      "description": "Manage clinic delivery areas, localized offers, schedules, and Cairo cutoff times.",
+      "loadError": "Delivery settings could not be loaded.",
+      "refresh": "Refresh",
+      "zones": "Delivery zones",
+      "zonesDescription": "Zones can be deactivated safely when they are already in use.",
+      "active": "Active",
+      "addZone": "Add zone",
+      "updateZone": "Update zone",
+      "cancel": "Cancel",
+      "zoneSaved": "Delivery zone saved.",
+      "offerSaved": "Delivery offer saved.",
+      "confirmDeleteZone": "Delete {name}?",
+      "confirmDeleteOffer": "Delete {name}?",
+      "completeRequired": "Complete both languages and select at least one delivery zone.",
+      "offerEditor": "Delivery offer editor",
+      "offerEditorDescription": "All matching uses Africa/Cairo. At the cutoff time, an offer stops appearing."
+    },
+    "heroSlider": {
+      "nav": "Hero Slider"
+    },
+    "scheduledPromotions": {
+      "nav": "Scheduled Promotions"
+    },
+    "ownerSync": {
+      "settingsTitle": "Settings",
+      "settingsDescription": "Manage store settings and the manual owner-system integration.",
+      "title": "Owner System Sync",
+      "manualNote": "Import the authoritative product catalog and export confirmed orders through the protected manual CSV workflow.",
+      "manualCsvSync": "Manual CSV sync is active.",
+      "directNewAccNote": "Direct NewAcc integration will be added after client-system documentation is available.",
+      "productImport": "Product Import",
+      "downloadTemplate": "Download Product Import Template",
+      "downloading": "Downloading...",
+      "selectCsv": "Select CSV file",
+      "importProductsCsv": "Import Products CSV",
+      "importing": "Importing...",
+      "orderExport": "Order Export",
+      "orderExportDescription": "Download confirmed orders and their item details for manual import into the owner system.",
+      "exportConfirmedOrders": "Export Confirmed Orders CSV",
+      "exporting": "Exporting...",
+      "syncLogs": "Sync Logs",
+      "lastImport": "Last Import",
+      "lastExport": "Last Export",
+      "latestSync": "Latest Sync",
+      "created": "Created",
+      "updated": "Updated",
+      "failed": "Failed",
+      "warnings": "Warnings",
+      "importCompleted": "Import completed",
+      "exportDownloaded": "Export downloaded",
+      "confirmedOrderExport": "Confirmed Order Export",
+      "exportAcknowledgement": "Export Acknowledgement",
+      "dateTime": "Date / Time",
+      "sourceType": "Source / Type",
+      "status": "Status",
+      "summary": "Summary",
+      "row": "Row",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "loading": "Loading sync data...",
+      "loadError": "Sync status could not be loaded.",
+      "noSyncYet": "No sync recorded yet",
+      "noLogs": "No sync logs are available yet.",
+      "readOnly": "Support access is read-only. Product import and order export require an administrator.",
+      "fileRequired": "Select a CSV file before importing.",
+      "fileTypeError": "Choose a file with a .csv extension.",
+      "fileSizeError": "The CSV file cannot exceed 2 MB.",
+      "templateError": "The product import template could not be downloaded.",
+      "importError": "The product CSV could not be imported.",
+      "exportError": "Confirmed orders could not be exported.",
+      "statuses": {
+        "pending": "Pending",
+        "success": "Success",
+        "failed": "Failed"
+      }
+    },
+    "users": {
+      "title": "Users",
+      "description": "View real customer and staff accounts, roles, and account activity.",
+      "addUser": "Add User",
+      "createUser": "Create User",
+      "createDescription": "Create a customer or staff account with secure sign-in credentials.",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "password": "Password",
+      "role": "Role",
+      "customerTier": "Customer tier",
+      "allTiers": "All tiers",
+      "tiers": {
+        "standard": "Standard",
+        "vip": "VIP"
+      },
+      "inactive": "Inactive",
+      "status": "Status",
+      "manageBenefits": "Manage benefits",
+      "managePermissions": "Manage permissions",
+      "backToUsers": "Back to users",
+      "activate": "Activate account",
+      "deactivate": "Deactivate account",
+      "tierHelp": "VIP is a commercial tier and never grants staff access.",
+      "lifecycleState": "Lifecycle",
+      "accountLifecycle": "Account lifecycle",
+    "accountLifecycleHelp": "Protected two-stage deactivation and deletion with a permanent audit trail.",
+    "viewAccount": "View account",
+    "vipConfirmationTitle": "Confirm VIP tier benefits",
+    "vipConfirmationBody": "VIP automatically receives double point earning, free Standard delivery, Fast upgrade-only pricing, and free Pickup. No manual benefit is required.",
+    "confirmVip": "Confirm VIP",
+    "addAdditionalVipBenefit": "Add Additional VIP Benefit",
+      "openAccountRequest": "Open account request",
+      "initiateDeactivation": "Start deactivation",
+      "initiateDeletion": "Start deletion",
+      "reactivateFromRequest": "Review reactivation",
+      "customerVisibleResponse": "Customer-visible response",
+      "privateAdminReason": "Private administrative reason",
+      "typedConfirmation": "Type {token} to continue",
+      "createAccountRequest": "Create protected request",
+      "noLifecycleHistory": "No account lifecycle actions have been recorded.",
+      "permissions": {
+        "title": "Permissions",
+        "preset": "Permission preset",
+        "selected": "{count} selected",
+        "viewer": "Support Viewer",
+        "agent": "Support Agent",
+        "manager": "Support Manager",
+        "custom": "Custom",
+        "saved": "Permissions updated"
+      },
+      "permissionGroups": {
+        "SUPPORT_INBOX": "Support Inbox",
+        "ORDERS": "Orders",
+        "QUOTES": "Quotes",
+        "PRODUCT_REQUESTS": "Product Requests",
+        "CUSTOMERS": "Customers",
+        "NOTIFICATIONS": "Notifications",
+        "ACCOUNT_REQUESTS": "Account Requests",
+        "ACCOUNT_LIFECYCLE": "Account Lifecycle"
+      },
+      "benefits": {
+        "title": "VIP benefits",
+        "type": "Benefit type",
+        "saved": "Benefit saved"
+      },
+      "roles": {
+        "customer": "Customer",
+        "support": "Support",
+        "admin": "Admin"
+      },
+      "createdSuccess": "User created successfully",
+      "emailExists": "Email already exists",
+      "notAllowed": "You are not allowed to create users",
+      "noUsers": "No users found",
+      "searchUsers": "Search users",
+      "searchPlaceholder": "Search by name or email",
+      "filterByRole": "Filter by role",
+      "allRoles": "All roles",
+      "refresh": "Refresh",
+      "retry": "Retry",
+      "loading": "Loading users...",
+      "loadError": "Users could not be loaded. Please try again.",
+      "createError": "The user could not be created. Please try again.",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "orderCount": "{count} orders",
+      "requestCount": "{count} product requests",
+      "columns": {
+        "user": "User",
+        "contact": "Contact",
+        "activity": "Activity",
+        "created": "Created"
+      },
+      "validation": {
+        "name": "Full name must be between 2 and 100 characters.",
+        "email": "Enter a valid email address.",
+        "phone": "Phone number must be 30 characters or fewer.",
+        "password": "Password must be between 8 and 128 characters.",
+        "role": "Choose Customer, Support, or Admin."
+      }
+    },
+    "brands": {
+      "title": "Brands",
+      "description": "Manage real product brands, visibility, logos, and status.",
+      "brand": "Brand",
+      "addBrand": "Add Brand",
+      "editBrand": "Edit Brand",
+      "deleteBrand": "Delete Brand",
+      "edit": "Edit",
+      "delete": "Delete",
+      "brandName": "Brand name",
+      "country": "Country",
+      "logoUrl": "Logo URL",
+      "descriptionField": "Description",
+      "featured": "Featured",
+      "status": "Status",
+      "products": "Products",
+      "actions": "Actions",
+      "statuses": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "needsLogo": "Needs logo"
+      },
+      "createdSuccess": "Brand created successfully",
+      "updatedSuccess": "Brand updated successfully",
+      "deletedSuccess": "Brand deleted successfully",
+      "linkedDeleteError": "Brand cannot be deleted because it has linked products",
+      "duplicate": "A brand with this name already exists",
+      "noBrands": "No brands found",
+      "searchBrands": "Search brands",
+      "searchPlaceholder": "Search by name or country",
+      "deleteConfirmation": "Are you sure you want to delete {name}?",
+      "formDescription": "Add or update the brand details shown in product administration.",
+      "allStatuses": "All statuses",
+      "allFeatured": "All brands",
+      "refresh": "Refresh",
+      "loading": "Loading brands...",
+      "loadError": "Brands could not be loaded. Please try again.",
+      "saveError": "The brand could not be saved.",
+      "deleteError": "The brand could not be deleted.",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "saveChanges": "Save Changes",
+      "createBrand": "Create Brand",
+      "notProvided": "Not provided",
+      "validation": {
+        "name": "Brand name is required.",
+        "logoUrl": "Enter a valid http or https logo URL."
+      }
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "Manage real catalog categories and their publishing status.",
+      "addCategory": "Add Category",
+      "editCategory": "Edit Category",
+      "deleteCategory": "Delete Category",
+      "createCategory": "Create Category",
+      "categoryName": "Category name",
+      "slug": "Slug",
+      "slugOptional": "Slug (optional)",
+      "descriptionField": "Description",
+      "status": "Status",
+      "products": "Products",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "statuses": {
+        "active": "Active",
+        "draft": "Draft",
+        "inactive": "Inactive"
+      },
+      "createdSuccess": "Category created successfully",
+      "updatedSuccess": "Category updated successfully",
+      "deletedSuccess": "Category deleted successfully",
+      "linkedDeleteError": "Category cannot be deleted because it has linked products",
+      "duplicate": "A category with this name or slug already exists",
+      "noCategories": "No categories found",
+      "searchCategories": "Search categories",
+      "searchPlaceholder": "Search by category name or slug",
+      "allStatuses": "All statuses",
+      "refresh": "Refresh",
+      "loading": "Loading categories...",
+      "loadError": "Categories could not be loaded. Please try again.",
+      "saveError": "The category could not be saved.",
+      "deleteError": "The category could not be deleted.",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "saveChanges": "Save Changes",
+      "formDescription": "Add or update the category used in product administration.",
+      "deleteConfirmation": "Are you sure you want to delete {name}?",
+      "validation": {
+        "name": "Category name is required."
+      },
+      "parent": "Type / Parent",
+      "noParent": "None (main category)",
+      "mainCategory": "Main category",
+      "subcategory": "Subcategory",
+      "parentCategory": "Parent Category"
+    },
+    "products": {
+      "title": "Products",
+      "description": "Manage real catalog products, pricing, stock, and publishing status.",
+      "addProduct": "Add Product",
+      "editProduct": "Edit Product",
+      "createProduct": "Create Product",
+      "productName": "Product name",
+      "productNameAr": "Product name (Arabic)",
+      "sku": "SKU",
+      "brand": "Brand",
+      "category": "Category",
+      "price": "Price",
+      "stock": "Stock",
+      "status": "Status",
+      "imageUrl": "Image URL",
+      "imageUpload": {
+        "label": "Product image",
+        "openPicker": "Choose a product image",
+        "previewAlt": "Product image preview",
+        "currentImage": "Current product image",
+        "ready": "Ready to upload when you save the product.",
+        "saved": "This image is saved with the product.",
+        "replace": "Replace Image",
+        "remove": "Remove Image",
+        "dropTitle": "Drop a product image here",
+        "help": "JPEG, PNG, or WebP. Maximum file size 5 MB.",
+        "choose": "Choose from laptop",
+        "uploading": "Uploading product image...",
+        "invalidType": "Choose a JPEG, PNG, or WebP image.",
+        "tooLarge": "Product images must be 5 MB or smaller.",
+        "externalToggle": "Use external image URL",
+        "externalLabel": "External image URL",
+        "externalHelp": "Optional advanced option. Existing external product image URLs remain supported."
+      },
+      "descriptionField": "Description",
+      "descriptionArField": "Description (Arabic)",
+      "shortDescriptionField": "Short description",
+      "shortDescriptionArField": "Short description (Arabic)",
+      "featured": "Featured",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "statuses": {
+        "active": "Active",
+        "lowStock": "Low stock",
+        "outOfStock": "Out of stock",
+        "draft": "Draft",
+        "inactive": "Inactive"
+      },
+      "createdSuccess": "Product created successfully",
+      "updatedSuccess": "Product updated successfully",
+      "duplicateSku": "A product with this SKU already exists",
+      "noProducts": "No products found",
+      "searchProducts": "Search products",
+      "searchPlaceholder": "Search by product, SKU, brand, or category",
+      "allStatuses": "All statuses",
+      "allBrands": "All brands",
+      "allCategories": "All categories",
+      "noBrand": "No brand",
+      "noCategory": "No category",
+      "refresh": "Refresh",
+      "loading": "Loading products...",
+      "loadError": "Products could not be loaded. Please try again.",
+      "lookupError": "Brands and categories could not be loaded.",
+      "saveError": "The product could not be saved.",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "saveChanges": "Save Changes",
+      "notProvided": "Not provided",
+      "formDescription": "Add or update product catalog details, pricing, and availability.",
+      "zeroStockWarning": "Zero stock will save this product as Out of stock.",
+      "validation": {
+        "name": "Product name is required.",
+        "sku": "SKU is required.",
+        "price": "Enter a numeric price of 0 or more.",
+        "stock": "Enter a whole-number stock quantity of 0 or more.",
+        "imageUrl": "Enter a valid http or https image URL."
+      },
+      "productType": "Product type",
+      "allTypes": "All types",
+      "typeSimple": "Simple",
+      "typeVariant": "Has variants",
+      "stockFilter": "Stock",
+      "allStock": "All stock levels",
+      "sourceSystem": "Source system",
+      "allSources": "All sources",
+      "manualEntry": "Manual entry",
+      "lastSynced": "Last synced",
+      "notSynced": "Never synced",
+      "variantCount": "{count} variants",
+      "view": "View",
+      "openVariants": "Open variants",
+      "openImages": "Open images",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "activatedSuccess": "Product activated",
+      "deactivatedSuccess": "Product deactivated",
+      "duplicateAsDraft": "Duplicate as draft",
+      "duplicateSuffix": "(Copy)",
+      "duplicatedSuccess": "Draft copy created. Variants and images are not copied.",
+      "paginationSummary": "Showing {count} products — page {page} of {pages}",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "variantParentWarning": "This product has variants. Price and stock here are fallback values only — manage variant pricing and stock in the Variants tab."
+    },
+    "productEditor": {
+      "backToProducts": "Back to products",
+      "newProductTitle": "New product",
+      "loading": "Loading product…",
+      "loadError": "This product could not be loaded.",
+      "createdSuccess": "Product created. You can now add variants and images.",
+      "detailsTitle": "Product details",
+      "detailsDescription": "Basic information, classification, and pricing for this product.",
+      "simpleSkuOnly": "Simple products only",
+      "fallbackPrice": "Fallback price",
+      "fallbackPriceHint": "Used only when a variant has no price override",
+      "variantStockOnly": "Stock is managed per variant",
+      "variantParentPricingNotice": "This product has variants. Price and stock below are the fallback used only when a variant has no override — they do not control variant stock.",
+      "tabs": {
+        "details": "Details",
+        "variants": "Variants",
+        "images": "Images"
+      },
+      "summary": {
+        "optionDimensions": "Option dimensions",
+        "variants": "Variants",
+        "priceRange": "Price range",
+        "totalStock": "Total stock",
+        "missingImages": "Missing images",
+        "incompleteIdentifiers": "Incomplete identifiers"
+      },
+      "warnings": {
+        "noSellableVariants": "No sellable variants — this product cannot currently be purchased.",
+        "missingBasePrice": "This product has no base price.",
+        "missingProductImage": "This product has no image.",
+        "hasUnconfirmedRightsImages": "Some images are pending rights confirmation and are hidden from customers."
+      }
+    },
+    "variants": {
+      "optionsTitle": "Product options",
+      "optionsDescription": "Define the option dimensions (like Shade or Size) this product's variants are built from.",
+      "optionCode": "Code",
+      "optionNameEn": "Name (English)",
+      "optionNameAr": "Name (Arabic)",
+      "addOption": "Add option",
+      "optionCreated": "Option added",
+      "optionSaveError": "The option could not be saved.",
+      "optionValidation": "A code and English name are required.",
+      "valueCode": "Code",
+      "valueEn": "Value (English)",
+      "addValue": "Add value",
+      "valueCreated": "Value added",
+      "valueSaveError": "The value could not be saved.",
+      "valueValidation": "A code and English value are required.",
+      "noValuesYet": "No values yet.",
+      "removeValue": "Remove value",
+      "optional": "Optional",
+      "generatorTitle": "Generate variant combinations",
+      "generatorDescription": "Select one or more values per option to generate the combinations to create.",
+      "alreadyExists": "Already exists",
+      "duplicateInSelection": "Duplicate in this selection",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "priceOverride": "Price override",
+      "stock": "Stock",
+      "create": "Create",
+      "createAll": "Create all {count} new variants",
+      "resultsTitle": "Results",
+      "duplicateCombinationError": "Duplicate variant combination: {combination}",
+      "stockValidation": "Enter a whole-number stock quantity of 0 or more.",
+      "variantSaveError": "The variant could not be saved.",
+      "variantCreated": "Variant created",
+      "matrixTitle": "Variants",
+      "matrixDescription": "Every variant of this product, its identifiers, effective price, stock, and status.",
+      "noVariants": "No variants yet. Use the generator above to create the first one.",
+      "combination": "Combination",
+      "effectivePrice": "Effective price",
+      "usesParentPrice": "Uses parent price",
+      "selectVariant": "Select variant",
+      "editVariant": "Edit variant",
+      "editVariantDescription": "Changes take effect immediately and are validated by the server, including duplicate SKU, barcode, and combination checks.",
+      "fallbackHint": "Leave blank to use the parent product's price",
+      "variantUpdated": "Variant updated",
+      "variantActivated": "Variant activated",
+      "variantDeactivated": "Variant deactivated",
+      "bulkEditSelected": "{count} variants selected",
+      "noChange": "No change",
+      "lowStockThreshold": "Low-stock threshold",
+      "applyBulkEdit": "Apply to selected",
+      "applying": "Applying…",
+      "deleteValueTitle": "Delete option value",
+      "deleteValueDescription": "Delete \"{value}\"? This cannot be undone.",
+      "forceDeleteTitle": "Value is used by active variants",
+      "forceDeleteDescription": "\"{value}\" is used by {count} active variant(s). Deleting it will deactivate those variants so none is left with an incomplete combination.",
+      "forceDeleteConfirm": "Deactivate variants and delete",
+      "valueDeleted": "Value deleted",
+      "valueDeletedWithDeactivation": "Value deleted and {count} variant(s) deactivated"
+    },
+    "images": {
+      "productGalleryTitle": "Product gallery",
+      "productGalleryDescription": "Images shown for this product when no variant-specific image applies.",
+      "variantGalleryTitle": "Variant images",
+      "variantGalleryDescription": "Images specific to one variant. They take priority over the product gallery for that variant.",
+      "selectVariant": "Variant",
+      "noImages": "No images yet.",
+      "imageUrl": "Image URL",
+      "altText": "Alt text",
+      "sourceUrl": "Source URL",
+      "addImage": "Add image",
+      "imageAdded": "Image added",
+      "imageDeleted": "Image deleted",
+      "saveError": "The image could not be saved.",
+      "urlValidation": "Enter a valid http or https image URL.",
+      "rightsConfirmedLabel": "Rights confirmed",
+      "rightsConfirmedHint": "Only confirm this if X Dental Store has permission to publish this image publicly.",
+      "reviewOnlyLabel": "Review only — not public",
+      "reviewOnlyBanner": "This product has images pending rights confirmation. They are never shown to customers.",
+      "primary": "Primary",
+      "setPrimary": "Set as primary",
+      "confirmRights": "Confirm rights",
+      "markReviewOnly": "Mark as review only",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "source": "Source",
+      "deleteImageTitle": "Delete image",
+      "deleteImageDescription": "This image will be permanently removed from the gallery."
+    },
+    "catalogImport": {
+      "title": "Catalog Import",
+      "description": "Preview-first product catalog import. Nothing is created, updated, or deleted until you review and confirm.",
+      "viewHistory": "View history",
+      "sourceSystem": "Source system",
+      "filename": "Filename",
+      "entitiesToInclude": "Entities to include",
+      "uploadTitle": "1. Upload",
+      "uploadDescription": "Provide normalized rows per entity type. This pilot importer accepts JSON arrays; a CSV/Excel-compatible workflow will be added after the workbook is approved.",
+      "technicalFormatLabel": "Technical JSON Import",
+      "technicalFormatExplanation": "This technical import format is intended for administrators and integration testing. The client-facing Excel workbook import will be added in the next catalog-data phase.",
+      "excel": {
+        "title": "Excel Workbook Import (Pilot)",
+        "description": "Upload the approved .xlsx catalogue workbook for a preview-first, admin-only pilot import. The workbook is validated for its TemplateVersion, required sheets and headers, then mapped onto the same preview below — nothing is created, updated, or deleted until you review and confirm.",
+        "chooseFile": "Workbook file (.xlsx)",
+        "selectedFile": "Selected file: {name}",
+        "fileRequired": "Choose an .xlsx workbook file to preview."
+      },
+      "entityType": {
+        "BRANDS": "Brands",
+        "CATEGORIES": "Categories",
+        "PRODUCTS": "Products",
+        "PRODUCT_OPTIONS": "Product options",
+        "OPTION_VALUES": "Option values",
+        "VARIANTS": "Variants",
+        "VARIANT_OPTION_VALUES": "Variant option values",
+        "IMAGES": "Images",
+        "INVENTORY": "Inventory"
+      },
+      "jsonError": {
+        "invalidJson": "This is not valid JSON.",
+        "mustBeArray": "Enter a JSON array of rows.",
+        "mustBeObjectArray": "Every row must be a JSON object."
+      },
+      "markMissingInactive": "Mark missing records inactive",
+      "markMissingInactiveUnavailable": "Not available yet in this import contract. Always off.",
+      "sourceSystemRequired": "Enter a source system.",
+      "noRowsProvided": "Add at least one row to an included entity.",
+      "runPreview": "Run preview",
+      "previewing": "Running preview…",
+      "dryRunNotice": "This only validates and classifies your rows. No catalog record is created, updated, or deleted.",
+      "previewError": "The preview could not be generated.",
+      "previewTitle": "2–3. Preview & confirm",
+      "previewDescription": "Review every row's proposed action before applying anything.",
+      "stalePreview": "Your upload changed since this preview was generated. Run a new preview before applying.",
+      "totalRows": "Total rows",
+      "action": {
+        "CREATE": "Create",
+        "UPDATE": "Update",
+        "SKIP": "Skip",
+        "CONFLICT": "Conflict",
+        "ERROR": "Error"
+      },
+      "warnings": "Warnings",
+      "warning": "Warning",
+      "allRows": "All",
+      "rowFilterLabel": "Filter rows by action",
+      "columnEntity": "Entity",
+      "columnRow": "Row",
+      "columnExternalId": "External ID",
+      "columnSku": "SKU",
+      "columnAction": "Action",
+      "columnMessages": "Messages",
+      "duplicateCombinationLabel": "Duplicate variant combination",
+      "noRowsForFilter": "No rows match this filter.",
+      "confirmTitle": "4. Confirm and apply",
+      "confirmSummary": "{create} record(s) will be created and {update} updated for source system \"{source}\". This cannot be undone from this screen.",
+      "confirmCheckbox": "I have reviewed this preview and confirm it should be applied.",
+      "gateReason": {
+        "NO_PREVIEW": "Run a preview first.",
+        "ALREADY_APPLIED": "This batch was already applied.",
+        "HAS_ERRORS": "Resolve all error rows before applying.",
+        "HAS_CONFLICTS": "Resolve all conflict rows before applying.",
+        "STALE_PREVIEW": "This preview is stale. Run a new preview.",
+        "CONFIRMATION_REQUIRED": "Check the confirmation box to enable Apply."
+      },
+      "applyImport": "Apply import",
+      "applying": "Applying…",
+      "applyError": "The import could not be applied.",
+      "applySuccess": "Import applied successfully",
+      "cancelPreview": "Discard preview",
+      "resultTitle": "5. Result",
+      "resultDescription": "This batch has been applied. The result below is final and cannot be partially undone.",
+      "appliedHeadline": "Import applied successfully",
+      "batchId": "Batch ID",
+      "appliedAt": "Applied at",
+      "actor": "Applied by",
+      "viewImportedProducts": "View products",
+      "startAnother": "Start another import",
+      "history": {
+        "title": "Import History",
+        "description": "Every catalog import preview and apply, for audit.",
+        "backToImport": "Back to Catalog Import",
+        "loadError": "Import history could not be loaded.",
+        "filename": "Filename",
+        "status": "Status",
+        "createdBy": "Created by",
+        "previewDate": "Preview date",
+        "noBatches": "No imports yet.",
+        "untitled": "Untitled upload",
+        "rowLevelTitle": "Row-level detail",
+        "batchStatus": {
+          "PREVIEW": "Preview",
+          "APPLIED": "Applied",
+          "FAILED": "Failed"
+        }
+      }
+    },
+    "flashSale": {
+      "title": "Flash Sale",
+      "description": "Configure the time-limited product deal shown in the Home page Flash Sale section.",
+      "addFlashSale": "Add Flash Sale",
+      "editFlashSale": "Edit Flash Sale",
+      "deleteFlashSale": "Delete Flash Sale",
+      "createFlashSale": "Create Flash Sale",
+      "product": "Product",
+      "selectProduct": "Select a product",
+      "salePrice": "Flash sale price",
+      "originalPrice": "Original price",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "active": "Active",
+      "displayOrder": "Display order",
+      "statusColumn": "Status",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "statuses": {
+        "active": "Active",
+        "scheduled": "Scheduled",
+        "expired": "Sale ended",
+        "inactive": "Inactive"
+      },
+      "createdSuccess": "Flash sale created successfully",
+      "updatedSuccess": "Flash sale updated successfully",
+      "deletedSuccess": "Flash sale deleted successfully",
+      "noFlashSales": "No flash sales configured yet",
+      "refresh": "Refresh",
+      "loading": "Loading flash sales...",
+      "loadError": "Flash sales could not be loaded. Please try again.",
+      "saveError": "The flash sale could not be saved.",
+      "deleteError": "The flash sale could not be deleted.",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "saveChanges": "Save Changes",
+      "formDescription": "Choose a product, set its flash sale price, and schedule when the deal runs on the Home page.",
+      "checkoutBehavior": "The lowest eligible Flash Sale price is applied first. Checkout then evaluates the other eligible order-level promotions against that reduced subtotal.",
+      "overlapWarning": "This schedule overlaps {count} other Flash Sale record(s) for the same product. Saving is allowed; the lowest eligible price will win.",
+      "deleteConfirmation": "Are you sure you want to delete the flash sale for {name}?",
+      "validation": {
+        "product": "Choose a product for this flash sale.",
+        "salePrice": "Enter a positive flash sale price.",
+        "salePriceTooHigh": "Sale price must be lower than the product's current price.",
+        "startsAt": "Choose a start date and time.",
+        "endsAt": "Choose an end date and time.",
+        "endsAtBeforeStart": "End date must be after the start date."
+      }
+    },
+    "orders": {
+      "title": "Admin Orders",
+      "description": "Review customer orders, verify details, and update order status.",
+      "viewOrder": "View Order",
+      "detailTitle": "Order Details",
+      "detailEyebrow": "Admin Order Review",
+      "closeDetails": "Close order details",
+      "loading": "Loading orders...",
+      "loadingDetails": "Loading order details...",
+      "loadError": "Orders could not be loaded. Please try again.",
+      "detailError": "Order details could not be loaded.",
+      "empty": "No customer orders are available yet.",
+      "noSearchResults": "No orders found for this search.",
+      "retry": "Retry",
+      "currentStatus": "Current Status",
+      "paymentStatus": "Payment Status",
+      "customerDetails": "Customer Details",
+      "shippingDetails": "Shipping Details",
+      "paymentAndNotes": "Payment & Notes",
+      "paymentMethod": "Payment Method",
+      "deliveryNotes": "Delivery Notes",
+      "orderNotes": "Order Notes",
+      "notProvided": "Not provided",
+      "items": "Order Items",
+      "quantity": "Qty: {quantity}",
+      "subtotal": "Subtotal",
+      "originalSubtotal": "Original products subtotal",
+      "productPromotionSavings": "Flash Sale savings",
+      "effectiveSubtotal": "Products subtotal after promotions",
+      "shippingBeforeDiscount": "Shipping before discount",
+      "deliveryOfferDiscount": "Delivery offer discount",
+      "vipShippingDiscount": "VIP delivery saving",
+      "monetaryPromotion": "Order promotion",
+      "shippingPromotion": "Free shipping promotion",
+      "finalShipping": "Final shipping",
+      "totalSavings": "Total savings",
+      "pointsRedeemed": "Points redeemed",
+      "walletCreditUsed": "Wallet credit used",
+      "remainingCod": "Remaining Cash on Delivery",
+      "legacyPricing": "This order predates detailed pricing snapshots.",
+      "shipping": "Shipping",
+      "total": "Total",
+      "confirmOrder": "Confirm Order",
+      "verifyOrder": "Verify Order",
+      "rejectOrder": "Reject Order",
+      "cancelOrder": "Cancel Order",
+      "markPreparing": "Mark Preparing",
+      "markOutForDelivery": "Mark Out for Delivery",
+      "markDelivered": "Mark Delivered",
+      "markCashCollected": "Mark Cash as Collected",
+      "confirmReject": "Reject this order? The customer will be notified.",
+      "confirmCancel": "Cancel this order? The customer will be notified.",
+      "confirmedMessage": "Order confirmed.",
+      "rejectedMessage": "Order rejected.",
+      "canceledMessage": "Order canceled.",
+      "statusUpdatedMessage": "Order status updated to {status}.",
+      "cashCollectedMessage": "Cash payment marked as collected.",
+      "paymentUpdateError": "The payment status could not be updated.",
+      "updateError": "The order status could not be updated.",
+      "columns": {
+        "order": "Order",
+        "customer": "Customer",
+        "items": "Items",
+        "total": "Total",
+        "date": "Date",
+        "status": "Status",
+        "payment": "Payment",
+        "actions": "Actions"
+      },
+      "statuses": {
+        "pendingReview": "Pending Review",
+        "confirmed": "Confirmed",
+        "preparing": "Preparing",
+        "outForDelivery": "Out for Delivery",
+        "delivered": "Delivered",
+        "verified": "Verified",
+        "rejected": "Rejected",
+        "canceled": "Canceled"
+      },
+      "paymentStatuses": {
+        "pendingCollection": "Pending Collection",
+        "paid": "Paid"
+      }
+    },
+    "contactMessages": {
+      "title": "Contact Messages",
+      "description": "Messages from the public contact form, including guests.",
+      "loadError": "Failed to load contact messages.",
+      "updateError": "The message status could not be updated.",
+      "markReviewed": "Mark Reviewed",
+      "markResolved": "Mark Resolved",
+      "empty": "No contact messages yet.",
+      "registeredCustomer": "Registered customer"
+    }
+  },
+  "quoteWorkflow": {
+    "quotes": "Quotes",
+    "quote": "Quote",
+    "requestQuote": "Request a Quote",
+    "quoteRequest": "Quote Request",
+    "myQuotes": "My Quotes",
+    "quoteDetails": "Quote Details",
+    "sendQuoteResponse": "Send Quote Response",
+    "saveDraftResponse": "Save Draft Response",
+    "supplierReview": "Supplier Review",
+    "customerMessage": "Customer Message",
+    "adminResponse": "Admin Response",
+    "quotedPrice": "Quoted Price",
+    "viewMyQuotes": "View My Quotes",
+    "openSupportChat": "Open Support Chat",
+    "responseSent": "Quote response sent",
+    "draftSaved": "Draft response saved",
+    "requestSubmitted": "Quote request {quoteNumber} submitted",
+    "noQuotes": "No quotes found",
+    "loading": "Loading quotes...",
+    "loadingDetails": "Loading quote details...",
+    "loadError": "Quotes could not be loaded. Please try again.",
+    "detailLoadError": "Quote details could not be loaded.",
+    "requestError": "The quote request could not be submitted.",
+    "updateError": "The quote could not be updated.",
+    "statusUpdated": "Quote status updated",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "searchQuotes": "Search quotes",
+    "filterStatus": "Filter by status",
+    "allStatuses": "All statuses",
+    "submitRequest": "Submit Quote Request",
+    "submitting": "Submitting...",
+    "productOrRequest": "Product or Request",
+    "productRequired": "Enter a product or request description.",
+    "selectedOptions": "Selected Options",
+    "customerDescription": "Review real quote requests, responses, pricing, and linked support discussions.",
+    "adminDescription": "Review customer quote requests, open details, and send persistent responses.",
+    "itemSummary": "{count} items · {quantity} total quantity",
+    "priceValue": "EGP {price}",
+    "quantityValue": "Qty: {quantity}",
+    "backToQuotes": "Back to Quotes",
+    "requestedItems": "Requested Items",
+    "awaitingResponse": "The support team has not sent a response yet.",
+    "notProvided": "Not provided",
+    "notFound": "Quote not found",
+    "pending": "Pending",
+    "summary": "Quote Summary",
+    "items": "Items",
+    "totalQuantity": "Total Quantity",
+    "linkedDiscussion": "Linked Discussion",
+    "adminReview": "Admin Quote Review",
+    "customer": "Customer",
+    "responseMessage": "Response Message",
+    "responseRequired": "Write a response before saving or sending.",
+    "statusActions": "Status Actions",
+    "products": "Products",
+    "owner": "Owner",
+    "supportTeam": "Support team",
+    "date": "Date",
+    "status": "Status",
+    "statuses": {
+      "pending": "Pending",
+      "supplier_review": "Supplier Review",
+      "draft_response": "Draft Response",
+      "sent": "Sent",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "canceled": "Canceled"
+    }
+  },
+  "productAutocomplete": {
+    "searchProducts": "Search products",
+    "startTyping": "Start typing to search products",
+    "noMatches": "No matching products",
+    "useCustomRequest": "No problem — keep this text to use it as a custom request.",
+    "selectedProduct": "Selected product",
+    "productRequired": "Enter a product name.",
+    "quantityRequired": "Quantity must be at least 1."
+  },
   "footer": {
     "description": "Your trusted partner for premium dental supplies, instruments, and clinic essentials, serving clinics and professionals across the region.",
     "newsletterTitle": "Stay updated on new arrivals & offers",
     "newsletterBody": "Subscribe to receive product updates, weekly deals, and dental supply news.",
     "subscribed": "You're subscribed. Thank you.",
+    "subscribeError": "The subscription could not be completed. Please try again.",
     "emailPlaceholder": "your@email.com",
     "copyright": "© 2026 X Dental Store. All rights reserved.",
     "creditPrefix": "Designed & developed by",
@@ -144,7 +1191,9 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "contact": {
-      "ordersWhatsApp": "Orders WhatsApp"
+      "ordersWhatsApp": "Orders WhatsApp",
+      "mainSupport": "Main Support",
+      "branch": "Branch"
     },
     "sections": {
       "shop": "Shop",
@@ -185,6 +1234,25 @@
     "cta": "Shop Offer",
     "secondary": "Maybe Later",
     "close": "Close scheduled offer",
+    "types": {
+      "informational": "Information",
+      "percentageDiscount": "Percentage discount",
+      "fixedDiscount": "Fixed discount",
+      "coupon": "Coupon",
+      "freeDelivery": "Free delivery",
+      "custom": "Campaign"
+    },
+    "automaticCheckout": "Automatically applied at checkout.",
+    "couponInstruction": "Enter this code in your cart before checkout.",
+    "freeDeliveryAutomatic": "Automatically applied to eligible Standard and Fast delivery.",
+    "checkoutUnaffected": "This campaign does not change checkout totals.",
+    "minimumOrder": "Minimum qualifying subtotal: {amount}",
+    "endsOn": "Ends {date}{time}",
+    "validOn": "Valid on {date}{time}",
+    "weeklySchedule": "Available every {days}{time}",
+    "couponCode": "Coupon code",
+    "copyCode": "Copy Code",
+    "copied": "Copied",
     "weekly": {
       "monday": {
         "badge": "15% OFF",
@@ -230,19 +1298,78 @@
       }
     }
   },
+  "flashSale": {
+    "title": "Flash Sale",
+    "endsIn": "Offer ends in",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "viewProduct": "View Product",
+    "saleEnded": "Sale ended",
+    "savePercentage": "Save {percentage}%"
+  },
   "home": {
     "heroBadge": "Trusted Dental Supplies",
     "heroTitle": "Premium Dental Products for Clinics & Professionals",
     "heroBody": "We provide high-quality dental instruments, clinic essentials, and trusted brands - all in one place with competitive pricing and reliable delivery.",
     "browseProducts": "Browse Products",
     "infoStrip": {
-      "ariaLabel": "X Dental Store benefits",
-      "products": "500+ Products",
-      "brands": "50+ Trusted Brands",
-      "delivery": "Fast Delivery",
-      "quoteSupport": "Quote Support",
-      "supplyLists": "Clinic Supply Lists",
-      "specialRequests": "Special Requests"
+      "ariaLabel": "Payment partners"
+    },
+    "promotionalFlyers": {
+      "ariaLabel": "X Dental Store promotional flyers",
+      "slideLabel": "Promotional flyer {current} of {total}",
+      "dotsLabel": "Promotional flyer navigation",
+      "goToSlide": "Show promotional flyer {number}",
+      "previous": "Previous promotional flyer",
+      "next": "Next promotional flyer"
+    },
+    "paymentPlans": {
+      "eyebrow": "Financing partners",
+      "title": "Flexible Payment Plans",
+      "subtitle": "We’re preparing flexible financing options with trusted fintech partners to help clinics plan purchases with more confidence.",
+      "status": "In preparation",
+      "cta": "Explore Plans",
+      "previous": "Previous financing partner",
+      "next": "Next financing partner",
+      "pagination": "Financing partner navigation",
+      "goTo": "Go to partner",
+      "checkoutNote": "These plans are informational and are not yet available at checkout. Cash on Delivery remains the active checkout method.",
+      "detailsNote": "Partner terms, eligibility, fees, and availability are still being finalized. No financing method is active in checkout yet.",
+      "partners": {
+        "valu": {
+          "title": "Flexible clinic financing",
+          "highlight": "Plan details coming soon",
+          "description": "We’re preparing potential valU financing options for eligible clinic purchases, subject to final partner terms and approval."
+        },
+        "seven": {
+          "title": "Smarter purchase planning",
+          "highlight": "Terms to be announced",
+          "description": "We’re exploring seven installment options that could help clinics plan eligible purchases with greater flexibility."
+        },
+        "tru": {
+          "title": "More ways to manage costs",
+          "highlight": "Availability to be confirmed",
+          "description": "TRU payment-plan details are being prepared to support more flexible clinic purchasing once final terms are confirmed."
+        },
+        "fawry": {
+          "title": "Convenient payment access",
+          "highlight": "Options under review",
+          "description": "We’re exploring Fawry-supported payment options for eligible orders. Availability will be announced once confirmed."
+        },
+        "paymob": {
+          "title": "Digital payment options",
+          "highlight": "Integration details pending",
+          "description": "We’re preparing potential Paymob-supported payment methods while checkout continues with Cash on Delivery."
+        }
+      }
+    },
+    "campaigns": {
+      "eyebrow": "Current campaigns",
+      "title": "Clinic Campaigns",
+      "subtitle": "Explore current dental supply campaigns, partner offers, and limited-time promotions.",
+      "viewAll": "Shop Campaigns"
     },
     "stats": {
       "products": "Products",
@@ -260,13 +1387,18 @@
       "weeklyTitle": "Weekly Offers",
       "weeklySubtitle": "Limited-time deals on everyday dental supplies and clinic essentials.",
       "whyTitle": "Why Clinics Choose X Dental Store",
-      "whySubtitle": "Practical tools and reliable support for smoother dental purchasing.",
+      "whySubtitle": "Better value, trusted quality, and convenient service designed around the daily needs of dental clinics.",
       "bestSellersTitle": "Best Sellers",
       "bestSellersSubtitle": "Popular products ordered by dental clinics and professionals.",
       "trustedBrandsEyebrow": "Our Partners",
       "trustedBrandsTitle": "Trusted Brands",
       "trustedBrandsSubtitle": "Explore dental supplies from reliable brands and suppliers trusted by clinics and professionals.",
+      "viewBrandProductsAriaLabel": "View {brand} products",
       "bestServiceBadge": "Best Service",
+      "clinicEssentialsTitle": "Clinic Essentials",
+      "clinicEssentialsSubtitle": "Popular supplies trusted by dental clinics.",
+      "clinicEssentialsPersonalizedTitle": "Clinic Essentials for {specialty}",
+      "clinicEssentialsPersonalizedSubtitle": "Recommended supplies based on your clinic specialty.",
       "recommendedTitle": "Recommended for Your Practice",
       "recommendedSubtitle": "Curated products based on common clinic needs and everyday dental procedures.",
       "fastDeliveryTitle": "Fast Delivery Items",
@@ -274,18 +1406,18 @@
       "viewFastDelivery": "View Fast Delivery"
     },
     "features": {
-      "authenticTitle": "Authentic Products",
-      "authenticBody": "We provide trusted dental products from reliable brands and suppliers.",
-      "pricesTitle": "Competitive Prices",
-      "pricesBody": "Get the products your clinic needs at fair, practical, and competitive pricing.",
-      "deliveryTitle": "Fast Delivery",
-      "deliveryBody": "Quick and dependable delivery to keep your clinic stocked and running smoothly.",
-      "rangeTitle": "Wide Product Range",
-      "rangeBody": "From instruments to clinic essentials, find everything in one place.",
-      "orderingTitle": "Easy Ordering",
-      "orderingBody": "Browse products, request quotes, or place orders with a simple smooth process.",
-      "supportTitle": "Support for Clinics",
-      "supportBody": "We understand dental practice needs and help clinics choose the right supplies."
+      "authenticTitle": "Better Prices",
+      "authenticBody": "Get dependable dental products at competitive prices that help your clinic purchase more efficiently.",
+      "pricesTitle": "Premium Quality",
+      "pricesBody": "Shop carefully selected dental supplies from trusted brands and reliable suppliers.",
+      "deliveryTitle": "Reliable Delivery",
+      "deliveryBody": "Dependable delivery helps keep your clinic supplied and your daily work running without unnecessary delays.",
+      "rangeTitle": "Same-Day Zone Delivery",
+      "rangeBody": "Clinics located in the scheduled delivery zone can receive eligible orders on the same day, subject to availability and the daily cutoff time.",
+      "orderingTitle": "Flexible Payment Options",
+      "orderingBody": "More payment methods and installment options are being prepared to make clinic purchasing easier and more flexible.",
+      "supportTitle": "Easy Ordering & After-Sales Care",
+      "supportBody": "Order through a simple online process and receive continued support with product questions and after-sales needs."
     },
     "categoryDescriptions": {
       "endodontics": "Root canal files, obturation tools, and endodontic essentials.",
@@ -311,7 +1443,8 @@
       "newsletterEyebrow": "OFFERS & UPDATES",
       "newsletterTitle": "Get product updates and weekly offers",
       "newsletterBody": "Subscribe to receive new arrivals, offers, and dental supply updates.",
-      "subscribed": "You're subscribed - thank you!"
+      "subscribed": "You're subscribed - thank you!",
+      "subscribeError": "The subscription could not be completed. Please try again."
     }
   },
   "products": {
@@ -325,6 +1458,12 @@
     "sortLabel": "Sort products",
     "category": "Category",
     "brand": "Brand",
+    "searchBrands": "Search brands",
+    "clearBrands": "Clear brands",
+    "noBrandsFound": "No brands found",
+    "loadingBrands": "Loading brands",
+    "brandResults": "Brand results",
+    "brandsSelected": "{count} selected",
     "priceRange": "Price Range",
     "availability": "Availability",
     "offers": "Offers",
@@ -422,7 +1561,13 @@
         "name": "Implant Driver Kit",
         "category": "Implantology"
       }
-    }
+    },
+    "toggleSubcategories": "Toggle subcategories",
+    "toggleCategoryGroup": "Toggle {category} subcategories",
+    "selectedCategories": "Selected categories",
+    "selectedCategoryCount": "{count} category filters selected",
+    "selectedFilterCount": "{count} filters selected",
+    "removeCategoryFilter": "Remove {category} filter"
   },
   "categories": {
     "items": {
@@ -440,6 +1585,15 @@
       "restorative": "Restorative Materials",
       "instruments": "Dental Instruments",
       "consumables": "Consumables",
+      "prosthodontics": "Prosthodontics",
+      "perio-surgery": "Perio & Surgery",
+      "equipments": "Equipments",
+      "burs-stones": "Burs & Stones",
+      "bleaching": "Bleaching",
+      "dental-lab": "Dental lab",
+      "implant": "Implant",
+      "oral-care-system": "Oral Care System",
+      "pedodontics": "Pedodontics",
       "equipment": "Equipment",
       "surgery": "Surgery",
       "implantology": "Implantology",
@@ -448,6 +1602,163 @@
       "lab-supplies": "Lab Supplies",
       "radiology": "Radiology",
       "disposables": "Disposables"
+    }
+  },
+  "aboutPage": {
+    "actions": {
+      "browseProducts": "Browse Products",
+      "requestQuote": "Request a Quote"
+    },
+    "hero": {
+      "eyebrow": "About X Dental Store",
+      "fullTitle": "Smarter dental supply purchasing for clinics and professionals.",
+      "titleLine1": "Smarter dental",
+      "titleLine2": "supply purchasing",
+      "titleLine3": "for clinics and professionals.",
+      "description": "X Dental Store exists to make clinic purchasing clearer: organized catalogs, saved supply lists, quote support, and order help for dental teams.",
+      "imageAlt": "Dental products",
+      "benefitsLabel": "X Dental Store benefits",
+      "tags": {
+        "trustedBrands": "Trusted Brands",
+        "clinicSupplyLists": "Clinic Supply Lists",
+        "quoteSupport": "Quote Support",
+        "fastReordering": "Fast Reordering",
+        "verifiedSuppliers": "Verified Suppliers",
+        "specialRequests": "Special Requests",
+        "easyProductDiscovery": "Easy Product Discovery",
+        "orderSupport": "Order Support"
+      }
+    },
+    "intro": {
+      "eyebrow": "Who We Are",
+      "title": "More than a store",
+      "titleSecond": "your clinic supply partner.",
+      "description": "We help dental clinics and professionals access the products they need for daily practice, specialized treatments, and repeat purchasing. Our platform is designed to make product discovery, ordering, quotes, and reordering easier and more organized."
+    },
+    "clinicNeeds": {
+      "eyebrow": "Built For Clinics",
+      "title": "Everything your practice needs,",
+      "titleSecond": "organized in",
+      "titleStrong": "one place.",
+      "imageAlt": "Dental treatment in a clinic",
+      "items": {
+        "dailyEssentials": {
+          "title": "Daily Clinic Essentials",
+          "description": "Browse consumables, disposables, and frequently used products for everyday clinic operations."
+        },
+        "treatmentSpecific": {
+          "title": "Treatment-Specific Products",
+          "description": "Find organized product choices for restorative, endodontic, orthodontic, surgical, and specialty needs."
+        },
+        "repeatPurchasing": {
+          "title": "Repeat Purchasing",
+          "description": "Save products, build supply lists, and reorder clinic essentials faster."
+        },
+        "specialRequests": {
+          "title": "Special Requests & Quotes",
+          "description": "Send your product list or sourcing request and our team will help prepare a clear quote."
+        }
+      }
+    },
+    "whyChoose": {
+      "eyebrow": "Why Choose Us",
+      "title": "A better way to buy",
+      "titleSecond": "dental supplies.",
+      "description": "At X Dental Store, we do more than supply products. We support clinics and dental professionals with trusted brands, competitive prices, and a smooth, reliable buying experience.",
+      "carouselLabel": "Why choose X Dental Store",
+      "showCard": "Show {title}",
+      "items": {
+        "trustedBrands": {
+          "title": "Trusted Brands",
+          "description": "Access products from reliable dental brands and suppliers."
+        },
+        "organizedShopping": {
+          "title": "Organized Shopping",
+          "description": "Browse by category, brand, specialty, offer type, or practice need."
+        },
+        "clinicTools": {
+          "title": "Clinic Tools",
+          "description": "Use wishlist, supply lists, quotes, and product requests to manage purchasing."
+        },
+        "fasterReordering": {
+          "title": "Faster Reordering",
+          "description": "Use previous orders and saved supply lists to reorder essentials with less effort."
+        },
+        "support": {
+          "title": "Support When Needed",
+          "description": "Get help with products, orders, delivery, quotes, and availability questions."
+        }
+      }
+    },
+    "promise": {
+      "eyebrow": "Our Promise",
+      "title": "Reliable products.",
+      "titleSecond": "Clear support.",
+      "titleThird": "Better clinic workflows.",
+      "description": "X Dental Store is built to make dental purchasing easier for clinics — from organized categories and trusted suppliers to quote support and tools that help teams reorder faster.",
+      "items": {
+        "curatedProducts": {
+          "title": "Curated Dental Products",
+          "description": "We organize clinic essentials, instruments, consumables, and specialty products so dentists can find what they need faster."
+        },
+        "supplierNetwork": {
+          "title": "Trusted Supplier Network",
+          "description": "Our catalog focuses on reliable dental brands and suppliers selected for professional clinic use."
+        },
+        "orderingSupport": {
+          "title": "Quote & Ordering Support",
+          "description": "From product questions to bulk quote requests, our team helps clinics make clearer purchasing decisions."
+        },
+        "reordering": {
+          "title": "Built for Clinic Reordering",
+          "description": "Wishlist, supply lists, and account tools help clinics reduce repeated work and reorder daily essentials with less effort."
+        }
+      }
+    },
+    "workflow": {
+      "eyebrow": "Clinic Purchasing",
+      "title": "Designed for how clinics",
+      "titleSecond": "actually buy.",
+      "navigationLabel": "Clinic purchasing steps",
+      "goToStep": "Go to {step}",
+      "steps": {
+        "wishlist": {
+          "label": "Step 1",
+          "title": "Wishlist",
+          "description": "Save products you want to compare, reorder, or move into supply lists later.",
+          "imageAlt": "Dental products ready to add to a clinic wishlist"
+        },
+        "supplyLists": {
+          "label": "Step 2",
+          "title": "Supply Lists",
+          "description": "Create reusable lists for monthly essentials, branch needs, or specialty workflows.",
+          "imageAlt": "Dentist reviewing products for a clinic"
+        },
+        "quotes": {
+          "label": "Step 3",
+          "title": "Quotes",
+          "description": "Request pricing for bulk orders, repeat purchases, or special clinic needs.",
+          "imageAlt": "Organized dental supplies for repeat purchasing"
+        },
+        "productSupport": {
+          "label": "Step 4",
+          "title": "Product Requests / Support",
+          "description": "Ask our team to check availability for products not currently listed, or track orders and support tickets from your account.",
+          "imageAlt": "Dental clinic supported by X Dental Store"
+        }
+      }
+    },
+    "contact": {
+      "eyebrow": "Get In Touch",
+      "title": "Reach our",
+      "titleSecond": "team directly",
+      "description": "Choose the easiest way to contact us for product questions, order updates, quotes, or clinic support.",
+      "actions": {
+        "call": "Call Us",
+        "email": "Email Us",
+        "whatsapp": "WhatsApp Support",
+        "visit": "Visit / Warehouse"
+      }
     }
   },
   "categoriesPage": {
@@ -470,23 +1781,66 @@
       "Brands": "Brands",
       "Clinic Essentials": "Clinic Essentials"
     },
+    "helpEyebrow": "Clinic Purchasing",
     "helpTitle": "How X Dental Store",
     "helpTitleSecond": "Helps Your Clinic",
     "helpIntro": "From saved supply lists to quote requests, X Dental Store helps clinics order faster and manage dental supplies with less effort.",
     "step1": "Step 1",
     "stepTitle": "Browse by Category",
     "stepBody": "Find dental products organized by specialty, treatment type, and clinic needs.",
-    "imageAlt": "Dental supplies"
+    "imageAlt": "Dental supplies",
+    "workflow": {
+      "navigationLabel": "Clinic purchasing steps",
+      "goToStep": "Go to {step}",
+      "steps": {
+        "step1": {
+          "label": "STEP 1",
+          "title": "Browse by Category",
+          "description": "Find dental products organized by specialty, treatment type, and daily clinic needs.",
+          "imageAlt": "Dental clinic essentials category"
+        },
+        "step2": {
+          "label": "STEP 2",
+          "title": "Save to Supply Lists",
+          "description": "Keep frequently used products ready for reorder, comparison, or quote requests.",
+          "imageAlt": "Dental instruments for clinic supply lists"
+        },
+        "step3": {
+          "label": "STEP 3",
+          "title": "Earn Points & Unlock Rewards",
+          "description": "Earn points on completed purchases, view your rewards and store-credit balances, and redeem eligible value at checkout.",
+          "imageAlt": "Rewards available for completed clinic purchases",
+          "walletLink": "Rewards & Wallet",
+          "checkoutLink": "Go to Checkout"
+        },
+        "step4": {
+          "label": "STEP 4",
+          "title": "Checkout & Track Orders",
+          "description": "Confirm your order, apply points or rewards, and track delivery from your account.",
+          "imageAlt": "Dental products ready for checkout and delivery"
+        }
+      }
+    }
   },
   "brandsPage": {
     "featuredEyebrow": "Featured Brands",
     "featuredTitle": "Discover our most requested dental brands and suppliers.",
     "searchPlaceholder": "Search for brand name",
+    "noResultsTitle": "No brands found.",
+    "noResultsBody": "Try a different brand name or check the spelling.",
+    "paginationLabel": "Brands pagination",
+    "previousPage": "Previous",
+    "nextPage": "Next",
     "statusLabel": "Filter brands by status",
     "dateLabel": "Filter brands by date",
     "sortLabel": "Sort brands",
     "heroTitleLine1": "Trusted Dental",
     "heroTitleLine2": "Brands",
+    "heroBody": "Explore dental suppliers and manufacturers by brand, specialty, and product category.",
+    "brandCount": "50+ trusted dental brands",
+    "supplierTitleLine1": "Suppliers &",
+    "supplierTitleLine2": "manufacturers",
+    "supplierBody": "Find products from reliable dental brands and compare options within the catalog.",
     "over": "Over",
     "allIn": "All in",
     "onePlace": "One Place",
@@ -495,6 +1849,14 @@
   "contactPage": {
     "toastTitle": "Message sent",
     "toastBody": "Our team will get back to you as soon as possible.",
+    "accountAccess": {
+      "title": "Account Access Help",
+      "description": "Enter an email address we can use to contact you and explain the access problem. This form does not reactivate accounts automatically.",
+      "subjectLabel": "Support topic",
+      "subjectValue": "Account Access Help",
+      "successTitle": "Request received",
+      "successBody": "Your account-access request has been received. Our team will review it and contact you using the information provided."
+    },
     "heroTitle": "Expert support for products, orders, and quotes",
     "heroBody": "Have a question about a product, order, quote, or clinic supply request? Our team is ready to help you choose the right items and support your clinic clearly.",
     "supplySupport": "Clinic Supply Support",
@@ -542,24 +1904,594 @@
     "faqTitleSecond": "",
     "faqBody": "Find quick answers about quotes, supply lists, product requests, and account tools.",
     "viewMoreFaqs": "View More FAQs",
-    "faqs": {
-      "quoteBeforeOrdering": {
-        "question": "Can I request a quote before ordering?",
-        "answer": "Yes. You can request a quote for products before placing an order, especially for bulk quantities or special pricing."
+    "sending": "Sending...",
+    "toastErrorTitle": "Message not sent",
+    "toastErrorBody": "Your message could not be sent. Please try again or call us directly."
+  },
+  "privacyPage": {
+    "seoTitle": "Privacy Policy | X Dental Store",
+    "seoDescription": "Read how X Dental Store collects, uses, protects, and shares information related to accounts, orders, payments, delivery, support, and website services.",
+    "eyebrow": "Legal",
+    "title": "Privacy Policy",
+    "description": "Learn how X Dental Store collects, uses, protects, and shares your information.",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedDate": "July 2026",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "paragraph1": "This Privacy Policy explains how X Dental Store collects, uses, stores, protects, and shares information when you visit our website, create an account, browse products, request quotes, place orders, use supply lists, or contact support."
       },
-      "saveRepeatedLists": {
-        "question": "Can clinics save monthly or repeated purchase lists?",
-        "answer": "Yes. Clinics can use Supply Lists to save frequently ordered products and reorder them faster."
+      "informationCollected": {
+        "title": "Information We Collect",
+        "paragraph1": "Account information may include your full name, email address, phone number, account preferences, selected clinic specialty or major, and authentication information needed to create and manage your account. Passwords and authentication data should be processed securely and stored using hashed or encrypted methods according to security best practices; X Dental Store should not store plain-text passwords.",
+        "paragraph2": "Clinic and order information may include clinic name, delivery address, billing details where collected, order history, quote requests, product requests, supply lists, wishlist and cart activity, and preferred brands, categories, or products.",
+        "paragraph3": "Payment information may include payment method status, transaction references, and payment confirmation status. X Dental Store does not need to store full card numbers when sensitive payment details are processed by a third-party payment provider, and those providers may handle payment data under their own policies.",
+        "paragraph4": "Communication information may include messages sent through contact forms, support requests, WhatsApp messages, call or email records, feedback, reviews, uploaded content, or other information you choose to send to us.",
+        "paragraph5": "Technical and usage information may include IP address, browser and device type, pages visited, search queries, product or category interactions, cookies, local storage, error logs, and approximate location information from your browser, device, or network where available."
       },
-      "sourceUnlistedProduct": {
-        "question": "Can you help source a product that is not listed?",
-        "answer": "Yes. You can submit a product request, and the team can review availability or suggest alternatives."
+      "informationUse": {
+        "title": "How We Use Information",
+        "paragraph1": "X Dental Store uses information to create and manage user accounts, process orders and quote requests, manage supply lists, carts, wishlists, repeat purchases, product requests, delivery coordination, and customer support.",
+        "paragraph2": "We may also use information to personalize product recommendations, including Clinic Essentials based on clinic specialty, communicate about orders, delivery, support, offers, and account updates, improve website performance and user experience, prevent fraud or misuse, protect security, and meet legal, accounting, tax, or operational obligations."
+      },
+      "specialtyPersonalization": {
+        "title": "Clinic Specialty Personalization",
+        "paragraph1": "X Dental Store may use the clinic specialty selected during signup or saved in your profile to personalize product recommendations and make clinic purchasing tools more relevant.",
+        "paragraph2": "This may affect areas such as Clinic Essentials, recommended products, reorder suggestions, category highlights, or other product discovery features. If your specialty changes, you may be able to update it through your account tools or contact support for help, depending on the features currently available."
+      },
+      "cookies": {
+        "title": "Cookies and Similar Technologies",
+        "paragraph1": "The website may use cookies, local storage, and similar technologies to keep users signed in, remember preferences, manage cart and wishlist activity, support security, improve performance, and understand how the website is used.",
+        "paragraph2": "You can control cookies through your browser settings. If you block or delete cookies, some website features may not work as expected, including account sessions, saved preferences, cart behavior, and certain personalization features."
+      },
+      "informationSharing": {
+        "title": "How We Share Information",
+        "paragraph1": "X Dental Store may share information with suppliers, distributors, couriers, logistics providers, payment providers, hosting, database, email, SMS, WhatsApp, support, analytics, performance, security, legal, accounting, or business service providers where needed to operate the website and fulfill customer requests.",
+        "paragraph2": "Information may also be shared with legal or regulatory authorities where required by law, or with professional advisors where needed for accounting, legal, tax, compliance, or business purposes.",
+        "paragraph3": "X Dental Store does not sell users' personal information to advertisers."
+      },
+      "thirdPartyServices": {
+        "title": "Third-Party Services",
+        "paragraph1": "The website may use third-party services for payment processing, delivery and logistics, email or messaging, hosting, database infrastructure, analytics, maps, security tools, external links, or other operational services.",
+        "paragraph2": "Third-party services may collect or process information according to their own terms and privacy policies. Users should review those policies where relevant, especially for payment, delivery, messaging, and external website services."
+      },
+      "dataSecurity": {
+        "title": "Data Security",
+        "paragraph1": "X Dental Store uses reasonable technical and organizational measures designed to protect information, including secure authentication practices, limited access controls, secure hosting and database practices, HTTPS where applicable, and password hashing.",
+        "paragraph2": "No online system, database, or transmission method is completely secure. While we work to protect information, X Dental Store cannot guarantee that unauthorized access, loss, misuse, or technical issues will never occur."
+      },
+      "dataRetention": {
+        "title": "Data Retention",
+        "paragraph1": "X Dental Store keeps information only for as long as reasonably needed for account management, order history, customer support, legal, accounting, tax, fraud prevention, security, and business operations.",
+        "paragraph2": "Retention periods may vary depending on the type of information, the purpose for keeping it, legal requirements, operational needs, and whether an account, order, request, or support matter remains active."
+      },
+      "userRights": {
+        "title": "User Rights and Choices",
+        "paragraph1": "Subject to applicable law, users may request access to their personal information, correction of inaccurate information, deletion of certain information, account closure, unsubscribe from marketing communications, or updates to communication preferences.",
+        "paragraph2": "Some records may need to be retained where required for order history, support records, accounting, tax, fraud prevention, legal compliance, dispute handling, or legitimate business operations."
+      },
+      "marketing": {
+        "title": "Marketing Communications",
+        "paragraph1": "Users may receive product updates, offers, promotional messages, and service announcements where they have consented or where such communications are allowed by applicable law.",
+        "paragraph2": "Users may unsubscribe from marketing messages or ask X Dental Store to stop promotional communication. Transactional messages related to orders, delivery, account activity, security, quotes, requests, and support may still be sent when necessary."
+      },
+      "children": {
+        "title": "Children's Privacy",
+        "paragraph1": "X Dental Store is intended for clinics, dental professionals, and adult users. The website is not intended for children, and children should not create accounts, place orders, or submit personal information through the website."
+      },
+      "internationalTransfers": {
+        "title": "International Data Transfers",
+        "paragraph1": "Some hosting, database, payment, email, messaging, analytics, support, or other service providers may process or store information outside Egypt or outside the user's country.",
+        "paragraph2": "Where international processing is used, X Dental Store will use reasonable safeguards where applicable and will work with service providers that support appropriate data protection practices."
+      },
+      "businessTransfers": {
+        "title": "Business Transfers",
+        "paragraph1": "If X Dental Store is involved in a merger, acquisition, restructuring, financing, sale of assets, or similar business transaction, user information may be transferred or reviewed as part of that transaction, subject to appropriate confidentiality and legal protections where applicable."
+      },
+      "policyChanges": {
+        "title": "Changes to This Privacy Policy",
+        "paragraph1": "X Dental Store may update this Privacy Policy from time to time. Updated versions will be posted on this page with a revised update date.",
+        "paragraph2": "Continued use of the website or services after an updated Privacy Policy is posted means you acknowledge the updated policy."
+      },
+      "contactInformation": {
+        "title": "Contact Information",
+        "paragraph1": "For privacy questions or requests, contact X Dental Store through the website contact form, WhatsApp 01035777335, or Cairo, Egypt. The final registered business address and privacy mailbox will be published after legal review and production setup."
       }
+    },
+    "sidebar": {
+      "title": "Questions?",
+      "description": "If you have any questions about this Privacy Policy or how your information is handled, our support team is happy to help.",
+      "cta": "Contact Support"
+    }
+  },
+  "termsPage": {
+    "seoTitle": "Terms of Service | X Dental Store",
+    "seoDescription": "Read the terms governing the use of X Dental Store, orders, payments, delivery, returns, accounts, and website services.",
+    "eyebrow": "Legal",
+    "title": "Terms of Service",
+    "description": "Please read these terms carefully before using X Dental Store.",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedDate": "July 2026",
+    "sections": {
+      "introductionAcceptance": {
+        "title": "Introduction and Acceptance",
+        "paragraph1": "These Terms of Service explain the rules that apply when you access or use X Dental Store, including our website, product catalog, checkout, account tools, quote support, supply lists, product requests, notifications, and related services.",
+        "paragraph2": "By using X Dental Store, creating an account, placing an order, requesting a quote, or contacting us through the website, you agree to these Terms and to our Privacy Policy. If you do not agree, please do not use the website or services."
+      },
+      "services": {
+        "title": "About X Dental Store Services",
+        "paragraph1": "X Dental Store provides an ecommerce experience for dental products, clinic supplies, instruments, consumables, brands, categories, and purchasing tools designed for dental clinics and professionals.",
+        "paragraph2": "Products may be sold directly by X Dental Store or made available through partner suppliers, distributors, brands, couriers, or service providers. Where partners are involved, X Dental Store may help facilitate product discovery, ordering, payment, support, and delivery coordination."
+      },
+      "ordersAvailability": {
+        "title": "Orders and Product Availability",
+        "paragraph1": "Users may place orders, request quotes, or submit product requests through the website, subject to product availability and order acceptance.",
+        "paragraph2": "Product prices, descriptions, images, discounts, stock levels, packaging, and availability may change without prior notice. Product images and descriptions are provided for guidance and may not always exactly match the final delivered product.",
+        "paragraph3": "X Dental Store may reject, cancel, correct, or adjust an order when necessary, including when a product is unavailable, pricing is incorrect, product information contains an error, payment cannot be confirmed, delivery details are incomplete, or an order appears to be fraudulent or improper."
+      },
+      "pricingPayment": {
+        "title": "Pricing and Payment",
+        "paragraph1": "Prices are shown in the applicable currency displayed on the website. Taxes, delivery fees, handling charges, or other charges may apply depending on the order and location.",
+        "paragraph2": "Payment is currently made by Cash on Delivery: the X Dental Store team collects payment when your order is delivered. Any additional payment methods introduced later will be shown at checkout when available.",
+        "paragraph3": "Placing an order does not always mean final acceptance of that order. If a stock, pricing, supplier, delivery, or product information issue is discovered after the order is placed, X Dental Store may contact you to correct the issue, offer an alternative, adjust the order, or cancel it."
+      },
+      "delivery": {
+        "title": "Delivery",
+        "paragraph1": "Delivery timing may vary based on product availability, clinic location, supplier processing, order confirmation, holidays, weather, traffic, or other operational factors.",
+        "paragraph2": "Orders are delivered by the X Dental Store team, which will contact you to confirm delivery details. Delivery estimates are provided for convenience and are not guaranteed unless expressly confirmed in writing.",
+        "paragraph3": "X Dental Store is not responsible for delays caused by events outside its reasonable control, including supplier delay, incorrect delivery details, customs or regulatory issues, force majeure events, or other external circumstances."
+      },
+      "returns": {
+        "title": "Returns, Refunds, and Cancellations",
+        "paragraph1": "Customers should contact X Dental Store support for cancellation, return, exchange, or refund requests. Eligibility will depend on the product type, order status, item condition, supplier policy, applicable law, and any hygiene or safety restrictions.",
+        "paragraph2": "Some medical, dental, sterile, consumable, temperature-sensitive, special-order, or sealed products may not be eligible for return once opened, used, damaged, unsealed, installed, contaminated, expired, or handled in a way that affects safety or resale condition.",
+        "paragraph3": "Approved refunds, credits, exchanges, or cancellations may be processed through the original payment method or another method approved by X Dental Store, subject to any applicable processing timelines and deductions allowed by law."
+      },
+      "accounts": {
+        "title": "User Accounts",
+        "paragraph1": "Some website features may require an account, including clinic purchasing tools, supply lists, saved details, quote tracking, order history, product requests, wishlist features, and account support.",
+        "paragraph2": "Users are responsible for keeping account login details secure and for all activity that occurs under their account. If you suspect unauthorized access, you should contact X Dental Store promptly.",
+        "paragraph3": "Users must provide accurate, current, and complete information, including contact details, delivery information, clinic details, and payment-related information where required."
+      },
+      "professionalUse": {
+        "title": "Clinic and Professional Use",
+        "paragraph1": "X Dental Store serves dental clinics, dental professionals, and related purchasers. Users are responsible for confirming that any product they purchase is suitable for their intended clinical, laboratory, educational, or professional use.",
+        "paragraph2": "X Dental Store does not replace professional judgment, clinical training, manufacturer instructions, regulatory requirements, or dental/medical advice. Product selection, storage, handling, use, and disposal remain the responsibility of the user and the relevant clinic or professional.",
+        "paragraph3": "Users must comply with all applicable dental, medical, safety, storage, infection-control, licensing, and usage regulations that apply to their location and professional practice."
+      },
+      "websiteUse": {
+        "title": "Website Use Rules",
+        "paragraph1": "Users may not misuse the website or services. Prohibited activity includes hacking, scraping, automated harvesting, reverse engineering, interfering with website operation, bypassing security, copying design or code, submitting false information, abusing offers, or using the website for unlawful or harmful purposes.",
+        "paragraph2": "X Dental Store may suspend, restrict, or terminate access to the website or account features if we reasonably believe a user has misused the service, violated these Terms, harmed another user, created operational risk, or acted unlawfully."
+      },
+      "userContent": {
+        "title": "User Content and Feedback",
+        "paragraph1": "Users may submit reviews, messages, support requests, product requests, images, comments, feedback, or other content through the website or related communication channels. Users remain responsible for the accuracy, legality, and appropriateness of what they submit.",
+        "paragraph2": "By submitting feedback or suggestions, you allow X Dental Store to use that feedback to improve products, services, website features, support workflows, and customer experience without owing compensation unless separately agreed in writing.",
+        "paragraph3": "X Dental Store may remove, limit, or refuse content that is inaccurate, unlawful, abusive, misleading, confidential, infringing, promotional, or otherwise inappropriate."
+      },
+      "communications": {
+        "title": "Communications",
+        "paragraph1": "By creating an account, placing an order, requesting a quote, submitting a support request, or otherwise using X Dental Store, you may receive communications related to orders, delivery, account activity, support, quotes, product requests, offers, reminders, or service updates.",
+        "paragraph2": "Communications may be sent by email, phone call, SMS, WhatsApp, push notification, in-account message, or other available channels. Message and data charges may apply depending on your provider and plan."
+      },
+      "offers": {
+        "title": "Offers, Discounts, and Coupons",
+        "paragraph1": "Offers, discounts, coupons, free delivery promotions, bundles, loyalty rewards, and other promotional benefits may be limited by time, stock, product, category, user, clinic, location, payment method, or other conditions.",
+        "paragraph2": "X Dental Store may modify, cancel, expire, limit, or refuse promotions where necessary, including in cases of error, misuse, suspected fraud, stock issues, or operational changes.",
+        "paragraph3": "Coupons and promotional credits have no cash value unless expressly stated and may not be transferable, refundable, or combined with other offers except where X Dental Store allows it."
+      },
+      "thirdParty": {
+        "title": "Third-Party Products, Suppliers, and Links",
+        "paragraph1": "Some products, brands, suppliers, manufacturers, payment providers, delivery providers, tools, or external links may be provided by third parties. Their own terms, warranties, policies, instructions, and privacy practices may apply.",
+        "paragraph2": "X Dental Store is not responsible for third-party terms, policies, product claims, service interruptions, delivery performance, manufacturer changes, or external websites except to the extent required by applicable law or expressly agreed by X Dental Store."
+      },
+      "intellectualProperty": {
+        "title": "Intellectual Property",
+        "paragraph1": "The X Dental Store name, website design, layout, interface, logo, text, images, icons, graphics, product presentation, software, workflows, and other website materials are owned by X Dental Store or used under license.",
+        "paragraph2": "Users may not copy, reproduce, modify, distribute, sell, mirror, scrape, reuse, or create derivative works from website content, design, software, or branding without prior written permission from X Dental Store or the relevant rights holder."
+      },
+      "availabilityDisclaimer": {
+        "title": "Service Availability and Disclaimer",
+        "paragraph1": "X Dental Store provides the website and services on an available basis. We aim to keep product information, pricing, stock, account tools, and website functionality accurate and reliable, but we do not guarantee that the service will always be uninterrupted, error-free, fully current, or free from technical issues.",
+        "paragraph2": "Product information, images, availability, and descriptions are provided for guidance and may vary due to supplier updates, manufacturer changes, packaging differences, stock substitution, or display limitations."
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "paragraph1": "To the maximum extent permitted by applicable law, X Dental Store is not responsible for indirect, incidental, special, punitive, or consequential damages, including loss of profit, business interruption, data loss, clinic downtime, reputational harm, or loss resulting from use of or inability to use the website or services.",
+        "paragraph2": "Where liability cannot be excluded, X Dental Store's liability will be limited to the maximum extent allowed by applicable law and the specific circumstances of the relevant order or service."
+      },
+      "indemnification": {
+        "title": "Indemnification",
+        "paragraph1": "Users agree to protect and hold X Dental Store, its team, affiliates, service providers, and partners harmless from claims, losses, liabilities, damages, costs, or expenses arising from misuse of the website, breach of these Terms, unlawful activity, violation of third-party rights, inaccurate information, or improper product use by the user."
+      },
+      "termination": {
+        "title": "Termination",
+        "paragraph1": "Users may stop using X Dental Store at any time. X Dental Store may suspend, restrict, or terminate access to the website, account features, offers, or services if a user violates these Terms, creates risk, misuses the service, or acts in a way that may harm X Dental Store, suppliers, customers, or service providers.",
+        "paragraph2": "Termination does not affect obligations that should reasonably continue after access ends, including payment obligations, intellectual property restrictions, liability limits, and dispute-related provisions."
+      },
+      "termsChanges": {
+        "title": "Changes to These Terms",
+        "paragraph1": "X Dental Store may update these Terms from time to time. Updated Terms will be posted on this page with a revised update date. Continued use of the website or services after changes are posted means you accept the updated Terms."
+      },
+      "governingLaw": {
+        "title": "Governing Law",
+        "paragraph1": "These Terms are intended to be governed by the laws applicable in Egypt, unless the final legal version states another jurisdiction. This wording should be reviewed and confirmed by legal counsel before publication as a final policy."
+      },
+      "contactInformation": {
+        "title": "Contact Information",
+        "paragraph1": "For questions about these Terms, contact X Dental Store through the website contact form, WhatsApp 01035777335, or Cairo, Egypt. The final registered business address and support mailbox will be published after legal review and production setup."
+      }
+    },
+    "sidebar": {
+      "title": "Questions?",
+      "description": "If you have any questions about these Terms of Service, our support team is happy to help.",
+      "cta": "Contact Support"
+    }
+  },
+  "howToOrderPage": {
+    "seoTitle": "How to Order | X Dental Store",
+    "seoDescription": "Learn how to browse products, request quotes, choose payment methods, and track your order at X Dental Store.",
+    "eyebrow": "ORDER GUIDE",
+    "title": "How to Order",
+    "description": "Follow a simple process to browse products, request quotes, and receive your clinic supplies.",
+    "supportCta": "Contact Support",
+    "quickSteps": {
+      "browse": {
+        "title": "Browse",
+        "description": "Explore products by category, brand, specialty, or search."
+      },
+      "cartQuote": {
+        "title": "Add to Cart / Request Quote",
+        "description": "Choose a standard order or request a quote for special items."
+      },
+      "paymentDelivery": {
+        "title": "Confirm Payment & Delivery",
+        "description": "Review checkout details and provide delivery information."
+      },
+      "receive": {
+        "title": "Receive Order",
+        "description": "Track updates and contact support if you need assistance."
+      }
+    },
+    "orderSteps": {
+      "browseProducts": {
+        "title": "Browse Products",
+        "description": "Browse dental supplies by category, brand, specialty, or search. You can explore clinic essentials, instruments, consumables, equipment, and trusted dental brands."
+      },
+      "productDetails": {
+        "title": "Open Product Details",
+        "description": "Open any product to review its details, images, brand, price if available, and availability status before adding it to your order."
+      },
+      "cartOrQuote": {
+        "title": "Add to Cart or Request a Quote",
+        "description": "For standard products, you can add items directly to your cart. For bulk quantities, machines, special products, or items that need confirmation, you can request a quote before ordering."
+      },
+      "account": {
+        "title": "Create or Sign In to Your Account",
+        "description": "Creating an account helps you manage orders, quotes, supply lists, saved products, clinic information, and repeat purchases."
+      },
+      "payment": {
+        "title": "Choose Payment Method",
+        "description": "Cash on Delivery is the active launch payment method. Pay the X Dental Store team when your order is delivered."
+      },
+      "deliveryDetails": {
+        "title": "Confirm Delivery Details",
+        "description": "Add your delivery address, phone number, and any important delivery notes. Please make sure your contact details are correct so the X Dental Store delivery team can reach you."
+      },
+      "confirmation": {
+        "title": "Order Confirmation",
+        "description": "After placing your order, X Dental Store may confirm product availability, pricing, Cash on Delivery, and delivery details before dispatch."
+      },
+      "tracking": {
+        "title": "Receive and Track Your Order",
+        "description": "You can follow your order updates through your account, or contact support with your order number if you need help."
+      }
+    },
+    "help": {
+      "eyebrow": "NEED HELP?",
+      "title": "Our support team can guide your order from start to finish.",
+      "description": "Contact us if you need help choosing products, confirming availability, or following up on a quote or delivery."
+    }
+  },
+  "shippingDeliveryPage": {
+    "seoTitle": "Shipping & Delivery | X Dental Store",
+    "seoDescription": "Learn about X Dental Store delivery coverage, standard shipping, fast delivery products, COD, special product handling, and delivery support.",
+    "eyebrow": "Delivery",
+    "title": "Shipping & Delivery",
+    "description": "Learn how X Dental Store delivers dental supplies, fast delivery products, and special clinic orders.",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedDate": "July 2026",
+    "contactSupport": "Contact Support",
+    "fastProducts": {
+      "eyebrow": "Fast Delivery",
+      "title": "Fast Delivery Products",
+      "description": "Selected products are eligible for same-day or next-day delivery when available in stock and within supported coverage.",
+      "viewAll": "View All Fast Delivery Products",
+      "emptyTitle": "Fast Delivery products will appear here soon.",
+      "emptyDescription": "Products shown here come from the catalog when they are marked as Fast Delivery.",
+      "badge": "Fast Delivery",
+      "cardDescription": "Eligible for same-day or next-day delivery depending on stock and location.",
+      "outOfStock": "Out of Stock",
+      "viewProduct": "View Product"
+    },
+    "steps": {
+      "confirmOrder": {
+        "title": "Confirm your order",
+        "description": "We verify key details such as availability, address, phone number, and payment method when needed."
+      },
+      "prepareDispatch": {
+        "title": "Prepare and dispatch",
+        "description": "Eligible products are packed and handed to the X Dental Store delivery team according to product handling needs."
+      },
+      "receiveDelivery": {
+        "title": "Receive your delivery",
+        "description": "Please check the shipment when it arrives and contact support quickly if anything needs review."
+      }
+    },
+    "sections": {
+      "coverage": {
+        "title": "Delivery Coverage",
+        "paragraph1": "X Dental Store provides delivery across supported locations in Egypt through its internal delivery team. Availability, cost, and timing may vary depending on your city, governorate, product type, order size, and stock availability.",
+        "paragraph2": "Some products may require delivery confirmation before shipment, especially when the order includes special handling, high-value items, or products with limited stock."
+      },
+      "confirmation": {
+        "title": "Order Confirmation",
+        "paragraph1": "Orders are prepared for delivery after they are confirmed. In some cases, our team may contact you to verify product availability, address details, phone number, payment method, or special delivery requirements.",
+        "paragraph2": "Confirmation helps reduce delivery errors and makes sure the correct products are prepared for your clinic order."
+      },
+      "standard": {
+        "title": "Standard Delivery",
+        "paragraph1": "Standard delivery usually takes 2-5 business days depending on location, X Dental Store delivery coverage, product availability, and order confirmation time.",
+        "paragraph2": "Delivery to remote areas or during busy periods may take longer."
+      },
+      "fastDelivery": {
+        "title": "Fast Delivery Products",
+        "paragraph1": "Products marked as Fast Delivery are prioritized for same-day or next-day delivery, depending on stock availability, order confirmation time, and delivery location.",
+        "paragraph2": "Fast Delivery applies only to selected products and supported areas. It is not guaranteed for unsupported areas or unconfirmed orders.",
+        "bullet1": "Product is marked as Fast Delivery.",
+        "bullet2": "Product is available in stock.",
+        "bullet3": "Order is confirmed before the daily cut-off time.",
+        "bullet4": "Delivery address is within supported fast-delivery coverage.",
+        "bullet5": "Payment or order confirmation is completed."
+      },
+      "fees": {
+        "title": "Shipping Fees",
+        "paragraph1": "Delivery fees may vary depending on destination, product weight and size, COD collection, urgent delivery, or special handling.",
+        "paragraph2": "For standard products, the delivery fee may appear during checkout. For special products, our team may confirm the shipping cost before dispatch."
+      },
+      "cashOnDelivery": {
+        "title": "Cash on Delivery",
+        "paragraph1": "Cash on Delivery may be available for selected orders and locations.",
+        "paragraph2": "X Dental Store may limit COD for high-value products, special orders, large equipment, or products requiring special handling. Prepayment or additional confirmation may be requested for certain orders."
+      },
+      "specialProducts": {
+        "title": "Special Products and Shipping Quote",
+        "paragraph1": "Some dental products require special handling and cannot always be delivered through the standard X Dental Store delivery process.",
+        "paragraph2": "Large machines, heavy equipment, fragile instruments, liquids, gels, disinfectants, chemicals, adhesives, high-value instruments, and restricted dental materials may require a shipping quote before dispatch.",
+        "cta": "Request shipping confirmation from support."
+      },
+      "failedDelivery": {
+        "title": "Failed Delivery and Rescheduling",
+        "paragraph1": "If the X Dental Store delivery team cannot reach you, or if the address details are incorrect, delivery may be delayed, rescheduled, or returned.",
+        "paragraph2": "Additional delivery fees may apply for repeated delivery attempts or returned orders after the team confirms the details with you."
+      },
+      "orderIssues": {
+        "title": "Damaged, Missing, or Wrong Items",
+        "paragraph1": "Please check your order when it arrives.",
+        "paragraph2": "If an item is damaged, missing, or different from your order, contact our support team as soon as possible with your order number and clear photos. Please keep the original packaging until the issue is reviewed."
+      },
+      "delays": {
+        "title": "Delivery Delays",
+        "paragraph1": "Delivery may be delayed due to team capacity, public holidays, weather, remote locations, wrong address details, unavailable customer, product availability, or events outside our control."
+      },
+      "updates": {
+        "title": "Policy Updates",
+        "paragraph1": "X Dental Store may update this Shipping & Delivery Policy from time to time as delivery coverage, fees, and operational rules change."
+      }
+    },
+    "sidebar": {
+      "title": "Need confirmation?",
+      "description": "Contact support before ordering large machines, liquids, chemicals, fragile items, or urgent clinic supplies."
+    }
+  },
+  "returnsPolicyPage": {
+    "seoTitle": "Returns Policy | X Dental Store",
+    "seoDescription": "Learn how X Dental Store handles return requests, exchanges, damaged items, refunds, and special product return rules.",
+    "eyebrow": "Support",
+    "title": "Returns Policy",
+    "description": "Learn how returns, exchanges, damaged items, and refund requests are handled.",
+    "contactSupport": "Contact Support",
+    "steps": {
+      "contactSupport": {
+        "title": "Contact Support",
+        "description": "Send your order number, product details, and reason for the return or exchange request."
+      },
+      "reviewEligibility": {
+        "title": "Review Eligibility",
+        "description": "Our team checks product condition, supplier rules, courier notes, and applicable return requirements."
+      },
+      "confirmResolution": {
+        "title": "Confirm Return or Resolution",
+        "description": "If approved, support confirms the next step, replacement option, refund method, or alternative solution."
+      }
+    },
+    "sections": {
+      "requests": {
+        "title": "Return Requests",
+        "paragraph1": "To request a return or exchange, please contact X Dental Store support with your order number, product details, and the reason for the request. Our team will review the request and confirm the next steps."
+      },
+      "period": {
+        "title": "Return Period",
+        "paragraph1": "Return requests must be submitted within the approved return period confirmed by X Dental Store. The final return window may vary depending on product type, supplier policy, and applicable rules."
+      },
+      "conditions": {
+        "title": "Return Conditions",
+        "paragraph1": "Returned products should usually be unused, unopened, in their original packaging, and complete with all accessories, labels, manuals, or included items.",
+        "paragraph2": "Products damaged by misuse, improper storage, or customer handling may not be eligible for return."
+      },
+      "nonReturnable": {
+        "title": "Non-Returnable Products",
+        "paragraph1": "For safety and hygiene reasons, some dental products may not be eligible for return once opened, unsealed, used, installed, or specially ordered.",
+        "bullet1": "Opened or used consumables",
+        "bullet2": "Sterile products once opened or unsealed",
+        "bullet3": "Liquids, gels, disinfectants, chemicals, and adhesives",
+        "bullet4": "Temperature-sensitive or storage-sensitive products",
+        "bullet5": "Custom or special-order products",
+        "bullet6": "Machines or equipment after installation or use",
+        "bullet7": "Products damaged by customer misuse",
+        "bullet8": "Expired products after customer receipt if not reported immediately"
+      },
+      "orderIssues": {
+        "title": "Damaged, Missing, or Wrong Items",
+        "paragraph1": "If your order arrives damaged, missing an item, or different from what you ordered, please contact support as soon as possible. Include your order number, clear photos of the product and packaging, and a short description of the issue."
+      },
+      "refunds": {
+        "title": "Refunds",
+        "paragraph1": "Refund approval, method, and timing depend on the product condition, supplier review, and the details of the order.",
+        "paragraph2": "Approved refunds are handled directly by the X Dental Store team. The team will contact you to confirm the available refund arrangement."
+      },
+      "exchanges": {
+        "title": "Exchanges",
+        "paragraph1": "Exchanges may be available for eligible products if the requested replacement is in stock. If the replacement product is unavailable, the team may suggest an alternative solution."
+      },
+      "shippingFees": {
+        "title": "Return Shipping Fees",
+        "paragraph1": "Return shipping fees may depend on the reason for the return.",
+        "paragraph2": "If the return is due to a wrong, missing, or damaged item caused by X Dental Store, supplier, or delivery handling, the case will be reviewed by support. If the return is due to customer preference or incorrect customer information, return delivery fees may apply."
+      },
+      "specialOrders": {
+        "title": "Special Orders and Machines",
+        "paragraph1": "Special-order products, machines, large equipment, installed items, and quote-based orders may have separate cancellation, exchange, and return rules.",
+        "paragraph2": "These items may require review and approval before any return or refund is accepted."
+      },
+      "updates": {
+        "title": "Policy Updates",
+        "paragraph1": "X Dental Store may update this Returns Policy from time to time as supplier rules, delivery policies, product categories, and business operations change."
+      }
+    },
+    "sidebar": {
+      "title": "Before you return",
+      "description": "Return windows and category-specific restrictions can vary by product type. Our support team will confirm the exact steps for your order.",
+      "notice": "Contact support before returning any dental product, machine, special order, or hygiene-sensitive item."
+    }
+  },
+  "trackOrderPage": {
+    "seoTitle": "Track Your Order | X Dental Store",
+    "seoDescription": "Track your X Dental Store order through your account or contact support with your order number for delivery updates.",
+    "eyebrow": "Order Tracking",
+    "title": "Track Your Order",
+    "description": "Enter your order number and customer phone number to view the latest X Dental Store order status.",
+    "viewOrders": "View My Orders",
+    "contactSupport": "Contact Support",
+    "form": {
+      "eyebrow": "Public Order Lookup",
+      "title": "Check your current order status",
+      "description": "Use the order number and phone number entered when the order was placed.",
+      "orderNumberLabel": "Order number",
+      "orderNumberPlaceholder": "Example: ORD-ABC123",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "Example: 01012345678",
+      "phoneNote": "Egyptian mobile formats such as 010…, +20…, and 0020… are accepted.",
+      "submit": "Track Order",
+      "loading": "Checking order…",
+      "orderNumberRequired": "Enter your order number.",
+      "orderNumberInvalid": "Enter a valid order number.",
+      "phoneRequired": "Enter the customer phone number.",
+      "phoneInvalid": "Enter a valid Egyptian mobile number.",
+      "notFound": "We could not find an order matching these details.",
+      "rateLimited": "Too many tracking attempts. Please wait and try again.",
+      "privacyTitle": "Your details are verified securely",
+      "privacyDescription": "Only a matching order number and customer phone number can reveal the current order status."
+    },
+    "result": {
+      "title": "Order found",
+      "orderNumber": "Order number",
+      "orderDate": "Order date",
+      "currentStatus": "Current status",
+      "lastUpdate": "Last order update",
+      "deliveryNote": "Delivery updates are currently managed by X Dental Store."
+    },
+    "steps": {
+      "signIn": {
+        "title": "Sign in",
+        "description": "Use the account connected to the order so the dashboard can show your order history."
+      },
+      "openOrders": {
+        "title": "Open My Orders",
+        "description": "Review current orders, previous purchases, order details, and available delivery updates."
+      },
+      "checkStatus": {
+        "title": "Check Status or Contact Support",
+        "description": "If anything is unclear, contact support with your order number and contact details."
+      }
+    },
+    "sections": {
+      "account": {
+        "title": "Track from Your Account",
+        "paragraph1": "Sign in to your X Dental Store account to view your order history, current order status, order details, payment information, and delivery updates when available.",
+        "cta": "View My Orders"
+      },
+      "help": {
+        "title": "Need Help Tracking an Order?",
+        "paragraph1": "If you cannot find your order or need help tracking it, contact our support team and include your order number, phone number, and the email used when placing the order.",
+        "cta": "Contact Support"
+      },
+      "information": {
+        "title": "Order Information to Prepare",
+        "paragraph1": "To help us check your order faster, please prepare your order number, contact details, and any confirmation message you received from X Dental Store.",
+        "bullet1": "Order number",
+        "bullet2": "Full name",
+        "bullet3": "Phone number",
+        "bullet4": "Email address",
+        "bullet5": "Delivery address",
+        "bullet6": "Payment method if needed"
+      },
+      "statuses": {
+        "title": "Tracking Statuses",
+        "paragraph1": "Order statuses in your account are shown in simple stages so you can understand where your order is in the review process."
+      },
+      "courier": {
+        "title": "Courier Tracking",
+        "paragraph1": "If courier tracking is available for your order, the tracking number or courier update may appear in your account or be shared by the support team.",
+        "paragraph2": "Courier tracking depends on the delivery partner, order status, and whether a tracking reference is available for that shipment."
+      },
+      "publicNotice": {
+        "title": "Public Tracking Notice",
+        "paragraph1": "Public order lookup is coming soon. For now, please sign in to view your orders or contact support with your order number."
+      }
+    },
+    "statuses": {
+      "pending": {
+        "label": "Pending",
+        "description": "Your order has been received and is waiting for review."
+      },
+      "sent": {
+        "label": "Sent to Supplier/System",
+        "description": "Your order has been sent to the supplier/system or internal team for confirmation."
+      },
+      "confirmed": {
+        "label": "Confirmed",
+        "description": "Your order has been checked and accepted."
+      },
+      "rejected": {
+        "label": "Rejected",
+        "description": "The order could not be completed after review."
+      },
+      "canceled": {
+        "label": "Canceled",
+        "description": "The order was canceled before completion."
+      }
+    },
+    "sidebar": {
+      "title": "Need more help?",
+      "description": "Open My Orders for full account details, or contact support if you need help with an order."
     }
   },
   "faqsPage": {
     "eyebrow": "Help Center",
-    "heroTitle": "Questions, answered clearly",
+    "heroTitle": "Frequently Asked Questions",
+    "headerCta": "Contact Support",
     "heroBody": "Find practical guidance about quotes, supply lists, product requests, and the account tools available to your clinic.",
     "categoryNavLabel": "Browse FAQ categories",
     "libraryEyebrow": "FAQ Library",
@@ -647,11 +2579,17 @@
     "length": "Length",
     "size": "Size",
     "stockReady": "In Stock - Ready to ship",
+    "lowStockWithCount": "Low stock — only {count} left",
     "stockNotify": "Out of Stock - Notify me when available",
+    "outOfStock": "Out of Stock",
+    "outOfStockRequestHelp": "Request this product and our team will follow up with availability.",
     "notifyMe": "Notify Me",
     "requestProduct": "Request Product",
+    "productName": "Product Name",
+    "submitRequest": "Submit Request",
     "productRequestSent": "Product request sent to support.",
     "productRequestFailed": "Failed to send request. Please try again.",
+    "viewProductRequests": "View Product Requests",
     "openSupportChat": "Open Support Chat",
     "messageSupport": "Message Support",
     "quoteStarted": "Quote request started for {name}.",
@@ -692,9 +2630,42 @@
     "toggleWishlist": "Toggle wishlist",
     "viewProductImage": "View product image {number}"
   },
+  "floatingSupport": {
+    "title": "Customer Support",
+    "subtitle": "Message the X Dental support team",
+    "openChat": "Open customer support chat",
+    "recentThreads": "Recent support conversations",
+    "selectConversation": "Select conversation",
+    "newConversation": "New conversation",
+    "newConversationHelp": "Tell us how we can help. Sending your first message will create a support conversation.",
+    "generalSubject": "General support request",
+    "startConversation": "Start conversation",
+    "send": "Send message",
+    "refresh": "Refresh messages",
+    "messagePlaceholder": "Write a message...",
+    "openSupportCenter": "Open Support Center",
+    "noThreads": "No support conversations yet.",
+    "noMessages": "No messages in this conversation yet.",
+    "messageRequired": "Please write a message first.",
+    "loadFailed": "Could not load support conversations. Please try again.",
+    "sendFailed": "Could not send your message. Please try again.",
+    "autoAcknowledgement": "Thanks for contacting X Dental Store. Our support team received your message and will reply as soon as possible."
+  },
   "cart": {
     "emptyTitle": "Your cart is empty",
     "emptyBody": "Add dental supplies to review quantities, request a quote, or proceed to checkout.",
+    "syncErrorTitle": "Cart not saved",
+    "syncErrorBody": "Your cart is still visible here, but it could not be saved to your account. Please try again.",
+    "quantityLimitTitle": "Quantity limit reached",
+    "maximumAlreadyInCart": "You already have the maximum available quantity in your cart.",
+    "onlyCurrentlyAvailable": "Only {count} currently available.",
+    "availableQuantityChanged": "The available quantity changed. Update this item before checkout.",
+    "insufficientStockProduct": "Only {count} unit(s) of {name} are currently available.",
+    "adjustToAvailable": "Adjust to available quantity",
+    "productUnavailable": "This product is not currently available.",
+    "stockChangedTitle": "Available quantity changed",
+    "addedTitle": "Added to Cart",
+    "addedDescription": "{name} has been added to your cart.",
     "checkoutEmpty": "Your cart is empty. Add products before starting checkout.",
     "checkoutUnavailable": "No confirmed order is available. Checkout will be completed after backend connection.",
     "title": "Shopping Cart",
@@ -704,6 +2675,8 @@
     "increaseQuantity": "Increase quantity",
     "coupon": "Coupon Code",
     "couponPlaceholder": "Enter coupon code",
+    "couponComingSoonHint": "Coupons will be activated once the store team adds real campaign rules.",
+    "couponInactive": "Coupon campaigns are not active yet.",
     "couponCheck": "Coupon {code} will be checked at checkout.",
     "couponEmpty": "Enter a coupon code before applying.",
     "couponInvalid": "Invalid coupon code.",
@@ -712,6 +2685,7 @@
     "couponClinicOnly": "CLINIC15 applies only to Clinic Essentials products.",
     "couponNotEligible": "This coupon is not eligible for the current cart.",
     "couponApplied": "{code} applied.",
+    "couponValidStrongerPromotion": "{code} is valid. A stronger eligible promotion is currently giving you the better price.",
     "couponDemoHint": "Available demo codes: WELCOME10 (EGP 500 min), SAVE100 (EGP 1,000 min), FREESHIP (EGP 1,000 min), CLINIC15 (Clinic Essentials only, EGP 1,500 eligible subtotal).",
     "removeCoupon": "Remove",
     "discount": "Discount",
@@ -769,6 +2743,12 @@
     "moreTitle": "Need More Supplies?",
     "moreBody": "Explore products commonly ordered with your latest purchase."
   },
+  "welcomeRewards": {
+    "headline": "Get EGP {value} toward your first order",
+    "description": "Create your X Dental Store account and receive {points} welcome points (EGP {value}) to use on your first eligible purchase. Keep earning more points with every completed order.",
+    "cta": "Create Account & Claim {points} Points",
+    "note": "Valid for {days} days on eligible product purchases of EGP {minimum} or more. Points cannot be used for shipping."
+  },
   "checkout": {
     "title": "Checkout",
     "intro": "Complete your order details and choose your preferred delivery and payment method.",
@@ -816,7 +2796,8 @@
     "freeShipping": "Free Shipping",
     "pts": "pts",
     "paymentMethod": "Payment Method",
-    "cashNote": "Pay with cash when your order is delivered. Please have the exact amount ready.",
+    "cashNote": "Pay in cash when your order is delivered by the X Dental Store team.",
+    "internalDeliveryNote": "Delivery will be handled by the X Dental Store team. Our team will contact you to confirm delivery details.",
     "cardNumber": "Card number",
     "cardExpiry": "MM / YY",
     "cardName": "Name on card",
@@ -842,6 +2823,7 @@
       "firstNameRequired": "First name is required.",
       "lastNameRequired": "Last name is required.",
       "phoneRequired": "Phone number is required.",
+      "phoneInvalid": "Enter a valid Egyptian mobile number.",
       "emailRequired": "Email address is required.",
       "emailInvalid": "Enter a valid email address.",
       "governorateRequired": "Governorate is required.",
@@ -864,10 +2846,44 @@
     "orderReady": "Your order will be saved securely when you place it.",
     "placingOrder": "Placing Order...",
     "createFailed": "We could not create your order. Please review your details and try again.",
+    "idempotencyConflict": "This checkout attempt has changed. Review your order and submit it again.",
+    "idempotencyUnavailable": "Secure checkout retry protection is unavailable. Please refresh the page and try again.",
+    "networkResultUnknown": "We could not confirm the result. Keep this checkout open and try again; the same request will be safely reused.",
     "redirectingToCart": "Your cart is empty. Returning to the cart.",
     "itemsReview": "Items",
     "itemsSubtotal": "Items Subtotal",
+    "originalProductsSubtotal": "Original products subtotal",
+    "productPromotionSavings": "Flash Sale savings",
+    "shippingBeforeDiscount": "Shipping before discount",
+    "deliveryOfferDiscount": "Delivery offer discount",
+    "vipShippingDiscount": "VIP delivery saving",
+    "freeShippingApplied": "Free shipping applied",
+    "finalShipping": "Final shipping",
+    "totalSavings": "Total savings",
+    "pricingReviewUnavailable": "Secure pricing review is temporarily unavailable. Please try again.",
+    "priceChangedReview": "The price changed before submission. Review the updated total, then place the order again.",
+    "deliveryOfferLocationTitle": "Delivery offer location",
+    "deliveryOfferLocationLabel": "Delivery offer location",
+    "manualAddressNoZoneOffer": "Use manual delivery address",
+    "deliveryOfferLocationHelp": "Select a saved clinic location to check location-based delivery offers, or use your manual delivery address without a zone-based offer.",
+    "manualAddressNoZoneOfferHelp": "Location-based delivery offers are not applied to manual addresses.",
+    "savedLocationZoneStatus": "The selected saved location and its delivery zone are verified securely at checkout.",
     "secureNote": "Your order details are secure and will only be used to process your purchase.",
+    "vipDiscount": "VIP benefit",
+    "rewards": {
+      "title": "Rewards & Wallet",
+      "pointsLabel": "Redeem reward points",
+      "pointsAvailable": "{points} available - maximum {maximum}",
+      "pointsRule": "100 points = EGP 10. Points apply to products only and cannot pay shipping.",
+      "welcomeMinimumRule": "Welcome points require at least EGP {minimum} of eligible products and expire after {days} days.",
+      "walletLabel": "Use store credit",
+      "walletAvailable": "Available: {amount}",
+      "walletRule": "Store credit can cover products and shipping. Any remainder stays Cash on Delivery.",
+      "useMaximum": "Use maximum",
+      "pointsRedeemed": "Points redeemed",
+      "walletUsed": "Wallet credit used",
+      "remainingCod": "Remaining Cash on Delivery"
+    },
     "fallbackAddress": {
       "building": "270C Villa, north academy,",
       "street": "Anour St.,",
@@ -936,7 +2952,8 @@
     "viewOrders": "View my orders",
     "continueShopping": "Continue shopping",
     "loading": "Loading your order...",
-    "notFound": "A valid order confirmation could not be found."
+    "notFound": "A valid order confirmation could not be found.",
+    "pricingTitle": "Confirmed pricing"
   },
   "auth": {
     "serviceUnavailable": "Authentication service is currently unavailable. Please try again later.",
@@ -944,7 +2961,8 @@
       "toastTitle": "Welcome back",
       "toastDescription": "Redirecting to your dashboard...",
       "invalidTitle": "Sign in failed",
-      "invalidDescription": "Check your email and password, then try again.",
+      "invalidDescription": "We could not sign you in with these details. Check your email and password, or use Account Access Help if you need assistance restoring access.",
+      "accountAccessHelp": "Account Access Help",
       "sideTitle": "Welcome back to your clinic supply hub.",
       "sideBody": "Sign in to manage your orders, review saved supplies, and keep your clinic moving.",
       "sideCaption": "Supplies made simple",
@@ -958,6 +2976,9 @@
       "hidePassword": "Hide password",
       "showPassword": "Show password",
       "forgot": "Forgot password?",
+      "forgotHelpTitle": "For password reset, please contact X Dental support.",
+      "forgotWhatsApp": "WhatsApp",
+      "forgotPhone": "Phone",
       "signingIn": "Signing in...",
       "signIn": "Sign In",
       "noAccount": "Don't have an account?",
@@ -971,6 +2992,19 @@
       "fullName": "Full name",
       "fullNamePlaceholder": "Enter your full name",
       "phonePlaceholder": "+20 100 000 0000",
+      "clinicSpecialty": "Clinic Specialty",
+      "clinicSpecialtyPlaceholder": "Select your clinic specialty",
+      "clinicSpecialtyRequired": "Select your clinic specialty to continue.",
+      "clinicLocations": "Clinic locations",
+      "clinicLocationsPlaceholder": "Select your clinic locations",
+      "clinicLocationsAddAnother": "Add another location",
+      "clinicLocationsSearch": "Search delivery areas",
+      "clinicLocationsEmpty": "No delivery areas found.",
+      "clinicLocationsOtherLabel": "Other location name",
+      "clinicLocationsOtherPlaceholder": "Enter your clinic area",
+      "clinicLocationsRequired": "Select at least one clinic location to continue.",
+      "clinicLocationsOtherRequired": "Enter your clinic area for Other.",
+      "clinicLocationsLoadError": "Delivery areas could not be loaded. Please try again.",
       "confirmPassword": "Confirm password",
       "hideConfirmPassword": "Hide confirmation password",
       "showConfirmPassword": "Show confirmation password",
@@ -985,6 +3019,15 @@
       "toastTitle": "Account created successfully",
       "toastDescription": "Redirecting to your dashboard..."
     }
+  },
+  "deliveryAlerts": {
+    "locationNeededTitle": "Add your clinic location",
+    "locationNeededDescription": "Save your clinic’s delivery area to see available delivery services and location-based offers.",
+    "updateProfile": "Update profile",
+    "more": "more",
+    "orderBefore": "Order before {time}",
+    "dismiss": "Dismiss delivery alert",
+    "hideForToday": "Hide for today"
   },
   "notFound": {
     "title": "404 Page Not Found",
@@ -1027,6 +3070,10 @@
         "title": "Frequently Asked Questions | X Dental Store",
         "description": "Find answers about quotes, supply lists, product requests, account tools, and support at X Dental Store."
       },
+      "howToOrder": {
+        "title": "How to Order | X Dental Store",
+        "description": "Learn how to browse products, request quotes, choose payment methods, and track your order at X Dental Store."
+      },
       "cart": {
         "title": "Shopping Cart | X Dental Store",
         "description": "Review selected dental supplies and proceed to checkout."
@@ -1059,6 +3106,7 @@
   },
   "accountPages": {
     "address": {
+      "addAddressComingSoon": "Add Address (Coming soon)",
       "addAddress": "Add Address",
       "addNew": "Add New",
       "addNewAddress": "Add New Address",
@@ -1073,6 +3121,10 @@
       "deleteNamed": "Delete {name} address",
       "deleteTitle": "Delete Address?",
       "description": "Manage delivery locations for clinic orders, quotes, and product requests.",
+      "comingSoonDescription": "Saved addresses are not active yet. For now, please enter your delivery address during checkout.",
+      "emptyTitle": "No saved addresses yet",
+      "emptyBody": "Saving addresses to your account will be available soon. Until then, your delivery address is entered with each order at checkout, and our team confirms it with you before delivery.",
+      "browseProducts": "Browse Products",
       "editAddress": "Edit Address",
       "editNamed": "Edit {name} address",
       "eyebrow": "Delivery Details",
@@ -1091,6 +3143,7 @@
       "title": "Address Book"
     },
     "branches": {
+      "addBranchComingSoon": "Add Branch (Coming soon)",
       "addBranch": "Add Branch",
       "addNewBranch": "Add New Branch",
       "branch": "Branch",
@@ -1103,6 +3156,9 @@
       "deleteDescription": "This will remove {name} from clinic branch management. Existing orders will not be changed.",
       "deleteTitle": "Delete Branch?",
       "description": "Manage clinic locations, delivery contacts, and branch-specific supply lists.",
+      "comingSoonDescription": "Clinic branches will be available soon for clinics with multiple delivery locations.",
+      "emptyTitle": "Branch management is coming soon",
+      "emptyBody": "You will be able to save multiple clinic locations and choose one during checkout. Until then, please add branch details in the delivery notes of your order, or contact support for multi-branch deliveries.",
       "editBranch": "Edit Branch",
       "editBranchNamed": "Edit {name}",
       "eyebrow": "Clinic Management",
@@ -1146,14 +3202,20 @@
       "subtotal": "Subtotal",
       "summary": "Summary",
       "total": "Total",
-      "viewDetails": "View Details"
+      "viewDetails": "View Details",
+      "saving": "Saving...",
+      "comingSoon": "Coming soon"
     },
     "dashboard": {
       "metrics": {
-        "activeOrders": "Active Orders",
+      "activeOrders": "Active Orders",
+      "openOrders": "Open Orders",
         "pendingQuotes": "Pending Quotes",
         "wishlistItems": "Wishlist Items",
-        "xPoints": "X-Points"
+      "xPoints": "X-Points",
+      "availablePoints": "Available Points",
+      "pointsWorth": "Worth {amount}",
+      "pendingPoints": "{points} pending after delivery"
       },
       "overviewEyebrow": "Account Overview",
       "purchasingToolsTitle": "Clinic Purchasing Tools",
@@ -1194,6 +3256,22 @@
       "quickActionsBody": "Common tasks for managing your clinic orders and purchasing flow.",
       "quickActionsTitle": "Quick Actions",
       "recentOrdersTitle": "Recent Orders",
+      "vipBenefitsTitle": "Your VIP Benefits",
+    "vipBenefitsDescription": "Your automatic VIP tier benefits are active and verified by the server at checkout.",
+    "vipAutomaticEarning": "2 points per EGP 10 after delivered orders",
+    "vipAutomaticStandard": "Standard delivery free",
+    "vipAutomaticFast": "Fast delivery charged only at the upgrade difference",
+    "vipAutomaticPickup": "Pickup free",
+    "vipAdditionalBenefits": "Additional assigned benefits",
+      "vipPromoCode": "Your personal code",
+      "vipMinimumOrder": "Minimum order: {amount}",
+    "vipNoBenefits": "No additional benefit is currently assigned.",
+      "rewardsWalletLink": "Rewards & Wallet",
+      "dataLoadError": "Some account data couldn't be loaded.",
+      "dataLoadRetry": "Retry",
+    "pendingWelcomePoints": "{points} pending welcome points",
+    "pendingPurchasePoints": "{points} purchase points become available after delivery",
+      "viewRewardsBalances": "View points, store credit and activity",
       "welcome": "Welcome back, {name}",
       "accountSupportToolsTitle": "Account & Support Tools",
       "accountSupportToolsDescription": "Manage your account details, rewards, notifications, and support requests.",
@@ -1230,12 +3308,27 @@
       "emptyDescription": "New account updates will appear here.",
       "emptyTitle": "You're all caught up",
       "eyebrow": "Account Updates",
+      "latest": "Latest notifications",
+      "markAsRead": "Mark as read",
       "markAllAsReadCount": "Mark All as Read ({count})",
       "markedAllRead": "All notifications marked as read.",
       "loadFailed": "Failed to load notifications.",
+      "newNotification": "New notification",
+      "noNotifications": "No notifications yet.",
+      "open": "Open",
+      "relative": {
+        "justNow": "Just now",
+        "oneMinuteAgo": "1 minute ago",
+        "minutesAgo": "{count} minutes ago",
+        "oneHourAgo": "1 hour ago",
+        "hoursAgo": "{count} hours ago",
+        "yesterday": "Yesterday"
+      },
       "updateFailed": "Failed to update notifications.",
       "title": "Notifications",
-      "unreadNotification": "Unread notification"
+      "unreadCount": "{count} unread",
+      "unreadNotification": "Unread notification",
+      "viewAll": "View all notifications"
     },
     "orders": {
       "completePayment": "Complete Payment",
@@ -1248,6 +3341,7 @@
         "notFound": "Order not found",
         "orderStatus": "Order Status",
         "paymentInfo": "Payment Info",
+        "paymentStatus": "Payment status",
         "placedOn": "Placed on {date}",
         "reorderItems": "Reorder Items",
         "shippingInfo": "Shipping Info",
@@ -1260,6 +3354,7 @@
       "loading": "Loading orders...",
       "loadError": "Orders could not be loaded. Please try again.",
       "noProducts": "No products",
+      "paymentStatus": "Payment: {status}",
       "placedOn": "Placed {date}",
       "reorder": "Reorder",
       "searchLabel": "Search orders",
@@ -1340,8 +3435,10 @@
       "notesPlaceholder": "Add product size, shade, files, or supplier preference.",
       "productName": "Product Name",
       "productNamePlaceholder": "Example: M3-Pro Gold Rotary Files Double",
+      "productRequired": "Enter a product name.",
       "quantityNeeded": "Quantity Needed",
       "quantityPlaceholder": "2 packs",
+      "quantityRequired": "Enter a quantity of at least 1.",
       "requestCount": "{count} requests",
       "requestProduct": "Request Product",
       "requestTitle": "Request {requestNumber}",
@@ -1356,6 +3453,19 @@
       "changePhoto": "Change Photo",
       "chooseProfilePhoto": "Choose profile photo",
       "clinicName": "Clinic Name",
+      "clinicNamePlaceholder": "Enter your clinic name",
+      "clinicSpecialty": "Clinic Specialty",
+      "clinicLocations": "Clinic locations",
+      "clinicLocationsDescription": "We use these locations only to show delivery offers that apply to your clinic.",
+      "clinicLocationsPlaceholder": "Select your clinic locations",
+      "clinicLocationsAddAnother": "Add another location",
+      "clinicLocationsSearch": "Search delivery areas",
+      "clinicLocationsEmpty": "No delivery areas found.",
+      "clinicLocationsOtherLabel": "Other location name",
+      "clinicLocationsOtherPlaceholder": "Enter your clinic area",
+      "clinicLocationsRequired": "Select at least one clinic location.",
+      "clinicLocationsOtherRequired": "Enter the clinic area for Other.",
+      "clinicLocationsLoadError": "Delivery areas could not be loaded. Please try again.",
       "contactInformation": "Contact Information",
       "contactInformationDescription": "Use reachable contact details for order confirmation, quotes, and delivery support.",
       "description": "Update your personal details and contact information.",
@@ -1365,19 +3475,33 @@
       "lastName": "Last Name",
       "messages": {
         "changesDiscarded": "Changes discarded.",
+        "clinicNameTooLong": "Clinic name must be 120 characters or fewer.",
+        "clinicNameWhitespace": "Clinic name cannot contain only spaces.",
         "photoSelected": "Profile photo \"{fileName}\" selected.",
-        "profileSaved": "Profile changes saved."
+        "profileSaved": "Profile changes saved.",
+        "profileSaveFailed": "Profile changes could not be saved. Please try again.",
+        "nameRequired": "Please enter your name."
       },
       "personalInformation": "Personal Information",
       "personalInformationDescription": "Keep your name, role, and clinic details up to date.",
       "phoneNumber": "Phone Number",
+      "photoAlt": "Profile photo",
+      "photoInvalidFile": "The selected file does not contain a valid image.",
+      "photoInvalidType": "Choose a JPEG, PNG, or WebP image.",
+      "photoTooLarge": "Profile images must be 5 MB or smaller.",
+      "photoUploadFailed": "Profile photo could not be uploaded. Please try again.",
+      "photoUploadSuccess": "Profile photo updated successfully.",
       "professionalRole": "Professional Role",
       "selectedPhoto": "Selected photo: {fileName}",
       "title": "Profile Settings",
+      "uploadingPhoto": "Uploading...",
       "verifiedAccount": "Verified Account",
       "verifiedEmail": "Verified account email.",
       "whatsappHelper": "Used only for order and delivery support when needed.",
-      "whatsappNumber": "WhatsApp Number"
+      "whatsappNumber": "WhatsApp Number",
+      "emailReadOnly": "To change your account email, please contact support.",
+      "fieldComingSoon": "Saving this field will be available soon.",
+      "changePhotoComingSoon": "Change Photo (Coming soon)"
     },
     "quotes": {
       "acceptedLabel": "Accepted:",
@@ -1475,13 +3599,13 @@
       "currency": "Currency",
       "currentPassword": "Current Password",
       "deactivateAccount": "Deactivate Account",
-      "deactivateAccountDescription": "This starts an account deactivation request. You can contact support later if you need the account restored.",
+      "deactivateAccountDescription": "After administrator approval and completion, your account becomes inaccessible and all sessions are revoked. Orders and business records remain preserved.",
       "deactivateAccountQuestion": "Deactivate Account?",
-      "deactivationSubmitted": "Account deactivation request submitted.",
+      "deactivationSubmitted": "Your account deactivation request was submitted for administrator review.",
       "deleteAccount": "Delete Account",
-      "deleteAccountDescription": "This starts an account deletion request. Orders, quotes, supply lists, and saved data may no longer be available once the request is processed.",
+      "deleteAccountDescription": "Deletion requires administrator review. If completed, direct profile details are anonymized while transactional records required for store operations remain preserved.",
       "deleteAccountQuestion": "Delete Account?",
-      "deletionSubmitted": "Account deletion request submitted.",
+      "deletionSubmitted": "Your account deletion request was submitted for administrator review.",
       "description": "Manage your account preferences, security, notifications, language, and privacy options.",
       "eyebrow": "Account Control",
       "language": "Language",
@@ -1495,12 +3619,15 @@
       "notificationPreferencesDescription": "Choose which account updates you want to receive.",
       "orderUpdates": "Order Updates",
       "password": "Password",
-      "passwordChanged": "Password changed successfully.",
+      "wrongCurrentPassword": "The current password is incorrect.",
+      "passwordChangeFailed": "The password could not be changed. Please try again.",
       "passwordHint": "Use at least 8 characters.",
       "passwordMismatch": "New password and confirmation do not match.",
       "passwordSecurity": "Password & Security",
       "passwordSecurityDescription": "Manage your password, active sessions, and account protection.",
       "passwordTooShort": "New password must be at least 8 characters.",
+      "preferencesComingSoon": "Preference controls are not active yet and will be enabled soon.",
+      "accountActionFailed": "The account request could not be updated. Please try again.",
       "personalizedRecommendations": "Personalized product recommendations",
       "privacyPreferences": "Privacy Preferences",
       "privacyPreferencesDescription": "Manage how your data is used for recommendations and account support.",
@@ -1516,7 +3643,50 @@
       "title": "Settings",
       "unsubscribeAnytime": "You can unsubscribe from marketing messages at any time.",
       "useOrderHistory": "Use order history for reorder suggestions",
-      "weeklyOffers": "Weekly offers"
+      "weeklyOffers": "Weekly offers",
+      "passwordAdvice": "Use a strong password that you do not use anywhere else.",
+      "arabic": "Arabic",
+      "lastActive": "Last active",
+      "legacySessionNotice": "This development session predates secure session tracking. Sign in again once to manage all devices.",
+      "loadFailed": "Your settings could not be loaded. Please try again.",
+      "marketingConsentNote": "Marketing messages are off until you explicitly opt in. Transactional and support messages are separate.",
+      "noTrackedSessions": "No tracked sessions are available yet.",
+      "notificationPreferenceNote": "These choices apply to future optional notifications. Security alerts always remain enabled.",
+      "otherSessionsRevoked": "{count} other device(s) signed out.",
+      "passwordChanged": "Password changed successfully. {count} other device(s) were signed out.",
+      "privacyPreferenceNote": "Your choices are saved now. Personalized recommendation features will use them when those features are introduced.",
+      "saveFailed": "Your preference could not be saved. Please try again.",
+      "saveFailedTitle": "Preference not saved",
+      "sessionActionFailed": "The session could not be signed out.",
+      "sessionRevoked": "The selected device was signed out.",
+      "signOutOtherDevices": "Sign Out Other Devices",
+      "thisDevice": "This device",
+      "accountRequestReason": "Reason (optional)",
+      "accountRequestDetails": "Additional details (optional)",
+      "typeDeleteConfirmation": "Type DELETE to confirm this reviewed deletion request.",
+      "confirmDeactivationRequest": "I understand that my account becomes inaccessible only after an administrator approves and completes this request.",
+      "accountRequestSubmitted": "Your account request was submitted for administrator review.",
+      "accountRequestAlreadyActive": "An active request of this type already exists. Its current status is shown below.",
+      "accountRequestCanceled": "Your account request was canceled.",
+      "accountRequestHistory": "Your account requests",
+      "cancelAccountRequest": "Cancel request",
+      "reviewerResponse": "Reviewer response",
+      "approvedDeactivationExplanation": "Your request has been approved and is awaiting completion by an administrator. Your account remains active until completion.",
+      "approvedDeletionExplanation": "Your deletion request has been approved and is awaiting final completion. Your account remains accessible until the administrator completes the deletion and anonymization process.",
+      "completedDeactivationExplanation": "Your account has been deactivated. To restore access, contact X Dental Store support. An administrator must review and reactivate the account. You will need to sign in again after reactivation.",
+      "accountAccessHelp": "Account Access Help",
+      "accountRequestTypes": {
+        "deactivation": "Deactivation",
+        "deletion": "Deletion"
+      },
+      "accountRequestStatuses": {
+        "pending": "Pending",
+        "underReview": "Under Review",
+        "approved": "Approved — Awaiting Completion",
+        "rejected": "Rejected",
+        "canceled": "Canceled",
+        "completed": "Completed"
+      }
     },
     "statuses": {
       "searching": "Searching"
@@ -1554,6 +3724,8 @@
           "optionsSelected": "Product options selected.",
           "productAdded": "{name} added to this list.",
           "productRemoved": "Product removed from this list.",
+          "quoteItemLimit": "A quote request can include up to 50 different products.",
+          "quoteNeedsProducts": "Add at least one product before requesting a quote.",
           "quoteSubmitted": "Quote request submitted for {name}.",
           "reset": "List reset to its saved version.",
           "saved": "List changes saved.",
@@ -1699,8 +3871,10 @@
         "outOfStock": "Out of Stock",
         "paid": "Paid",
         "pending": "Pending",
+        "pendingCollection": "Pending Collection",
         "pendingPayment": "Pending Payment",
         "pendingReview": "Pending Review",
+        "preparing": "Preparing",
         "processing": "Processing",
         "refunded": "Refunded",
         "rejected": "Rejected",
@@ -1871,6 +4045,13 @@
       "notifications": {
         "orderProcessingTitle": "Order #ORD-2023-1102 is processing",
         "orderProcessingMessage": "Your order has been confirmed and is now being prepared for delivery.",
+        "orderStatusUpdatedTitle": "Order status updated",
+        "orderPendingMessage": "Your order is pending review.",
+        "orderConfirmedTitle": "Order confirmed",
+        "orderRejectedTitle": "Order rejected",
+        "orderRejectedMessage": "Your order could not be confirmed. Please contact support if you need help.",
+        "orderCanceledTitle": "Order canceled",
+        "orderCanceledMessage": "Your order has been canceled. Contact support if you have any questions.",
         "quoteApprovedTitle": "Quote #XQ-2038 has been approved",
         "quoteApprovedMessage": "Your quote is ready to review and will expire on 30 July 2025.",
         "checkingSupplierTitle": "We're checking supplier availability",
@@ -1924,6 +4105,17 @@
       }
     },
     "wallet": {
+      "comingSoonDescription": "Wallet and rewards are not active yet. Your points and wallet balance will appear here once the rewards program is launched.",
+      "notActiveNotice": "The rewards program is not active yet. Points cannot be earned or redeemed at the moment, and wallet credit cannot be used at checkout.",
+      "pointsBalance": "Points",
+      "walletBalance": "Wallet Balance",
+      "pendingRewards": "Pending rewards",
+      "rewardsStatus": "Rewards Status",
+      "notActiveShort": "Not active yet",
+      "whatToExpectTitle": "What to expect",
+      "expectEarn": "Earn points on completed orders once the program starts.",
+      "expectRedeem": "Redeem points and wallet credit during checkout.",
+      "expectHistory": "Follow your full earning and redemption history here.",
       "availablePoints": "Available Points",
       "availableRewards": "Available Rewards",
       "availableRewardsDescription": "Use rewards and vouchers when eligible during checkout.",
@@ -1953,7 +4145,46 @@
       "title": "Wallet & Points",
       "useAtCheckout": "Use at Checkout",
       "usePointsAtCheckout": "Use Points at Checkout",
-      "viewRewards": "View Rewards"
+      "viewRewards": "View Rewards",
+      "rewardsWalletTitle": "Rewards & Wallet",
+      "realDescription": "Track earned points and EGP-denominated store credit. Points are rewards for eligible checkout use and are not cash.",
+  "eligibleRewardValue": "Eligible reward value",
+  "rewardValue": "Reward value",
+  "pendingHelp": "Purchase points become available after delivery.",
+  "expires": "Expires",
+      "loadError": "Rewards information could not be loaded. Please try again.",
+      "loading": "Loading your rewards and wallet…",
+      "temporarilyPaused": "Rewards redemption is temporarily paused. Your balances and history remain safe.",
+      "pointsActivity": "Points activity",
+      "walletActivity": "Wallet activity",
+      "noPointsActivity": "No points activity yet.",
+      "noWalletActivity": "No wallet activity yet.",
+      "programRules": "How rewards work",
+      "earningRules": "Earning",
+      "redemptionRules": "Redemption",
+      "standardEarnRule": "Standard customers earn 1 point for each complete EGP 10 block of eligible delivered-order spending.",
+      "vipEarnRule": "VIP customers earn 2 points for each complete EGP 10 block of eligible delivered-order spending.",
+      "redemptionRuleBody": "Redeem in 100-point increments, where 100 points gives EGP 10 of eligible product value, up to 20% of the product subtotal. Points expire 12 months after activation.",
+      "welcomeRuleBody": "Welcome points are available immediately, expire after {days} days, and require at least EGP {minimum} of eligible products.",
+      "notCashNotice": "Points and store credit cannot be withdrawn or transferred. Wallet credit is used only for X Dental Store orders.",
+      "activity": {
+        "welcomePending": "Welcome points pending",
+        "welcomeActivated": "Welcome points activated",
+        "welcomeGranted": "Welcome points granted",
+        "welcomeRestore": "Welcome points restored",
+        "orderEarn": "Points earned from order",
+        "redemption": "Points redeemed",
+        "restore": "Points restored",
+        "reversal": "Points reversed",
+        "expiration": "Points expired",
+        "adjustment": "Points adjustment",
+        "refundCredit": "Approved refund credit",
+        "promotionalCredit": "Promotional store credit",
+        "adminCredit": "Store credit added",
+        "adminDebit": "Store credit adjustment",
+        "orderPayment": "Wallet used on order",
+        "walletRestore": "Wallet credit restored"
+      }
     },
     "wishlist": {
       "addAllToCart": "Add All to Cart",
@@ -1962,6 +4193,8 @@
       "emptyDescription": "Save products from the catalog by clicking the heart icon.",
       "emptyTitle": "Your wishlist is empty",
       "eyebrow": "Saved Products",
+      "loadErrorDescription": "We couldn't load your saved products. Please check your connection and try again.",
+      "loadErrorTitle": "Couldn't load your wishlist",
       "messages": {
         "addedToCart": "{count} wishlist products added to cart.",
         "cleared": "Wishlist cleared.",
@@ -1969,6 +4202,7 @@
       },
       "noSavedProductsDescription": "Try changing the search term or stock filter to find another saved product.",
       "noSavedProductsTitle": "No saved products found",
+      "retry": "Try Again",
       "recommendedDescription": "Explore dental supplies commonly saved and reordered by clinics.",
       "recommendedTitle": "Recommended for Your Practice",
       "searchLabel": "Search wishlist",
@@ -1976,6 +4210,9 @@
       "sortLabel": "Sort wishlist",
       "stockFilterLabel": "Filter wishlist by stock",
       "title": "Wishlist"
+    },
+    "featureUnavailable": {
+      "contactSupport": "Contact Support"
     }
   }
 }

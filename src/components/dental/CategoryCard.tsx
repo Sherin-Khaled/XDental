@@ -16,7 +16,7 @@ export function CategoryCard({ id, name, slug, icon, productCount }: CategoryCar
   return (
     <Link href={`/products?category=${slug}`} className="group block outline-none" data-testid={`link-category-${id}`}>
       <GlassCard hoverEffect className="p-6 h-full flex flex-col items-center justify-center text-center gap-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]">
-        <div className="w-16 h-16 rounded-full bg-[#EFE8D8]/50 flex items-center justify-center text-[var(--xd-gold-text)] transition-transform duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+        <div className="xd-gold-icon xd-icon-card-surface w-16 h-16 rounded-full bg-[#EFE8D8]/50 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
           <IconComponent size={28} strokeWidth={1.5} />
         </div>
         <div>

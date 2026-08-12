@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-full font-sans font-bold transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--xd-bg)] disabled:pointer-events-none disabled:opacity-55 motion-reduce:transition-none motion-reduce:active:scale-100",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-full font-sans font-bold transition-[transform,filter,background-color,border-color,color,box-shadow] duration-200 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--xd-bg)] disabled:pointer-events-none disabled:opacity-55 motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
         primary:
-          "bg-[var(--xd-gold)] text-[#3A2600] hover:-translate-y-[1px] hover:bg-[var(--xd-gold-hover)] hover:text-[#2A1A00] hover:shadow-[var(--xd-shadow-hover)]",
+          "xd-gradient-primary-button hover:-translate-y-[1px]",
         secondary:
           "border border-[#050505]/10 bg-white/70 text-[#050505] backdrop-blur-md hover:-translate-y-[1px] hover:border-[var(--xd-gold-border-hover)] hover:bg-white hover:shadow-[0px_10px_24px_rgba(5,5,5,0.06)]",
         tertiary:

@@ -37,6 +37,22 @@
       rel="stylesheet"
     />
 
+    <!-- Apply the saved/system theme before React paints. -->
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem("xdental.theme");
+          var theme = storedTheme === "light" || storedTheme === "dark"
+            ? storedTheme
+            : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          var root = document.documentElement;
+          root.classList.toggle("dark", theme === "dark");
+          root.dataset.theme = theme;
+          root.style.colorScheme = theme;
+        } catch (_) {}
+      })();
+    </script>
+
     <!-- Theme color (mobile browser chrome) -->
     <meta name="theme-color" content="#F8F7F2" />
   </head>

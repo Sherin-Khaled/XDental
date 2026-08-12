@@ -16,12 +16,17 @@ export const getOrderStatusStyle = (status: string) => {
   switch (status.toLowerCase()) {
     case 'delivered':
     case 'confirmed':
+    case 'verified':
       return { bg: 'bg-[#16803C]/10', text: 'text-[#16803C]', border: 'border-[#16803C]/20' };
     case 'processing':
     case 'pending':
+    case 'pending review':
+    case 'pending collection':
+    case 'preparing':
       return { bg: 'bg-[var(--xd-gold-bg-soft)]', text: 'text-[var(--xd-gold-text)]', border: 'border-[var(--xd-gold-border-soft)]' };
     case 'shipped':
     case 'sent to supplier/system':
+    case 'out for delivery':
       return { bg: 'bg-[#25B8C7]/10', text: 'text-[#178A96]', border: 'border-[#25B8C7]/20' };
     case 'cancelled':
     case 'canceled':

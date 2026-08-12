@@ -22,6 +22,7 @@ import { accountT, accountValue } from "@/lib/accountI18n";
 import {
   getMyOrders,
   getOrderStatusLabel,
+  getPaymentStatusLabel,
   type CustomerOrder,
   type OrderItem,
 } from "@/services/orders";
@@ -30,9 +31,11 @@ import { formatCurrency } from "@/utils";
 type Order = CustomerOrder;
 type OrderTab = "current" | "history";
 type OrderDisplayStatus =
-  | "Pending"
-  | "Sent to Supplier/System"
+  | "Pending Review"
   | "Confirmed"
+  | "Preparing"
+  | "Out for Delivery"
+  | "Delivered"
   | "Rejected"
   | "Canceled";
 type StatusFilter = "all" | OrderDisplayStatus;
@@ -43,9 +46,11 @@ const controlClassName =
   "h-12 rounded-full border border-[#050505]/[0.08] bg-white/70 text-[14px] text-[#050505] shadow-none backdrop-blur outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10";
 
 const statusBadgeClasses: Record<OrderDisplayStatus, string> = {
-  Pending: "border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]",
-  "Sent to Supplier/System": "border-[#25B8C7]/20 bg-[#25B8C7]/10 text-[#178A96]",
+  "Pending Review": "border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]",
   Confirmed: "border-[#16803C]/20 bg-[#16803C]/10 text-[#16803C]",
+  Preparing: "border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]",
+  "Out for Delivery": "border-[#25B8C7]/20 bg-[#25B8C7]/10 text-[#178A96]",
+  Delivered: "border-[#16803C]/20 bg-[#16803C]/10 text-[#16803C]",
   Rejected: "border-[#F44336]/20 bg-[#F44336]/10 text-[#B42318]",
   Canceled: "border-[#F44336]/20 bg-[#F44336]/10 text-[#B42318]",
 };
@@ -63,7 +68,7 @@ function getDisplayStatus(order: Order): OrderDisplayStatus {
 }
 
 function isHistoryOrder(order: Order) {
-  return order.status === "REJECTED" || order.status === "CANCELED";
+  return order.status === "DELIVERED" || order.status === "REJECTED" || order.status === "CANCELED";
 }
 
 function getReferenceTime(orders: Order[]) {
@@ -100,9 +105,11 @@ function getProductPreview(order: Order) {
 function getStatusOptions(t: ReturnType<typeof useLanguage>["t"]): DentalSelectOption[] {
   return [
     { value: "all", label: accountValue(t, "All Statuses") },
-    { value: "Pending", label: accountValue(t, "Pending") },
-    { value: "Sent to Supplier/System", label: accountValue(t, "Sent to Supplier/System") },
+    { value: "Pending Review", label: accountValue(t, "Pending Review") },
     { value: "Confirmed", label: accountValue(t, "Confirmed") },
+    { value: "Preparing", label: accountValue(t, "Preparing") },
+    { value: "Out for Delivery", label: accountValue(t, "Out for Delivery") },
+    { value: "Delivered", label: accountValue(t, "Delivered") },
     { value: "Rejected", label: accountValue(t, "Rejected") },
     { value: "Canceled", label: accountValue(t, "Canceled") },
   ];
@@ -278,6 +285,11 @@ function OrderCard({ order }: { order: Order }) {
             <p className="mt-1 text-[13px] font-medium text-[#8A8D9A]">
               {getDeliveryMethodLabel(t, order.deliveryMethod)} - {getPaymentMethodLabel(t, order.paymentMethod)}
             </p>
+            <p className="mt-1 text-[12px] font-semibold text-[var(--xd-gold-text)]">
+              {accountT(t, "orders.paymentStatus", "Payment: {status}", {
+                status: accountValue(t, getPaymentStatusLabel(order.paymentStatus)),
+              })}
+            </p>
           </div>
         </div>
 
@@ -417,7 +429,7 @@ export default function AccountOrders() {
                   className={cn(
                     "h-10 rounded-full px-5 text-[13px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] sm:h-11",
                     activeTab === value
-                      ? "bg-[var(--xd-gold-active)] text-white shadow-[0_8px_20px_rgba(212,167,44,0.18)]"
+                      ? "xd-account-selected-gold-control xd-gradient-gold shadow-[var(--xd-gold-gradient-shadow)]"
                       : "text-[var(--xd-gold-text)] hover:bg-[var(--xd-gold-active)]/[0.08] hover:text-[#050505]"
                   )}
                 >

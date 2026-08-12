@@ -1,6 +1,13 @@
 import { prisma } from "../config/db.js";
-import { sendEmailIfConfigured } from "../services/email.service.js";
-import { createNotification } from "../services/notification.service.js";
+import {
+  createSubmissionEmailDelivery,
+  getEmailDeliveryMap,
+} from "../services/email.service.js";
+import {
+  createNotification,
+  deliverNotificationPush,
+} from "../services/notification.service.js";
+import { createFirstMessageAcknowledgement } from "../services/supportAcknowledgement.service.js";
 import { cleanText, isValidId, nextPublicNumber, safeUser } from "../utils/records.js";
 
 const STATUS_TO_DATABASE = {
@@ -68,6 +75,7 @@ function serializeRequest(productRequest) {
     syncStatus: productRequest.syncStatus ?? null,
     lastSyncedAt: productRequest.lastSyncedAt ?? null,
     resolvedAt: productRequest.resolvedAt ?? null,
+    emailDelivery: productRequest.emailDelivery ?? null,
     createdAt: productRequest.createdAt,
     updatedAt: productRequest.updatedAt,
   };
@@ -145,9 +153,10 @@ export async function createProductRequest(request, response) {
           body: customerMessage,
         },
       });
+      await createFirstMessageAcknowledgement(database, thread.id);
     }
 
-    await createNotification(
+    const notification = await createNotification(
       {
         userId: request.user.id,
         type: "PRODUCT_REQUEST",
@@ -159,11 +168,35 @@ export async function createProductRequest(request, response) {
       database
     );
 
-    return { productRequest, thread };
+    return { productRequest, thread, notification };
+  });
+
+  await deliverNotificationPush(result.notification);
+  const isMachineInquiry = /\b(machine|equipment|device)\b/i.test(
+    `${productName} ${request.body?.category ?? ""}`
+  );
+  const emailResult = await createSubmissionEmailDelivery({
+    category: isMachineInquiry ? "MACHINE_INQUIRY" : "PRODUCT_REQUEST",
+    entityId: result.productRequest.id,
+    replyTo: request.user.email,
+    payload: {
+      reference: result.productRequest.requestNumber,
+      name: request.user.name,
+      email: request.user.email,
+      phone: request.user.phone,
+      subject: isMachineInquiry ? "Machine inquiry" : "Product request",
+      productName,
+      quantity: quantity ?? null,
+      message: customerMessage,
+      adminPath: `/admin/product-requests?search=${encodeURIComponent(result.productRequest.requestNumber)}`,
+    },
   });
 
   return response.status(201).json({
-    productRequest: serializeRequest(result.productRequest),
+    productRequest: serializeRequest({
+      ...result.productRequest,
+      emailDelivery: emailResult.delivery,
+    }),
     supportThread: threadSummary(result.thread),
   });
 }
@@ -273,7 +306,20 @@ export async function getAdminProductRequests(_request, response) {
     include: adminRequestInclude,
     orderBy: { createdAt: "desc" },
   });
-  return response.json({ productRequests: requests.map(serializeRequest) });
+  const ids = requests.map((item) => item.id);
+  const [productDeliveries, machineDeliveries] = await Promise.all([
+    getEmailDeliveryMap("PRODUCT_REQUEST", ids),
+    getEmailDeliveryMap("MACHINE_INQUIRY", ids),
+  ]);
+  return response.json({
+    productRequests: requests.map((item) =>
+      serializeRequest({
+        ...item,
+        emailDelivery:
+          productDeliveries.get(item.id) ?? machineDeliveries.get(item.id) ?? null,
+      })
+    ),
+  });
 }
 
 export async function getAdminProductRequest(request, response) {
@@ -285,7 +331,19 @@ export async function getAdminProductRequest(request, response) {
     include: adminRequestInclude,
   });
   if (!productRequest) return response.status(404).json({ message: "Product request not found." });
-  return response.json({ productRequest: serializeRequest(productRequest) });
+  const [productDeliveries, machineDeliveries] = await Promise.all([
+    getEmailDeliveryMap("PRODUCT_REQUEST", [productRequest.id]),
+    getEmailDeliveryMap("MACHINE_INQUIRY", [productRequest.id]),
+  ]);
+  return response.json({
+    productRequest: serializeRequest({
+      ...productRequest,
+      emailDelivery:
+        productDeliveries.get(productRequest.id) ??
+        machineDeliveries.get(productRequest.id) ??
+        null,
+    }),
+  });
 }
 
 export async function updateAdminProductRequestStatus(request, response) {
@@ -321,7 +379,7 @@ export async function updateAdminProductRequestStatus(request, response) {
       include: adminRequestInclude,
     });
 
-    await createNotification(
+    const notification = await createNotification(
       {
         userId: productRequest.userId,
         type: isAvailable ? "PRODUCT_AVAILABLE" : "PRODUCT_REQUEST",
@@ -352,11 +410,11 @@ export async function updateAdminProductRequestStatus(request, response) {
       });
     }
 
-    return nextRequest;
+    return { productRequest: nextRequest, notification };
   });
 
-  if (isAvailable) {
-    await sendEmailIfConfigured({ event: "PRODUCT_AVAILABLE" }).catch(() => {});
-  }
-  return response.json({ productRequest: serializeRequest(updated) });
+  await deliverNotificationPush(updated.notification);
+  return response.json({
+    productRequest: serializeRequest(updated.productRequest),
+  });
 }

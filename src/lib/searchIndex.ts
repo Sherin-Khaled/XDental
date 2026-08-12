@@ -1,8 +1,9 @@
-import { mockBrands } from "@/data/brands";
-import { mockCategories } from "@/data/categories";
-import { mockProducts } from "@/data/products";
+import type { CatalogBrand, CatalogCategory } from "@/services/catalog";
+import type { Product } from "@/types/product";
 import {
   getCategoryTranslationKey,
+  getLocalizedCategoryName,
+  getLocalizedProductName,
   normalizeCategorySlug,
 } from "@/lib/catalogTranslations";
 
@@ -40,19 +41,6 @@ const resultLimits: Record<GlobalSearchType, number> = {
   page: 4,
 };
 
-const extraCategories = [
-  { id: "search-cat-clinic-essentials", name: "Clinic Essentials", slug: "clinic-essentials" },
-  { id: "search-cat-equipment", name: "Equipment", slug: "equipment" },
-  { id: "search-cat-surgery", name: "Surgery", slug: "surgery" },
-  { id: "search-cat-implantology", name: "Implantology", slug: "implantology" },
-  { id: "search-cat-infection-control", name: "Infection Control", slug: "infection-control" },
-  { id: "search-cat-dental-burs", name: "Dental Burs", slug: "dental-burs" },
-  { id: "search-cat-prophylaxis", name: "Prophylaxis", slug: "prophylaxis" },
-  { id: "search-cat-lab-supplies", name: "Lab Supplies", slug: "lab-supplies" },
-  { id: "search-cat-radiology", name: "Radiology & Imaging", slug: "radiology" },
-  { id: "search-cat-disposables", name: "Disposables", slug: "disposables" },
-];
-
 const websitePages = [
   { id: "home", titleKey: "nav.home", fallback: "Home", href: "/", suggested: true },
   { id: "products", titleKey: "nav.products", fallback: "Products", href: "/products", suggested: true },
@@ -76,7 +64,7 @@ const accountPages = [
   { id: "quotes", titleKey: "account.quotes", fallback: "Quotes", href: "/account/quotes", suggested: true, keywords: ["Request Quote", "Request a Quote"] },
   { id: "product-requests", titleKey: "account.productRequests", fallback: "Product Requests", href: "/account/product-requests" },
   { id: "notifications", titleKey: "account.notifications", fallback: "Notifications", href: "/account/notifications" },
-  { id: "wallet", titleKey: "account.walletPoints", fallback: "Wallet & Points", href: "/account/wallet", suggested: true },
+  { id: "wallet", titleKey: "account.walletPoints", fallback: "Wallet & Points", href: "/account/wallet" },
   { id: "support", titleKey: "account.supportTickets", fallback: "Support Tickets", href: "/account/support" },
   { id: "settings", titleKey: "account.settings", fallback: "Settings", href: "/account/settings" },
 ];
@@ -98,41 +86,58 @@ function uniqueBySlug<T extends { slug: string }>(items: T[]) {
   });
 }
 
-export function buildGlobalSearchIndex(t: Translate): GlobalSearchItem[] {
-  const products = mockProducts.map<GlobalSearchItem>((product, index) => {
-    const title = t(`products.items.${product.id}.name`, { fallback: product.name });
-    const category = t(getCategoryTranslationKey(product.category), {
-      fallback: t(`products.items.${product.id}.category`, { fallback: product.category }),
-    });
-    const price = formatPrice(product.currentPrice);
-
-    return {
-      id: product.id,
-      type: "product",
-      title,
-      metadata: t("globalSearch.metadata.product", {
-        fallback: "Product - {category} - {price}",
-        values: { category, price },
-      }),
-      href: `/products/${product.id}`,
-      image: product.image,
-      priority: product.isBestSeller ? 80 - index : 50 - index,
-      suggested: product.isBestSeller || product.isWeeklyOffer,
-      searchValues: [
-        title,
-        product.name,
-        product.brand,
-        product.category,
-        category,
-        product.sku ?? "",
-      ],
-    };
+/** Builds a single product's search index entry. Exported so callers with a
+ * small, server-fetched product list (not the full catalogue) can build
+ * matching entries for the "product" result group without needing the
+ * full-catalogue path through {@link buildGlobalSearchIndex}. */
+export function buildProductSearchItem(
+  product: Product,
+  index: number,
+  t: Translate,
+  language: "en" | "ar"
+): GlobalSearchItem {
+  const title = getLocalizedProductName(product, language, t);
+  const category = t(getCategoryTranslationKey(product.category), {
+    fallback: t(`products.items.${product.id}.category`, { fallback: product.category }),
   });
+  const price = formatPrice(product.currentPrice);
 
-  const categories = uniqueBySlug([...mockCategories, ...extraCategories]).map<GlobalSearchItem>(
+  return {
+    id: product.id,
+    type: "product",
+    title,
+    metadata: t("globalSearch.metadata.product", {
+      fallback: "Product - {category} - {price}",
+      values: { category, price },
+    }),
+    href: `/products/${product.slug || product.id}`,
+    image: product.image,
+    priority: product.isBestSeller ? 80 - index : 50 - index,
+    suggested: product.isBestSeller || product.isWeeklyOffer,
+    searchValues: [
+      title,
+      product.name,
+      product.brand,
+      product.category,
+      category,
+      product.sku ?? "",
+    ],
+  };
+}
+
+export function buildGlobalSearchIndex(
+  t: Translate,
+  language: "en" | "ar",
+  catalogProducts: Product[],
+  catalogCategories: CatalogCategory[],
+  catalogBrands: CatalogBrand[]
+): GlobalSearchItem[] {
+  const products = catalogProducts.map((product, index) => buildProductSearchItem(product, index, t, language));
+
+  const categories = uniqueBySlug(catalogCategories).map<GlobalSearchItem>(
     (category, index) => {
       const slug = normalizeCategorySlug(category.slug);
-      const title = t(getCategoryTranslationKey(category.name), { fallback: category.name });
+      const title = getLocalizedCategoryName(category, language, t);
 
       return {
         id: category.id,
@@ -147,15 +152,15 @@ export function buildGlobalSearchIndex(t: Translate): GlobalSearchItem[] {
     }
   );
 
-  const brands = mockBrands.map<GlobalSearchItem>((brand, index) => ({
+  const brands = catalogBrands.map<GlobalSearchItem>((brand, index) => ({
     id: brand.id,
     type: "brand",
     title: brand.name,
     metadata: t("globalSearch.metadata.brand", { fallback: "Brand" }),
     href: `/products?brand=${encodeURIComponent(brand.slug)}`,
-    priority: brand.isFeatured ? 70 - index : 40 - index,
-    suggested: brand.isFeatured,
-    searchValues: [brand.name, brand.slug, slugify(brand.name), brand.country],
+    priority: brand.featured ? 70 - index : 40 - index,
+    suggested: brand.featured,
+    searchValues: [brand.name, brand.slug, slugify(brand.name), brand.country ?? ""],
   }));
 
   const pages = [

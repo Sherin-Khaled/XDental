@@ -3,11 +3,43 @@ node_modules/
 
 # Build output
 dist/
+server/generated/
+server/src/generated/
 
 # Local environment
 .env
 .env.local
 .env.*.local
+
+# Local data exports (may contain tokenized logo URLs)
+server/exports/*.csv
+server/uploads/profile-images/*
+!server/uploads/profile-images/.gitkeep
+server/uploads/product-images/*
+!server/uploads/product-images/.gitkeep
+server/uploads/hero-slides/*
+!server/uploads/hero-slides/.gitkeep
+
+# Never commit database dumps/backups (server/backups/*.backup, *.dump, *.dump.list)
+server/backups/
+
+# Local product-image acquisition staging output — bulk-downloaded/converted
+# images belong in object storage, never in Git or the frontend.
+/image-acquisition-output/
+
+# Stray one-off product-list JSON dumps produced while scoping image
+# acquisition (should have lived under /image-acquisition-output/ but were
+# written to the project root) — scratch input data, not app source.
+/komet-*.json
+/microdont-*.json
+
+# Ad hoc one-off catalogue/import scratch scripts and their working data —
+# not part of the running app.
+server/scripts-tmp/
+server/tmp-*.mjs
+
+# Local dev tooling caches/binaries (e.g. .tools/ngrok/*.exe, *.zip) — not part of the app
+.tools/
 
 # Editor directories
 .vscode/
@@ -21,8 +53,27 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+# Microsoft Office lock files (e.g. docs/~$Batch01.xlsx)
+~$*
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
+*.err.log
+*.out.log
+vite-*.log
+vite-*.err.log
+vite-*.out.log
+ngrok-*.log
+ngrok-*.err.log
+ngrok-*.out.log
+gold-*.err
+
+# Ad hoc local QA screenshots (e.g. gold-home-desktop.png, theme-cart-dark.png)
+/gold-*.png
+/theme-*.png
+
+# Replit-era generated artifacts (retained from prior hosting target; harmless to keep ignored)
+.replit-artifact/

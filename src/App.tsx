@@ -5,11 +5,17 @@ import { MotionConfig } from "framer-motion";
 import { Toaster }         from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StoreProvider }   from "@/context/StoreContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import { useStore } from "@/context/StoreContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { CatalogProvider } from "@/context/CatalogContext";
 import { Layout }          from "@/components/layout";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { DailyOfferAlert } from "@/components/DailyOfferAlert";
+import { FloatingSupportChat } from "@/components/dental/FloatingSupportChat";
+import { GoldIconGradientDefs } from "@/components/dental/GoldIconGradientDefs";
+import { WelcomeRewardsPopup } from "@/components/WelcomeRewardsPopup";
 
 // Lazy-loaded route pages — each page becomes its own JS chunk
 const Home                = lazy(() => import("@/pages/home"));
@@ -26,6 +32,7 @@ const AccountDashboardHome = lazy(() => import("@/pages/account-dashboard"));
 const AccountOrders       = lazy(() => import("@/pages/account-orders"));
 const AccountOrderDetail  = lazy(() => import("@/pages/account-order-detail"));
 const AccountWishlist     = lazy(() => import("@/pages/account-wishlist"));
+// Address book and clinic branches retain their existing account routes.
 const AccountAddress      = lazy(() => import("@/pages/account-address"));
 const AccountSettings     = lazy(() => import("@/pages/account-settings"));
 const AccountWallet       = lazy(() => import("@/pages/account-wallet"));
@@ -41,17 +48,34 @@ const AccountProductRequestDetail = lazy(() => import("@/pages/account-product-r
 const About               = lazy(() => import("@/pages/about"));
 const Contact             = lazy(() => import("@/pages/contact"));
 const Faqs                = lazy(() => import("@/pages/faqs"));
+const HowToOrder          = lazy(() => import("@/pages/how-to-order"));
+const Privacy             = lazy(() => import("@/pages/privacy"));
+const Terms               = lazy(() => import("@/pages/terms"));
+const ShippingDelivery    = lazy(() => import("@/pages/shipping-delivery"));
+const ReturnsPolicy       = lazy(() => import("@/pages/returns-policy"));
+const TrackOrder          = lazy(() => import("@/pages/track-order"));
 const Brands              = lazy(() => import("@/pages/brands"));
 const NotFound            = lazy(() => import("@/pages/not-found"));
 const AdminOverview       = lazy(() => import("@/pages/admin/index"));
 const AdminProducts       = lazy(() => import("@/pages/admin/products"));
+const AdminProductEditor  = lazy(() => import("@/pages/admin/product-editor"));
+const AdminCatalogImport  = lazy(() => import("@/pages/admin/catalog-import"));
+const AdminCatalogImportHistory = lazy(() => import("@/pages/admin/catalog-import-history"));
+const AdminFlashSale      = lazy(() => import("@/pages/admin/flash-sale"));
+const AdminCoupons        = lazy(() => import("@/pages/admin/coupons"));
+const AdminScheduledPromotions = lazy(() => import("@/pages/admin/scheduled-promotions"));
+const AdminHeroSlider      = lazy(() => import("@/pages/admin/hero-slider"));
+const AdminDelivery       = lazy(() => import("@/pages/admin/delivery"));
 const AdminCategories     = lazy(() => import("@/pages/admin/categories"));
 const AdminBrands         = lazy(() => import("@/pages/admin/brands"));
 const AdminOrders         = lazy(() => import("@/pages/admin/orders"));
 const AdminQuotes         = lazy(() => import("@/pages/admin/quotes"));
 const AdminProductRequests = lazy(() => import("@/pages/admin/product-requests"));
 const AdminSupport         = lazy(() => import("@/pages/admin/support"));
+const AdminAccountRequests = lazy(() => import("@/pages/admin/account-requests"));
+const AdminLoyalty        = lazy(() => import("@/pages/admin/loyalty"));
 const AdminUsers          = lazy(() => import("@/pages/admin/users"));
+const AdminUserDetails    = lazy(() => import("@/pages/admin/user-details"));
 const AdminSettings       = lazy(() => import("@/pages/admin/settings"));
 const AdminNotFound       = lazy(() => import("@/pages/admin/not-found"));
 
@@ -70,7 +94,6 @@ const accountRoutePreloads = [
   () => import("@/pages/account-supply-list-detail"),
   () => import("@/pages/account-quotes"),
   () => import("@/pages/account-product-requests"),
-  () => import("@/pages/account-wallet"),
 ];
 
 const queryClient = new QueryClient({
@@ -186,8 +209,19 @@ function RequireAdminAuth({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const role = currentUser?.role?.trim().toLowerCase();
   const isAdmin = role === "admin";
-  const isSupportRoute = location === "/admin" || location === "/admin/support" || location.startsWith("/admin/support?") || location === "/admin/product-requests" || location.startsWith("/admin/product-requests?");
-  const hasAdminAccess = isAdmin || (role === "support" && isSupportRoute);
+  const adminPathname = location.split("?")[0];
+  const isSupportRoute =
+    ["/admin", "/admin/products", "/admin/flash-sale", "/admin/categories", "/admin/brands", "/admin/orders", "/admin/quotes", "/admin/support", "/admin/product-requests", "/admin/account-requests", "/admin/loyalty", "/admin/settings"].includes(adminPathname)
+    || adminPathname.startsWith("/admin/products/");
+  const hasSensitiveAccountAccess =
+    adminPathname === "/admin/account-requests"
+      ? currentUser?.permissions?.includes("ACCOUNT_REQUESTS_VIEW")
+      : adminPathname === "/admin/loyalty"
+        ? currentUser?.permissions?.includes("LOYALTY_VIEW")
+      : true;
+  const hasAdminAccess =
+    isAdmin
+    || (role === "support" && isSupportRoute && hasSensitiveAccountAccess);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -249,12 +283,23 @@ function Router() {
           <Switch>
             <Route path="/admin"                  component={AdminOverview} />
             <Route path="/admin/products"         component={AdminProducts} />
+            <Route path="/admin/products/:id"     component={AdminProductEditor} />
+            <Route path="/admin/catalog-import/history" component={AdminCatalogImportHistory} />
+            <Route path="/admin/catalog-import"   component={AdminCatalogImport} />
+            <Route path="/admin/flash-sale"       component={AdminFlashSale} />
+            <Route path="/admin/coupons"          component={AdminCoupons} />
+            <Route path="/admin/scheduled-promotions" component={AdminScheduledPromotions} />
+            <Route path="/admin/hero-slider"     component={AdminHeroSlider} />
+            <Route path="/admin/delivery"         component={AdminDelivery} />
             <Route path="/admin/categories"       component={AdminCategories} />
             <Route path="/admin/brands"           component={AdminBrands} />
             <Route path="/admin/orders"           component={AdminOrders} />
             <Route path="/admin/quotes"           component={AdminQuotes} />
             <Route path="/admin/product-requests" component={AdminProductRequests} />
             <Route path="/admin/support"          component={AdminSupport} />
+            <Route path="/admin/account-requests" component={AdminAccountRequests} />
+            <Route path="/admin/loyalty"          component={AdminLoyalty} />
+            <Route path="/admin/users/:id"        component={AdminUserDetails} />
             <Route path="/admin/users"            component={AdminUsers} />
             <Route path="/admin/settings"         component={AdminSettings} />
             <Route                                component={AdminNotFound} />
@@ -303,6 +348,12 @@ function Router() {
           <Route path="/about"               component={About} />
           <Route path="/contact"             component={Contact} />
           <Route path="/faqs"                component={Faqs} />
+          <Route path="/how-to-order"        component={HowToOrder} />
+          <Route path="/privacy"             component={Privacy} />
+          <Route path="/terms"               component={Terms} />
+          <Route path="/shipping-delivery"   component={ShippingDelivery} />
+          <Route path="/returns-policy"      component={ReturnsPolicy} />
+          <Route path="/track-order"         component={TrackOrder} />
           <Route path="/brands"              component={Brands} />
           <Route                             component={NotFound} />
         </Switch>
@@ -323,6 +374,8 @@ function RoutedAppChrome() {
         <>
           <NotificationPermissionPrompt />
           <DailyOfferAlert />
+          <FloatingSupportChat />
+          <WelcomeRewardsPopup />
         </>
       )}
       <Toaster />
@@ -334,15 +387,22 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <LanguageProvider>
-          <StoreProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <MotionConfig reducedMotion="user">
-                <RoutedAppChrome />
-              </MotionConfig>
-            </WouterRouter>
-          </StoreProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <GoldIconGradientDefs />
+          <LanguageProvider>
+            <CatalogProvider>
+              <StoreProvider>
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                  <NotificationProvider>
+                    <MotionConfig reducedMotion="user">
+                      <RoutedAppChrome />
+                    </MotionConfig>
+                  </NotificationProvider>
+                </WouterRouter>
+              </StoreProvider>
+            </CatalogProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

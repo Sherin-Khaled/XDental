@@ -10,7 +10,7 @@ import type { ComponentProps } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 type DirectionalIconFamily = "arrow" | "chevron" | "move";
-type DirectionalIconDirection = "forward" | "back";
+type DirectionalIconDirection = "forward" | "back" | "next" | "previous";
 type DirectionalIconProps = ComponentProps<typeof ArrowRight> & {
   direction?: DirectionalIconDirection;
   family?: DirectionalIconFamily;
@@ -37,8 +37,9 @@ export function DirectionalIcon({
   ...props
 }: DirectionalIconProps) {
   const { isRtl } = useLanguage();
+  const movesForward = direction === "forward" || direction === "next";
   const side =
-    direction === "forward"
+    movesForward
       ? isRtl ? "left" : "right"
       : isRtl ? "right" : "left";
   const Icon = icons[family][side];

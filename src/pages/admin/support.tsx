@@ -3,6 +3,10 @@ import { Send } from "lucide-react";
 import { useLocation } from "wouter";
 import { AdminLayout } from "./_components/AdminLayout";
 import { AdminPageHeader, AdminStatusBadge } from "./_components/admin-ui";
+import { ContactMessagesPanel } from "./_components/ContactMessagesPanel";
+import { DentalSelect } from "@/components/dental/Select";
+import { useLanguage } from "@/context/LanguageContext";
+import { presentSupportMessageBody } from "@/lib/supportMessagePresentation";
 import {
   getAdminSupportThreads,
   getSupportMessages,
@@ -19,7 +23,17 @@ function tone(status: SupportThread["status"]) {
   return "slate" as const;
 }
 
+const supportStatuses = [
+  "Open",
+  "Waiting for Support",
+  "Waiting for Customer",
+  "Resolved",
+] as const;
+const supportStatusOptions: Array<{ value: SupportThread["status"]; label: string }> =
+  supportStatuses.map((status) => ({ value: status, label: status }));
+
 export default function AdminSupport() {
+  const { t } = useLanguage();
   const [location] = useLocation();
   const [threads, setThreads] = useState<SupportThread[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -107,11 +121,28 @@ export default function AdminSupport() {
                   key={thread.id}
                   type="button"
                   onClick={() => setSelectedId(thread.id)}
-                  className={`w-full border-b border-[#F3E8C8] px-5 py-4 text-left transition-colors ${selectedId === thread.id ? "bg-[#FFF9E8]" : "hover:bg-[#FBFAF7]"}`}
+                  className={`w-full border-b border-[#F3E8C8] px-5 py-4 text-left transition-colors ${selectedId === thread.id ? "bg-[#FFF9E8] dark:bg-[#D4A72C]/15" : "hover:bg-[#FBFAF7] dark:hover:bg-white/[0.04]"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm font-bold text-[#050505]">{thread.ticketNumber}</p>
-                    <AdminStatusBadge tone={tone(thread.status)}>{thread.status}</AdminStatusBadge>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      <AdminStatusBadge tone={tone(thread.status)}>{thread.status}</AdminStatusBadge>
+                      {thread.emailDelivery && (
+                        <AdminStatusBadge
+                          tone={
+                            thread.emailDelivery.status === "SENT"
+                              ? "green"
+                              : thread.emailDelivery.status === "FAILED"
+                                ? "red"
+                                : thread.emailDelivery.status === "PENDING"
+                                  ? "amber"
+                                  : "slate"
+                          }
+                        >
+                          EMAIL {thread.emailDelivery.status}
+                        </AdminStatusBadge>
+                      )}
+                    </div>
                   </div>
                   <p className="mt-2 line-clamp-1 text-sm font-semibold text-[#5F5F5F]">{thread.subject}</p>
                   <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#8A8D9A]">{thread.latestMessage || "No messages yet"}</p>
@@ -131,9 +162,16 @@ export default function AdminSupport() {
                       <h2 className="font-bold text-[#050505]">{selected.subject}</h2>
                       <p className="mt-1 text-xs text-[#717182]">{selected.user?.name ?? "Customer"} · {selected.ticketNumber}</p>
                     </div>
-                    <select value={selected.status} onChange={(event) => void changeThreadStatus(event.target.value as SupportThread["status"])} className="h-9 rounded-lg border border-[#EFE2BC] bg-white px-3 text-xs font-bold text-[#050505] outline-none focus:border-[#D4A72C]">
-                      {(["Open", "Waiting for Support", "Waiting for Customer", "Resolved"] as const).map((status) => <option key={status} value={status}>{status}</option>)}
-                    </select>
+                    <DentalSelect
+                      label="Update support thread status"
+                      value={selected.status}
+                      onChange={(value) => void changeThreadStatus(value as SupportThread["status"])}
+                      options={supportStatusOptions}
+                      className="w-[210px]"
+                      triggerClassName="h-9 rounded-lg border-[#EFE2BC] px-3 text-xs font-bold"
+                      contentClassName="rounded-xl"
+                      itemClassName="py-2 text-xs"
+                    />
                   </div>
                 </header>
                 <div className="flex-1 space-y-4 overflow-y-auto bg-[#FBFAF7] p-5">
@@ -141,7 +179,7 @@ export default function AdminSupport() {
                     <div key={message.id} className={`flex ${message.senderRole === "ADMIN" || message.senderRole === "SUPPORT" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-6 ${message.senderRole === "SYSTEM" ? "border border-[#EFE2BC] bg-[#FFF9E8] text-[#717182]" : message.senderRole === "CUSTOMER" ? "bg-white text-[#050505] shadow-sm" : "bg-[#050505] text-white"}`}>
                         <p className="mb-1 text-[10px] font-bold uppercase tracking-wide opacity-60">{message.senderRole}</p>
-                        <p>{message.body}</p>
+                        <p>{presentSupportMessageBody(t, message.body)}</p>
                       </div>
                     </div>
                   ))}
@@ -164,6 +202,8 @@ export default function AdminSupport() {
             ) : <div className="flex flex-1 items-center justify-center p-8 text-sm text-[#717182]">Select a support thread.</div>}
           </section>
         </div>
+
+        <ContactMessagesPanel />
       </div>
     </AdminLayout>
   );

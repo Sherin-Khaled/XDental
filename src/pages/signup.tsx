@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Eye,
@@ -7,14 +7,30 @@ import {
   Mail,
   Phone,
   ShieldCheck,
+  Stethoscope,
   UserRound,
 } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
+import { DeliveryZoneMultiSelect } from "@/components/dental/DeliveryZoneMultiSelect";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useStore } from "@/context/StoreContext";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
+import { CLINIC_SPECIALTIES } from "@/lib/clinicSpecialties";
+import { cn } from "@/lib/utils";
+import {
+  getActiveDeliveryZones,
+  type ClinicLocationInput,
+  type DeliveryZone,
+} from "@/services/delivery";
 
 const inputClassName =
   "h-12 min-w-0 w-full rounded-[12px] border border-[#050505]/10 bg-white/80 px-11 text-[14px] text-[#050505] outline-none transition placeholder:text-[#9A9A9A] focus:border-[var(--xd-gold-active)]/70 focus:ring-4 focus:ring-[var(--xd-gold-bg-soft)]";
@@ -69,25 +85,85 @@ export default function Signup() {
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
+    clinicSpecialty: "",
+    clinicLocations: [] as ClinicLocationInput[],
     email: "",
     password: "",
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [clinicSpecialtyError, setClinicSpecialtyError] = useState(false);
+  const [clinicLocationsError, setClinicLocationsError] = useState<string | undefined>();
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [deliveryZonesLoadError, setDeliveryZonesLoadError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const clinicSpecialtyTriggerRef = useRef<HTMLButtonElement | null>(null);
   const { toast } = useToast();
   const { signUp } = useStore();
   const [, navigate] = useLocation();
 
-  const updateField = (field: keyof typeof formData, value: string) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    getActiveDeliveryZones(controller.signal)
+      .then((zones) => {
+        setDeliveryZones(zones);
+        setDeliveryZonesLoadError(false);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setDeliveryZonesLoadError(true);
+      });
+    return () => controller.abort();
+  }, []);
+
+  const updateField = (
+    field: Exclude<keyof typeof formData, "clinicLocations">,
+    value: string
+  ) => {
+    if (field === "clinicSpecialty") {
+      setClinicSpecialtyError(false);
+    }
     setFormData((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateClinicLocations = (clinicLocations: ClinicLocationInput[]) => {
+    setFormData((current) => ({ ...current, clinicLocations }));
+    setClinicLocationsError(undefined);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isSubmitting) return;
+
+    if (!formData.clinicSpecialty) {
+      setClinicSpecialtyError(true);
+      clinicSpecialtyTriggerRef.current?.focus();
+      return;
+    }
+
+    if (formData.clinicLocations.length === 0) {
+      setClinicLocationsError(
+        t("auth.signup.clinicLocationsRequired", {
+          fallback: "Select at least one clinic location.",
+        })
+      );
+      return;
+    }
+
+    const selectedOther = formData.clinicLocations.find(
+      (location) =>
+        deliveryZones.find((zone) => zone.id === location.deliveryZoneId)
+          ?.slug === "other"
+    );
+    if (selectedOther && (selectedOther.customArea?.trim().length ?? 0) < 2) {
+      setClinicLocationsError(
+        t("auth.signup.clinicLocationsOtherRequired", {
+          fallback: "Enter your clinic area when selecting Other.",
+        })
+      );
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       toast({
@@ -102,6 +178,11 @@ export default function Signup() {
     const result = await signUp({
       fullName: formData.fullName,
       phone: formData.phone,
+      clinicSpecialty: formData.clinicSpecialty,
+      clinicLocations: formData.clinicLocations.map((location) => ({
+        ...location,
+        customArea: location.customArea?.trim() || undefined,
+      })),
       email: formData.email,
       password: formData.password,
     });
@@ -151,7 +232,7 @@ export default function Signup() {
             <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.16),transparent_45%,rgba(5,5,5,0.24))]" />
 
             <Link href="/" className="relative z-10 flex w-fit items-center gap-2.5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-[var(--xd-gold-active)] font-display text-[18px] font-bold text-white shadow-[0_8px_20px_rgba(212,167,44,0.32)]">
+              <span className="xd-gradient-gold flex h-10 w-10 items-center justify-center rounded-[11px] font-display text-[18px] font-bold text-[#050505] shadow-[var(--xd-gold-gradient-shadow)]">
                 X
               </span>
               <span className="font-display text-[15px] font-semibold tracking-tight">
@@ -231,6 +312,99 @@ export default function Signup() {
                   </span>
                 </label>
               </div>
+
+              <label className="block">
+                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.09em] text-[#3A3A3A]">
+                  {t("auth.signup.clinicSpecialty", { fallback: "Clinic Specialty" })}
+                </span>
+                <Select
+                  value={formData.clinicSpecialty}
+                  onValueChange={(value) => updateField("clinicSpecialty", value)}
+                >
+                  <SelectTrigger
+                    ref={clinicSpecialtyTriggerRef}
+                    aria-invalid={clinicSpecialtyError}
+                    aria-describedby={clinicSpecialtyError ? "clinic-specialty-error" : undefined}
+                    className={cn(
+                      inputClassName,
+                      "relative flex justify-start text-left font-normal shadow-none",
+                      "data-[placeholder]:text-[#9A9A9A] data-[placeholder]:font-normal",
+                      "data-[state=open]:border-[var(--xd-gold-active)]/50 data-[state=open]:ring-4 data-[state=open]:ring-[var(--xd-gold-bg-soft)]",
+                      "[&>span]:min-w-0 [&>span]:truncate [&>svg:last-child]:absolute [&>svg:last-child]:right-4 [&>svg:last-child]:top-1/2 [&>svg:last-child]:h-4 [&>svg:last-child]:w-4 [&>svg:last-child]:-translate-y-1/2 [&>svg:last-child]:text-[#9A9A9A] [&>svg:last-child]:opacity-100 [&>svg:last-child]:transition-transform data-[state=open]:[&>svg:last-child]:rotate-180",
+                      clinicSpecialtyError &&
+                        "border-[#C97922]/35 bg-[#FFF8E6]/45 focus:border-[#C97922]/50 focus:ring-[#C97922]/10"
+                    )}
+                    data-testid="select-clinic-specialty"
+                  >
+                    <Stethoscope className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--xd-gold-text)]" size={16} />
+                    <SelectValue
+                      placeholder={t("auth.signup.clinicSpecialtyPlaceholder", {
+                        fallback: "Select your clinic specialty",
+                      })}
+                    />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    sideOffset={8}
+                    className="z-[100] max-h-[min(280px,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-32px)] overflow-hidden rounded-[16px] border border-[#050505]/10 bg-white p-1.5 text-[#050505] shadow-[0_18px_44px_rgba(5,5,5,0.12)]"
+                  >
+                    {CLINIC_SPECIALTIES.map((specialty) => (
+                      <SelectItem
+                        key={specialty}
+                        value={specialty}
+                        className="min-w-0 rounded-[12px] py-2.5 ps-3 pe-9 text-[14px] font-medium text-[#3A3A3A] outline-none transition-colors focus:bg-[var(--xd-gold-bg-soft)] focus:text-[#050505] data-[state=checked]:bg-[var(--xd-gold-bg-soft)] data-[state=checked]:text-[var(--xd-gold-text)] [&>span:last-child]:min-w-0 [&>span:last-child]:truncate"
+                      >
+                        {specialty}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {clinicSpecialtyError && (
+                  <p id="clinic-specialty-error" className="mt-2 text-[12px] font-medium text-[#9B6B18]">
+                    {t("auth.signup.clinicSpecialtyRequired", {
+                      fallback: "Select your clinic specialty to continue.",
+                    })}
+                  </p>
+                )}
+              </label>
+
+              <DeliveryZoneMultiSelect
+                zones={deliveryZones}
+                value={formData.clinicLocations}
+                onChange={updateClinicLocations}
+                label={t("auth.signup.clinicLocations", {
+                  fallback: "Clinic Locations",
+                })}
+                placeholder={t("auth.signup.clinicLocationsPlaceholder", {
+                  fallback: "Select your clinic locations",
+                })}
+                addAnotherPlaceholder={t(
+                  "auth.signup.clinicLocationsAddAnother",
+                  {
+                    fallback: "Add another location",
+                  }
+                )}
+                searchPlaceholder={t("auth.signup.clinicLocationsSearch", {
+                  fallback: "Search delivery areas",
+                })}
+                emptyText={
+                  deliveryZonesLoadError
+                    ? t("auth.signup.clinicLocationsLoadError", {
+                        fallback: "Clinic locations could not be loaded.",
+                      })
+                    : t("auth.signup.clinicLocationsEmpty", {
+                        fallback: "No clinic locations found.",
+                      })
+                }
+                otherLabel={t("auth.signup.clinicLocationsOtherLabel", {
+                  fallback: "Other location name",
+                })}
+                otherPlaceholder={t("auth.signup.clinicLocationsOtherPlaceholder", {
+                  fallback: "Enter your clinic area",
+                })}
+                error={clinicLocationsError}
+                testId="signup-clinic-locations"
+              />
 
               <label className="block">
                 <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.09em] text-[#3A3A3A]">

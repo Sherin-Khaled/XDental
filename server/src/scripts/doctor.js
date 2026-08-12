@@ -2,6 +2,12 @@ import dotenv from "dotenv";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  getMailConfigurationErrors,
+  readMailConfiguration,
+} from "../config/mail.js";
+import { readPushConfiguration } from "../config/push.js";
+import { readServerConfiguration } from "../config/server.js";
 
 const serverRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const envPath = join(serverRoot, ".env");
@@ -29,35 +35,46 @@ if (envExists) ok("server/.env exists.");
 else failure("server/.env does not exist.");
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
-const jwtSecret = process.env.JWT_SECRET?.trim();
-const clientUrl = process.env.CLIENT_URL?.trim();
-const configuredPort = process.env.PORT?.trim();
-const emailEnabled = process.env.EMAIL_ENABLED?.trim().toLowerCase();
-
-if (databaseUrl) ok("DATABASE_URL is configured.");
-else failure("DATABASE_URL is missing.");
-
-if (!jwtSecret) failure("JWT_SECRET is missing.");
-else if (jwtSecret.length < 32) failure("JWT_SECRET must contain at least 32 characters.");
-else ok("JWT_SECRET is configured and long enough.");
-
-if (clientUrl) ok("CLIENT_URL is configured.");
-else failure("CLIENT_URL is missing.");
-
-if (!configuredPort) ok("PORT defaults to 5000.");
-else if (/^\d+$/.test(configuredPort) && Number(configuredPort) > 0 && Number(configuredPort) <= 65535) {
-  ok(`PORT is configured as ${configuredPort}.`);
-} else {
-  failure("PORT must be a number between 1 and 65535.");
+try {
+  const serverConfiguration = readServerConfiguration();
+  ok(
+    `Core startup configuration is valid for ${serverConfiguration.nodeEnvironment} on port ${serverConfiguration.port}.`
+  );
+} catch (error) {
+  failure(
+    error instanceof Error
+      ? `Core startup configuration is invalid: ${error.message}`
+      : "Core startup configuration is invalid."
+  );
 }
 
-if (!emailEnabled) ok("EMAIL_ENABLED defaults safely to false.");
-else if (["true", "false"].includes(emailEnabled)) ok("EMAIL_ENABLED is configured.");
-else warning("EMAIL_ENABLED is invalid and will behave as false.");
+const mailErrors = getMailConfigurationErrors();
+if (mailErrors.length > 0) {
+  failure(`Mail configuration is invalid or incomplete: ${mailErrors.join(", ")}.`);
+} else {
+  const mailConfiguration = readMailConfiguration();
+  if (mailConfiguration.enabled) ok("MAIL_ENABLED is true and required mail variables are configured.");
+  else ok("MAIL_ENABLED is false; SMTP is intentionally disabled.");
+}
+
+try {
+  const pushConfiguration = readPushConfiguration();
+  if (pushConfiguration.enabled) {
+    ok("Authenticated browser push notifications are enabled and VAPID keys are valid.");
+  } else {
+    ok("WEB_PUSH_ENABLED is false; browser push is intentionally disabled.");
+  }
+} catch (error) {
+  failure(
+    error instanceof Error
+      ? `Browser push configuration is invalid: ${error.message}`
+      : "Browser push configuration is invalid."
+  );
+}
 
 let prisma;
 try {
-  const { PrismaClient } = await import("@prisma/client");
+  const { PrismaClient } = await import("../generated/prisma-client/index.js");
   prisma = new PrismaClient({ log: [] });
   ok("Prisma Client can be imported.");
 } catch {
@@ -87,6 +104,8 @@ if (databaseConnected) {
       prisma.supportThread.count(),
       prisma.supportMessage.count(),
       prisma.notification.count(),
+      prisma.pushSubscription.count(),
+      prisma.emailDelivery.count(),
     ]);
     tablesReady = true;
     ok("Core Prisma tables are accessible.");

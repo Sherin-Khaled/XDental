@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { Heart, Search, ShoppingCart } from "lucide-react";
 import { AccountSidebar } from "@/components/dental/AccountSidebar";
@@ -14,7 +14,8 @@ import { ProductCard } from "@/components/dental/ProductCard";
 import { DentalSelect, type DentalSelectOption } from "@/components/dental/Select";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStore } from "@/context/StoreContext";
-import { mockProducts } from "@/data/products";
+import { fetchPublicProducts, fetchPublicProductsByIds } from "@/services/catalog";
+import type { Product } from "@/types/product";
 import { accountT, accountValue } from "@/lib/accountI18n";
 import { cn } from "@/lib/utils";
 
@@ -71,14 +72,39 @@ export default function AccountWishlist() {
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [wishlistedProducts, setWishlistedProducts] = useState<Product[]>([]);
+  const [recommendationCandidates, setRecommendationCandidates] = useState<Product[]>([]);
+  const [wishlistLoadFailed, setWishlistLoadFailed] = useState(false);
+  const [wishlistRetryToken, setWishlistRetryToken] = useState(0);
 
-  const wishlistedProducts = useMemo(
-    () =>
-      wishlistIds
-        .map((id) => mockProducts.find((product) => product.id === id))
-        .filter((product): product is (typeof mockProducts)[number] => Boolean(product)),
-    [wishlistIds]
-  );
+  // Wishlist is a known, bounded set of ids — fetch exactly those products.
+  useEffect(() => {
+    const controller = new AbortController();
+    setWishlistLoadFailed(false);
+    fetchPublicProductsByIds(wishlistIds, controller.signal)
+      .then((products) => {
+        if (controller.signal.aborted) return;
+        const byId = new Map(products.map((product) => [product.id, product]));
+        setWishlistedProducts(
+          wishlistIds.map((id) => byId.get(id)).filter((product): product is Product => Boolean(product))
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setWishlistLoadFailed(true);
+      });
+    return () => controller.abort();
+  }, [wishlistIds, wishlistRetryToken]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchPublicProducts({ featured: true, limit: 4 + wishlistIds.length, signal: controller.signal })
+      .then(({ products }) => {
+        if (!controller.signal.aborted) setRecommendationCandidates(products);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const availableProducts = useMemo(
     () => wishlistedProducts.filter((product) => product.stockStatus !== "Out of Stock"),
@@ -109,20 +135,8 @@ export default function AccountWishlist() {
 
   const recommendedProducts = useMemo(() => {
     const savedIds = new Set(wishlistIds);
-    const recommendationPool = mockProducts.filter(
-      (product) =>
-        !savedIds.has(product.id) &&
-        (product.isRecommended || product.isBestSeller || product.isWeeklyOffer)
-    );
-    const fallbackProducts = mockProducts.filter((product) => !savedIds.has(product.id));
-
-    return [...recommendationPool, ...fallbackProducts]
-      .filter(
-        (product, index, products) =>
-          products.findIndex((candidate) => candidate.id === product.id) === index
-      )
-      .slice(0, 4);
-  }, [wishlistIds]);
+    return recommendationCandidates.filter((product) => !savedIds.has(product.id)).slice(0, 4);
+  }, [recommendationCandidates, wishlistIds]);
 
   const handleAddAllToCart = () => {
     if (availableProducts.length === 0) {
@@ -130,11 +144,16 @@ export default function AccountWishlist() {
       return;
     }
 
-    availableProducts.forEach((product) => {
-      addToCart(product, 1, product.options?.[0]);
-    });
+    const addedCount = availableProducts.reduce((count, product) => {
+      const result = addToCart(product, 1, product.options?.[0]);
+      return count + (result.ok ? 1 : 0);
+    }, 0);
 
-    setStatusMessage(accountT(t, "wishlist.messages.addedToCart", "{count} wishlist products added to cart.", { count: availableProducts.length }));
+    setStatusMessage(
+      addedCount > 0
+        ? accountT(t, "wishlist.messages.addedToCart", "{count} wishlist products added to cart.", { count: addedCount })
+        : accountT(t, "cart.maximumAlreadyInCart", "You already have the maximum available quantity in your cart.")
+    );
   };
 
   const handleClearWishlist = () => {
@@ -248,6 +267,26 @@ export default function AccountWishlist() {
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
+            ) : wishlistIds.length > 0 && wishlistLoadFailed ? (
+              <Card className="p-10 text-center">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
+                  <Heart size={24} />
+                </span>
+                <h2 className="mt-4 text-[18px] font-bold text-[#050505]">
+                  {accountT(t, "wishlist.loadErrorTitle", "Couldn't load your wishlist")}
+                </h2>
+                <p className="mx-auto mt-2 max-w-[440px] text-[14px] leading-6 text-[#8A8D9A]">
+                  {accountT(t, "wishlist.loadErrorDescription", "We couldn't load your saved products. Please check your connection and try again.")}
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="mt-6 h-11 px-6 text-[14px]"
+                  onClick={() => setWishlistRetryToken((token) => token + 1)}
+                >
+                  {accountT(t, "wishlist.retry", "Try Again")}
+                </Button>
+              </Card>
             ) : (
               <Card className="p-10 text-center">
                 <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">

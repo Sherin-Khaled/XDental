@@ -52,7 +52,8 @@
     "surgery": "الجراحة",
     "implantology": "زراعة الأسنان",
     "infectionControl": "مكافحة العدوى",
-    "clinicEssentials": "مستلزمات العيادة"
+    "clinicEssentials": "مستلزمات العيادة",
+    "viewAll": "عرض الكل"
   },
   "common": {
     "brand": "العلامة التجارية",
@@ -65,11 +66,26 @@
     "total": "الإجمالي",
     "free": "مجانًا",
     "edit": "تعديل",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
     "apply": "تطبيق",
     "clearAll": "مسح الكل",
     "clearFilters": "مسح الفلاتر",
     "filters": "الفلاتر",
     "viewAll": "عرض الكل",
+    "previous": "السابق",
+    "next": "التالي",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "previousSlide": "العرض السابق",
+    "nextSlide": "العرض التالي",
+    "previousProducts": "المنتجات السابقة",
+    "nextProducts": "المنتجات التالية",
+    "previousCard": "البطاقة السابقة",
+    "nextCard": "البطاقة التالية",
+    "previousFeature": "الميزة السابقة",
+    "nextFeature": "الميزة التالية",
+    "pagination": "ترقيم الصفحات",
     "viewDetails": "عرض التفاصيل",
     "loadMoreProducts": "تحميل المزيد من المنتجات",
     "continueShopping": "متابعة التسوق",
@@ -100,6 +116,8 @@
     "inStock": "متوفر",
     "outOfStock": "غير متوفر",
     "lowStock": "كمية محدودة",
+    "lowStockWithCount": "كمية محدودة · متبقي {count} فقط",
+    "availabilityConfirmedWhenProcessed": "يتم تأكيد التوفر عند معالجة الطلب.",
     "discounted": "خصومات",
     "min": "الأدنى",
     "max": "الأعلى",
@@ -110,7 +128,9 @@
     "last6Months": "آخر 6 أشهر",
     "last30Days": "آخر 30 يومًا",
     "allTime": "كل الوقت",
-    "newestFirst": "الأحدث أولًا"
+    "newestFirst": "الأحدث أولًا",
+    "saving": "جارٍ الحفظ...",
+    "comingSoon": "قريبًا"
   },
   "account": {
     "dashboard": "لوحة التحكم",
@@ -132,11 +152,1038 @@
     "supportTicketDetails": "تفاصيل تذكرة الدعم",
     "settings": "الإعدادات"
   },
+  "staffAccount": {
+    "adminAccount": "حساب الإدارة",
+    "staffAccount": "حساب الموظف",
+    "staffTools": "أدوات الموظفين",
+    "personalAccount": "الحساب الشخصي",
+    "manageOperations": "أدر عمليات المتجر والطلبات وطلبات المنتجات ومحادثات الدعم.",
+    "staffToolsDescription": "افتح الأدوات التشغيلية المتاحة لدورك الوظيفي.",
+    "adminDashboard": "لوحة تحكم الإدارة",
+    "ordersManagement": "إدارة الطلبات",
+    "quotesManagement": "إدارة عروض الأسعار",
+    "productRequestsManagement": "إدارة طلبات المنتجات",
+    "supportInbox": "صندوق وارد الدعم",
+    "users": "المستخدمون",
+    "settings": "الإعدادات",
+    "adminUser": "مستخدم إدارة",
+    "supportUser": "مستخدم دعم",
+    "roles": {
+      "admin": "مسؤول",
+      "support": "دعم"
+    },
+    "actions": {
+      "adminDashboardDescription": "افتح نظرة عامة على عمليات المتجر.",
+      "ordersDescription": "راجع طلبات العملاء وحدّثها.",
+      "quotesDescription": "راجع طلبات عروض الأسعار من العملاء وأرسل الردود.",
+      "productRequestsDescription": "راجع طلبات المنتجات من العملاء.",
+      "supportDescription": "أدر محادثات الدعم والمتابعات.",
+      "usersDescription": "افتح إدارة مستخدمي النظام.",
+      "settingsDescription": "راجع إعدادات إدارة المتجر."
+    }
+  },
+  "admin": {
+    "backToAccount": "العودة إلى الحساب",
+    "shell": {
+      "admin": "الإدارة",
+      "dashboard": "لوحة تحكم الإدارة",
+      "navigation": "التنقل في لوحة الإدارة",
+      "openNavigation": "فتح قائمة الإدارة",
+      "closeNavigation": "إغلاق قائمة الإدارة",
+      "overview": "نظرة عامة",
+      "products": "المنتجات",
+      "catalogImport": "استيراد الكتالوج",
+      "catalogImportHistory": "سجل الاستيراد",
+      "flashSale": "العروض السريعة",
+      "coupons": "كوبونات الخصم",
+      "categories": "الفئات",
+      "brands": "العلامات التجارية",
+      "orders": "الطلبات",
+      "quotes": "عروض الأسعار",
+      "productRequests": "طلبات المنتجات",
+      "supportInbox": "صندوق وارد الدعم",
+      "accountRequests": "طلبات الحساب",
+      "loyalty": "الولاء والمحفظة",
+      "users": "المستخدمون",
+      "settings": "الإعدادات"
+    },
+    "accountRequests": {
+      "title": "طلبات الحساب",
+      "description": "راجع طلبات تعطيل وحذف حسابات العملاء ونفّذها بأمان.",
+      "searchPlaceholder": "ابحث برقم الطلب أو اسم العميل أو البريد الإلكتروني",
+      "allTypes": "كل أنواع الطلبات",
+      "allStatuses": "كل الحالات",
+      "loading": "جارٍ تحميل طلبات الحساب...",
+      "loadError": "تعذر تحميل طلبات الحساب.",
+      "empty": "لا توجد طلبات حساب تطابق عوامل التصفية.",
+      "request": "الطلب",
+      "customer": "العميل",
+      "type": "النوع",
+      "status": "الحالة",
+      "submitted": "تاريخ الإرسال",
+      "openDetails": "فتح تفاصيل الطلب",
+      "closeDetails": "إغلاق تفاصيل الطلب",
+      "reason": "سبب العميل",
+      "details": "تفاصيل إضافية",
+      "reviewerResponse": "الرد الظاهر للعميل",
+      "customerVisibleHelp": "سيظهر هذا الرد للعميل في طلب الحساب داخل إعداداته.",
+      "privateNote": "ملاحظة إدارية خاصة",
+      "privateNoteHelp": "تظهر فقط للموظفين المخولين وفي سجل التدقيق.",
+      "history": "سجل التدقيق",
+      "noValue": "غير متوفر",
+      "reviewedBy": "تمت المراجعة بواسطة",
+      "lifecycle": "دورة حياة الحساب",
+      "actionSuccess": "تم تحديث طلب الحساب.",
+      "actionError": "تعذر تحديث طلب الحساب.",
+      "actionDialogTitle": "تأكيد إجراء طلب الحساب",
+      "confirmationLabel": "اكتب {token} للتأكيد",
+      "approvalExplanation": "لا تؤدي الموافقة إلى تعطيل الحساب أو حذفه مباشرةً. بعد الموافقة، يلزم تنفيذ إجراء إكمال منفصل لتطبيق الطلب.",
+      "approvedStateExplanation": "تمت الموافقة على هذا الطلب وهو بانتظار التنفيذ. يظل حساب العميل نشطًا ويمكنه تسجيل الدخول وإجراء الطلبات حتى اكتمال التنفيذ.",
+      "underReviewAction": "تعيين قيد المراجعة",
+      "approveAction": "موافقة",
+      "rejectAction": "رفض",
+      "completeAction": "إكمال",
+      "completeDeactivationAction": "إكمال تعطيل الحساب",
+      "completeDeletionAction": "إكمال الحذف وإخفاء الهوية",
+      "deactivationCompletionTitle": "إكمال تعطيل الحساب",
+      "deactivationCompletionDescription": "سيؤدي هذا الإجراء عالي الخطورة إلى تعطيل العميل وإلغاء جميع الجلسات النشطة ومنع تسجيل الدخول. ستُحفظ الطلبات والسجلات التشغيلية، ويمكن للمسؤول إعادة تفعيل الحساب لاحقًا.",
+      "deletionCompletionTitle": "إكمال الحذف وإخفاء الهوية",
+      "deletionCompletionDescription": "سيؤدي هذا الإجراء غير القابل للتراجع إلى إلغاء جميع الجلسات ومنع تسجيل الدخول السابق نهائيًا وإخفاء هوية ملف العميل وإزالة معلومات الملف الشخصي المحفوظة. لا يمكن استعادة الحساب أو إعادة تفعيله. ستظل الطلبات والسجلات التشغيلية المطلوبة محفوظة.",
+      "reactivateAction": "إعادة تفعيل الحساب",
+      "reactivationTitle": "استعادة وصول العميل إلى الحساب",
+      "reactivationDescription": "ستعيد إعادة التفعيل الوصول إلى الحساب مع الحفاظ على الطلبات والسجلات التشغيلية. لن تتم استعادة الجلسات القديمة، ويجب على العميل تسجيل الدخول مرة أخرى.",
+      "permanentlyDeleted": "تم الحذف وإخفاء الهوية نهائيًا",
+      "submitAction": "تأكيد الإجراء",
+      "cancelAction": "إلغاء",
+      "refresh": "تحديث",
+      "refreshing": "جارٍ التحديث...",
+      "deepLinkUnavailable": "طلب الحساب المحدد غير متاح أو لا تملك صلاحية الوصول إليه.",
+      "attentionBadgeLabel": "{count} من طلبات الحساب تحتاج إلى متابعة",
+      "viewAccountRequests": "عرض طلبات الحساب",
+      "types": {
+        "deactivation": "تعطيل الحساب",
+        "deletion": "حذف الحساب"
+      },
+      "statuses": {
+        "pending": "قيد الانتظار",
+        "underReview": "قيد المراجعة",
+        "approved": "تمت الموافقة — بانتظار التنفيذ",
+        "rejected": "مرفوض",
+        "canceled": "ملغي",
+        "completed": "مكتمل"
+      },
+      "lifecycles": {
+        "active": "نشط",
+        "deletionRequested": "تم طلب الحذف",
+        "deactivated": "معطّل",
+        "deleted": "محذوف / مجهول الهوية"
+      },
+      "events": {
+        "statusChange": "تغيرت الحالة",
+        "reactivated": "تمت إعادة تفعيل الحساب"
+      }
+    },
+    "loyalty": {
+      "eyebrow": "الإدارة",
+      "title": "الولاء والمحفظة",
+    "description": "راجع السجلات غير القابلة للتعديل وأنشئ تسويات مصرحًا بها وموثقة.",
+    "tabs": { "customers": "العملاء", "transactions": "المعاملات", "settings": "إعدادات البرنامج" },
+    "transactions": "المعاملات",
+    "transactionsHelp": "اختر عميلاً من تبويب العملاء لمراجعة سجل النقاط ورصيد المتجر المصرح به.",
+    "pointsAdjustmentHelp": "أضف أو اطرح نقاط الولاء. تُسجل كل تسوية في سجل العميل.",
+    "walletAdjustmentHelp": "أضف أو اطرح رصيد متجر مقوّم بالجنيه. هذا الرصيد منفصل عن نقاط الولاء.",
+    "adjustmentType": "نوع التسوية",
+    "pointsAmount": "عدد النقاط",
+    "add": "إضافة نقاط",
+    "remove": "خصم نقاط",
+      "loadError": "تعذر تحميل بيانات الولاء.",
+      "search": "البحث عن العملاء",
+      "availablePoints": "النقاط المتاحة",
+      "pendingPoints": "النقاط المعلقة",
+      "walletBalance": "رصيد المحفظة",
+      "pointsAdjustment": "تسوية النقاط",
+      "walletAdjustment": "تسوية المحفظة",
+      "signedPoints": "النقاط بإشارة (+ أو -)",
+      "reason": "السبب",
+      "type": "النوع",
+      "walletTypes": {
+        "adminCredit": "رصيد إداري",
+        "promotionalCredit": "رصيد ترويجي",
+        "adminDebit": "خصم إداري",
+        "refundCredit": "رصيد استرداد معتمد"
+      },
+      "amount": "المبلغ (جنيه)",
+      "approvalReference": "مرجع استرداد معتمد",
+      "confirmAudit": "أؤكد هذه التسوية الموثقة.",
+      "adjustmentSaved": "تم حفظ التسوية الموثقة.",
+      "saveError": "تعذر حفظ التغيير.",
+      "viewOnly": "لديك صلاحية عرض الولاء فقط. تتطلب التسويات صلاحية إدارة منفصلة.",
+      "immutableHistory": "سجل المعاملات غير القابل للتعديل",
+      "date": "التاريخ",
+      "descriptionLabel": "الوصف",
+      "value": "القيمة",
+      "selectCustomer": "اختر عميلاً لمراجعة الأرصدة والسجل.",
+      "settings": "إعدادات برنامج الولاء",
+      "programEnabled": "البرنامج مفعّل",
+      "standardRate": "نقاط العميل العادي لكل 10 جنيه",
+      "vipRate": "نقاط VIP لكل 10 جنيه",
+      "pointsUnit": "النقاط لكل وحدة استبدال",
+      "redemptionValue": "قيمة وحدة الاستبدال (جنيه)",
+      "welcomePoints": "نقاط الترحيب",
+      "welcomeMinimumSubtotal": "الحد الأدنى لمنتجات نقاط الترحيب (جنيه)",
+      "welcomeExpiryDays": "صلاحية نقاط الترحيب (بالأيام)",
+      "minimumPoints": "الحد الأدنى لنقاط الاستبدال",
+      "maximumPercent": "الحد الأقصى للاستبدال (%)",
+      "expiryMonths": "مدة الصلاحية (بالشهور)",
+      "confirmSettings": "أؤكد تغييرات قواعد البرنامج.",
+      "settingsSaved": "تم حفظ إعدادات برنامج الولاء."
+    },
+    "delivery": {
+      "nav": "عروض التوصيل",
+      "title": "مناطق وعروض التوصيل",
+      "description": "إدارة مناطق العيادات وعروض التوصيل المترجمة والجداول ومواعيد الإغلاق بتوقيت القاهرة.",
+      "loadError": "تعذر تحميل إعدادات التوصيل.",
+      "refresh": "تحديث",
+      "zones": "مناطق التوصيل",
+      "zonesDescription": "يمكن إيقاف المنطقة بأمان عندما تكون مستخدمة بالفعل.",
+      "active": "نشطة",
+      "addZone": "إضافة منطقة",
+      "updateZone": "تحديث المنطقة",
+      "cancel": "إلغاء",
+      "zoneSaved": "تم حفظ منطقة التوصيل.",
+      "offerSaved": "تم حفظ عرض التوصيل.",
+      "confirmDeleteZone": "حذف {name}؟",
+      "confirmDeleteOffer": "حذف {name}؟",
+      "completeRequired": "أكمل المحتوى باللغتين واختر منطقة توصيل واحدة على الأقل.",
+      "offerEditor": "محرر عروض التوصيل",
+      "offerEditorDescription": "تستخدم جميع المطابقات توقيت القاهرة، ويتوقف ظهور العرض عند موعد الإغلاق."
+    },
+    "heroSlider": {
+      "nav": "السلايدر الرئيسي"
+    },
+    "scheduledPromotions": {
+      "nav": "العروض المجدولة"
+    },
+    "ownerSync": {
+      "settingsTitle": "الإعدادات",
+      "settingsDescription": "إدارة إعدادات المتجر والتكامل اليدوي مع نظام المالك.",
+      "title": "مزامنة نظام المالك",
+      "manualNote": "استورد كتالوج المنتجات المعتمد وصدّر الطلبات المؤكدة من خلال مسار CSV اليدوي والمحمي.",
+      "manualCsvSync": "مزامنة CSV اليدوية مفعّلة.",
+      "directNewAccNote": "ستتم إضافة التكامل المباشر مع NewAcc بعد توفر توثيق نظام العميل.",
+      "productImport": "استيراد المنتجات",
+      "downloadTemplate": "تنزيل قالب استيراد المنتجات",
+      "downloading": "جارٍ التنزيل...",
+      "selectCsv": "اختر ملف CSV",
+      "importProductsCsv": "استيراد ملف CSV للمنتجات",
+      "importing": "جارٍ الاستيراد...",
+      "orderExport": "تصدير الطلبات",
+      "orderExportDescription": "نزّل الطلبات المؤكدة وتفاصيل عناصرها لاستيرادها يدوياً إلى نظام المالك.",
+      "exportConfirmedOrders": "تصدير الطلبات المؤكدة بصيغة CSV",
+      "exporting": "جارٍ التصدير...",
+      "syncLogs": "سجلات المزامنة",
+      "lastImport": "آخر استيراد",
+      "lastExport": "آخر تصدير",
+      "latestSync": "أحدث مزامنة",
+      "created": "تم إنشاؤه",
+      "updated": "تم تحديثه",
+      "failed": "فشل",
+      "warnings": "تحذيرات",
+      "importCompleted": "اكتمل الاستيراد",
+      "exportDownloaded": "تم تنزيل التصدير",
+      "confirmedOrderExport": "تصدير الطلبات المؤكدة",
+      "exportAcknowledgement": "تأكيد استلام التصدير",
+      "dateTime": "التاريخ / الوقت",
+      "sourceType": "المصدر / النوع",
+      "status": "الحالة",
+      "summary": "الملخص",
+      "row": "الصف",
+      "refresh": "تحديث",
+      "retry": "إعادة المحاولة",
+      "loading": "جارٍ تحميل بيانات المزامنة...",
+      "loadError": "تعذر تحميل حالة المزامنة.",
+      "noSyncYet": "لم يتم تسجيل مزامنة بعد",
+      "noLogs": "لا توجد سجلات مزامنة حتى الآن.",
+      "readOnly": "صلاحية الدعم للعرض فقط. يتطلب استيراد المنتجات وتصدير الطلبات حساب مسؤول.",
+      "fileRequired": "اختر ملف CSV قبل الاستيراد.",
+      "fileTypeError": "اختر ملفاً بامتداد .csv.",
+      "fileSizeError": "يجب ألا يتجاوز حجم ملف CSV مقدار 2 ميجابايت.",
+      "templateError": "تعذر تنزيل قالب استيراد المنتجات.",
+      "importError": "تعذر استيراد ملف CSV للمنتجات.",
+      "exportError": "تعذر تصدير الطلبات المؤكدة.",
+      "statuses": {
+        "pending": "قيد الانتظار",
+        "success": "ناجح",
+        "failed": "فشل"
+      }
+    },
+    "users": {
+      "title": "المستخدمون",
+      "description": "اعرض حسابات العملاء والموظفين الفعلية وأدوارهم ونشاط حساباتهم.",
+      "addUser": "إضافة مستخدم",
+      "createUser": "إنشاء مستخدم",
+      "createDescription": "أنشئ حساب عميل أو موظف ببيانات تسجيل دخول آمنة.",
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "password": "كلمة المرور",
+      "role": "الدور",
+      "customerTier": "فئة العميل",
+      "allTiers": "كل الفئات",
+      "tiers": {
+        "standard": "عادي",
+        "vip": "VIP"
+      },
+      "inactive": "غير نشط",
+      "status": "الحالة",
+      "manageBenefits": "إدارة المزايا",
+      "managePermissions": "إدارة الصلاحيات",
+      "backToUsers": "العودة إلى المستخدمين",
+      "activate": "تفعيل الحساب",
+      "deactivate": "إلغاء تنشيط الحساب",
+      "tierHelp": "VIP فئة تجارية ولا تمنح أي صلاحيات للموظفين.",
+      "lifecycleState": "دورة حياة الحساب",
+      "accountLifecycle": "دورة حياة الحساب",
+    "accountLifecycleHelp": "تعطيل وحذف محميان على مرحلتين مع سجل تدقيق دائم.",
+    "viewAccount": "عرض الحساب",
+    "vipConfirmationTitle": "تأكيد مزايا فئة VIP",
+    "vipConfirmationBody": "يحصل عميل VIP تلقائيًا على مضاعفة كسب النقاط وتوصيل قياسي مجاني وتسعير التوصيل السريع بفرق الترقية فقط واستلام مجاني. لا تحتاج إلى إنشاء ميزة يدوية.",
+    "confirmVip": "تأكيد VIP",
+    "addAdditionalVipBenefit": "إضافة ميزة VIP إضافية",
+      "openAccountRequest": "فتح طلب الحساب",
+      "initiateDeactivation": "بدء التعطيل",
+      "initiateDeletion": "بدء الحذف",
+      "reactivateFromRequest": "مراجعة إعادة التفعيل",
+      "customerVisibleResponse": "رد ظاهر للعميل",
+      "privateAdminReason": "سبب إداري خاص",
+      "typedConfirmation": "اكتب {token} للمتابعة",
+      "createAccountRequest": "إنشاء طلب محمي",
+      "noLifecycleHistory": "لم يتم تسجيل أي إجراءات لدورة حياة الحساب.",
+      "permissions": {
+        "title": "الصلاحيات",
+        "preset": "نموذج الصلاحيات",
+        "selected": "تم اختيار {count}",
+        "viewer": "مشاهد الدعم",
+        "agent": "موظف الدعم",
+        "manager": "مدير الدعم",
+        "custom": "مخصص",
+        "saved": "تم تحديث الصلاحيات"
+      },
+      "permissionGroups": {
+        "SUPPORT_INBOX": "صندوق الدعم",
+        "ORDERS": "الطلبات",
+        "QUOTES": "عروض الأسعار",
+        "PRODUCT_REQUESTS": "طلبات المنتجات",
+        "CUSTOMERS": "العملاء",
+        "NOTIFICATIONS": "الإشعارات",
+        "ACCOUNT_REQUESTS": "طلبات الحساب",
+        "ACCOUNT_LIFECYCLE": "دورة حياة الحساب"
+      },
+      "benefits": {
+        "title": "مزايا VIP",
+        "type": "نوع الميزة",
+        "saved": "تم حفظ الميزة"
+      },
+      "roles": {
+        "customer": "عميل",
+        "support": "دعم",
+        "admin": "مسؤول"
+      },
+      "createdSuccess": "تم إنشاء المستخدم بنجاح",
+      "emailExists": "البريد الإلكتروني موجود بالفعل",
+      "notAllowed": "غير مسموح لك بإنشاء مستخدمين",
+      "noUsers": "لم يتم العثور على مستخدمين",
+      "searchUsers": "البحث عن المستخدمين",
+      "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني",
+      "filterByRole": "التصفية حسب الدور",
+      "allRoles": "كل الأدوار",
+      "refresh": "تحديث",
+      "retry": "إعادة المحاولة",
+      "loading": "جارٍ تحميل المستخدمين...",
+      "loadError": "تعذر تحميل المستخدمين. يرجى المحاولة مرة أخرى.",
+      "createError": "تعذر إنشاء المستخدم. يرجى المحاولة مرة أخرى.",
+      "cancel": "إلغاء",
+      "creating": "جارٍ الإنشاء...",
+      "orderCount": "الطلبات: {count}",
+      "requestCount": "طلبات المنتجات: {count}",
+      "columns": {
+        "user": "المستخدم",
+        "contact": "بيانات التواصل",
+        "activity": "النشاط",
+        "created": "تاريخ الإنشاء"
+      },
+      "validation": {
+        "name": "يجب أن يتراوح الاسم الكامل بين حرفين و100 حرف.",
+        "email": "أدخل عنوان بريد إلكتروني صالحًا.",
+        "phone": "يجب ألا يزيد رقم الهاتف على 30 حرفًا.",
+        "password": "يجب أن تتراوح كلمة المرور بين 8 و128 حرفًا.",
+        "role": "اختر عميلًا أو دعمًا أو مسؤولًا."
+      }
+    },
+    "brands": {
+      "title": "العلامات التجارية",
+      "description": "أدر العلامات التجارية الفعلية للمنتجات وظهورها وشعاراتها وحالتها.",
+      "brand": "العلامة التجارية",
+      "addBrand": "إضافة علامة تجارية",
+      "editBrand": "تعديل العلامة التجارية",
+      "deleteBrand": "حذف العلامة التجارية",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "brandName": "اسم العلامة التجارية",
+      "country": "الدولة",
+      "logoUrl": "رابط الشعار",
+      "descriptionField": "الوصف",
+      "featured": "مميزة",
+      "status": "الحالة",
+      "products": "المنتجات",
+      "actions": "الإجراءات",
+      "statuses": {
+        "active": "نشطة",
+        "inactive": "غير نشطة",
+        "needsLogo": "تحتاج إلى شعار"
+      },
+      "createdSuccess": "تم إنشاء العلامة التجارية بنجاح",
+      "updatedSuccess": "تم تحديث العلامة التجارية بنجاح",
+      "deletedSuccess": "تم حذف العلامة التجارية بنجاح",
+      "linkedDeleteError": "لا يمكن حذف العلامة التجارية لوجود منتجات مرتبطة بها",
+      "duplicate": "توجد علامة تجارية بهذا الاسم بالفعل",
+      "noBrands": "لم يتم العثور على علامات تجارية",
+      "searchBrands": "البحث في العلامات التجارية",
+      "searchPlaceholder": "ابحث بالاسم أو الدولة",
+      "deleteConfirmation": "هل أنت متأكد من حذف {name}؟",
+      "formDescription": "أضف أو حدّث بيانات العلامة التجارية المعروضة في إدارة المنتجات.",
+      "allStatuses": "كل الحالات",
+      "allFeatured": "كل العلامات التجارية",
+      "refresh": "تحديث",
+      "loading": "جارٍ تحميل العلامات التجارية...",
+      "loadError": "تعذر تحميل العلامات التجارية. يرجى المحاولة مرة أخرى.",
+      "saveError": "تعذر حفظ العلامة التجارية.",
+      "deleteError": "تعذر حذف العلامة التجارية.",
+      "saving": "جارٍ الحفظ...",
+      "deleting": "جارٍ الحذف...",
+      "saveChanges": "حفظ التغييرات",
+      "createBrand": "إنشاء العلامة التجارية",
+      "notProvided": "غير متوفر",
+      "validation": {
+        "name": "اسم العلامة التجارية مطلوب.",
+        "logoUrl": "أدخل رابط شعار صالحًا يبدأ بـ http أو https."
+      }
+    },
+    "categories": {
+      "title": "التصنيفات",
+      "description": "إدارة تصنيفات الكتالوج الفعلية وحالة نشرها.",
+      "addCategory": "إضافة تصنيف",
+      "editCategory": "تعديل التصنيف",
+      "deleteCategory": "حذف التصنيف",
+      "createCategory": "إنشاء تصنيف",
+      "categoryName": "اسم التصنيف",
+      "slug": "الاسم المختصر",
+      "slugOptional": "الاسم المختصر (اختياري)",
+      "descriptionField": "الوصف",
+      "status": "الحالة",
+      "products": "المنتجات",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "statuses": {
+        "active": "نشط",
+        "draft": "مسودة",
+        "inactive": "غير نشط"
+      },
+      "createdSuccess": "تم إنشاء التصنيف بنجاح",
+      "updatedSuccess": "تم تحديث التصنيف بنجاح",
+      "deletedSuccess": "تم حذف التصنيف بنجاح",
+      "linkedDeleteError": "لا يمكن حذف التصنيف لوجود منتجات مرتبطة به",
+      "duplicate": "يوجد تصنيف بهذا الاسم أو الاسم المختصر بالفعل",
+      "noCategories": "لم يتم العثور على تصنيفات",
+      "searchCategories": "البحث في التصنيفات",
+      "searchPlaceholder": "ابحث باسم التصنيف أو الاسم المختصر",
+      "allStatuses": "كل الحالات",
+      "refresh": "تحديث",
+      "loading": "جارٍ تحميل التصنيفات...",
+      "loadError": "تعذر تحميل التصنيفات. يرجى المحاولة مرة أخرى.",
+      "saveError": "تعذر حفظ التصنيف.",
+      "deleteError": "تعذر حذف التصنيف.",
+      "saving": "جارٍ الحفظ...",
+      "deleting": "جارٍ الحذف...",
+      "saveChanges": "حفظ التغييرات",
+      "formDescription": "أضف أو حدّث التصنيف المستخدم في إدارة المنتجات.",
+      "deleteConfirmation": "هل أنت متأكد من حذف {name}؟",
+      "validation": {
+        "name": "اسم التصنيف مطلوب."
+      },
+      "parent": "النوع / الفئة الأم",
+      "noParent": "بدون (فئة رئيسية)",
+      "mainCategory": "فئة رئيسية",
+      "subcategory": "فئة فرعية",
+      "parentCategory": "الفئة الأم"
+    },
+    "products": {
+      "title": "المنتجات",
+      "description": "إدارة منتجات الكتالوج الفعلية والأسعار والمخزون وحالة النشر.",
+      "addProduct": "إضافة منتج",
+      "editProduct": "تعديل المنتج",
+      "createProduct": "إنشاء منتج",
+      "productName": "اسم المنتج",
+      "productNameAr": "اسم المنتج (بالعربية)",
+      "sku": "كود المنتج",
+      "brand": "العلامة التجارية",
+      "category": "التصنيف",
+      "price": "السعر",
+      "stock": "المخزون",
+      "status": "الحالة",
+      "imageUrl": "رابط الصورة",
+      "imageUpload": {
+        "label": "صورة المنتج",
+        "openPicker": "اختر صورة للمنتج",
+        "previewAlt": "معاينة صورة المنتج",
+        "currentImage": "صورة المنتج الحالية",
+        "ready": "الصورة جاهزة للرفع عند حفظ المنتج.",
+        "saved": "هذه الصورة محفوظة مع المنتج.",
+        "replace": "استبدال الصورة",
+        "remove": "إزالة الصورة",
+        "dropTitle": "اسحب صورة المنتج وأفلتها هنا",
+        "help": "JPEG أو PNG أو WebP. الحد الأقصى لحجم الملف 5 ميجابايت.",
+        "choose": "اختر من الجهاز",
+        "uploading": "جارٍ رفع صورة المنتج...",
+        "invalidType": "اختر صورة بصيغة JPEG أو PNG أو WebP.",
+        "tooLarge": "يجب ألا يزيد حجم صورة المنتج على 5 ميجابايت.",
+        "externalToggle": "استخدام رابط صورة خارجي",
+        "externalLabel": "رابط الصورة الخارجي",
+        "externalHelp": "خيار متقدم اختياري. تظل روابط صور المنتجات الخارجية الحالية مدعومة."
+      },
+      "descriptionField": "الوصف",
+      "descriptionArField": "الوصف (بالعربية)",
+      "shortDescriptionField": "الوصف المختصر",
+      "shortDescriptionArField": "الوصف المختصر (بالعربية)",
+      "featured": "مميز",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "statuses": {
+        "active": "نشط",
+        "lowStock": "مخزون منخفض",
+        "outOfStock": "غير متوفر",
+        "draft": "مسودة",
+        "inactive": "غير نشط"
+      },
+      "createdSuccess": "تم إنشاء المنتج بنجاح",
+      "updatedSuccess": "تم تحديث المنتج بنجاح",
+      "duplicateSku": "يوجد منتج بهذا الكود بالفعل",
+      "noProducts": "لم يتم العثور على منتجات",
+      "searchProducts": "البحث في المنتجات",
+      "searchPlaceholder": "ابحث بالمنتج أو الكود أو العلامة التجارية أو التصنيف",
+      "allStatuses": "كل الحالات",
+      "allBrands": "كل العلامات التجارية",
+      "allCategories": "كل التصنيفات",
+      "noBrand": "بدون علامة تجارية",
+      "noCategory": "بدون تصنيف",
+      "refresh": "تحديث",
+      "loading": "جارٍ تحميل المنتجات...",
+      "loadError": "تعذر تحميل المنتجات. يرجى المحاولة مرة أخرى.",
+      "lookupError": "تعذر تحميل العلامات التجارية والتصنيفات.",
+      "saveError": "تعذر حفظ المنتج.",
+      "saving": "جارٍ الحفظ...",
+      "deleting": "جارٍ الحذف...",
+      "saveChanges": "حفظ التغييرات",
+      "notProvided": "غير متوفر",
+      "formDescription": "أضف أو حدّث بيانات المنتج والسعر والتوفر في الكتالوج.",
+      "zeroStockWarning": "سيتم حفظ المنتج غير متوفر عند وصول المخزون إلى صفر.",
+      "validation": {
+        "name": "اسم المنتج مطلوب.",
+        "sku": "كود المنتج مطلوب.",
+        "price": "أدخل سعراً رقمياً يساوي صفراً أو أكثر.",
+        "stock": "أدخل كمية مخزون صحيحة تساوي صفراً أو أكثر.",
+        "imageUrl": "أدخل رابط صورة صالحاً يبدأ بـ http أو https."
+      },
+      "productType": "نوع المنتج",
+      "allTypes": "كل الأنواع",
+      "typeSimple": "منتج بسيط",
+      "typeVariant": "له متغيرات",
+      "stockFilter": "المخزون",
+      "allStock": "كل مستويات المخزون",
+      "sourceSystem": "نظام المصدر",
+      "allSources": "كل المصادر",
+      "manualEntry": "إدخال يدوي",
+      "lastSynced": "آخر مزامنة",
+      "notSynced": "لم تتم المزامنة قط",
+      "variantCount": "{count} من المتغيرات",
+      "view": "عرض",
+      "openVariants": "فتح المتغيرات",
+      "openImages": "فتح الصور",
+      "activate": "تفعيل",
+      "deactivate": "إلغاء التفعيل",
+      "activatedSuccess": "تم تفعيل المنتج",
+      "deactivatedSuccess": "تم إلغاء تفعيل المنتج",
+      "duplicateAsDraft": "نسخ كمسودة",
+      "duplicateSuffix": "(نسخة)",
+      "duplicatedSuccess": "تم إنشاء نسخة كمسودة. لا يتم نسخ المتغيرات أو الصور.",
+      "paginationSummary": "عرض {count} منتج — صفحة {page} من {pages}",
+      "previousPage": "السابق",
+      "nextPage": "التالي",
+      "variantParentWarning": "لهذا المنتج متغيرات. السعر والمخزون هنا قيم احتياطية فقط — أدر أسعار ومخزون المتغيرات من تبويب المتغيرات."
+    },
+    "productEditor": {
+      "backToProducts": "العودة إلى المنتجات",
+      "newProductTitle": "منتج جديد",
+      "loading": "جارٍ تحميل المنتج…",
+      "loadError": "تعذر تحميل هذا المنتج.",
+      "createdSuccess": "تم إنشاء المنتج. يمكنك الآن إضافة المتغيرات والصور.",
+      "detailsTitle": "تفاصيل المنتج",
+      "detailsDescription": "المعلومات الأساسية والتصنيف والتسعير لهذا المنتج.",
+      "simpleSkuOnly": "للمنتجات البسيطة فقط",
+      "fallbackPrice": "السعر الاحتياطي",
+      "fallbackPriceHint": "يُستخدم فقط عندما لا يكون للمتغير سعر مخصص",
+      "variantStockOnly": "يُدار المخزون لكل متغير على حدة",
+      "variantParentPricingNotice": "لهذا المنتج متغيرات. السعر والمخزون أدناه هما القيمة الاحتياطية التي تُستخدم فقط عند عدم وجود سعر مخصص للمتغير — ولا يتحكمان في مخزون المتغيرات.",
+      "tabs": {
+        "details": "التفاصيل",
+        "variants": "المتغيرات",
+        "images": "الصور"
+      },
+      "summary": {
+        "optionDimensions": "أبعاد الخيارات",
+        "variants": "المتغيرات",
+        "priceRange": "نطاق السعر",
+        "totalStock": "إجمالي المخزون",
+        "missingImages": "صور ناقصة",
+        "incompleteIdentifiers": "معرّفات غير مكتملة"
+      },
+      "warnings": {
+        "noSellableVariants": "لا توجد متغيرات قابلة للبيع — لا يمكن شراء هذا المنتج حالياً.",
+        "missingBasePrice": "لا يوجد سعر أساسي لهذا المنتج.",
+        "missingProductImage": "لا توجد صورة لهذا المنتج.",
+        "hasUnconfirmedRightsImages": "بعض الصور بانتظار تأكيد الحقوق ومخفية عن العملاء."
+      }
+    },
+    "variants": {
+      "optionsTitle": "خيارات المنتج",
+      "optionsDescription": "حدد أبعاد الخيارات (مثل اللون أو المقاس) التي تُبنى منها متغيرات هذا المنتج.",
+      "optionCode": "الكود",
+      "optionNameEn": "الاسم (إنجليزي)",
+      "optionNameAr": "الاسم (عربي)",
+      "addOption": "إضافة خيار",
+      "optionCreated": "تمت إضافة الخيار",
+      "optionSaveError": "تعذر حفظ الخيار.",
+      "optionValidation": "الكود والاسم الإنجليزي مطلوبان.",
+      "valueCode": "الكود",
+      "valueEn": "القيمة (إنجليزي)",
+      "addValue": "إضافة قيمة",
+      "valueCreated": "تمت إضافة القيمة",
+      "valueSaveError": "تعذر حفظ القيمة.",
+      "valueValidation": "الكود والقيمة الإنجليزية مطلوبان.",
+      "noValuesYet": "لا توجد قيم بعد.",
+      "removeValue": "إزالة القيمة",
+      "optional": "اختياري",
+      "generatorTitle": "توليد مجموعات المتغيرات",
+      "generatorDescription": "اختر قيمة واحدة أو أكثر لكل خيار لتوليد المجموعات المطلوب إنشاؤها.",
+      "alreadyExists": "موجود بالفعل",
+      "duplicateInSelection": "مكرر ضمن هذا الاختيار",
+      "sku": "كود المنتج",
+      "barcode": "الباركود",
+      "priceOverride": "سعر مخصص",
+      "stock": "المخزون",
+      "create": "إنشاء",
+      "createAll": "إنشاء كل المتغيرات الجديدة ({count})",
+      "resultsTitle": "النتائج",
+      "duplicateCombinationError": "تركيبة متغير مكررة: {combination}",
+      "stockValidation": "أدخل كمية مخزون صحيحة تساوي صفراً أو أكثر.",
+      "variantSaveError": "تعذر حفظ المتغير.",
+      "variantCreated": "تم إنشاء المتغير",
+      "matrixTitle": "المتغيرات",
+      "matrixDescription": "كل متغيرات هذا المنتج ومعرّفاتها وسعرها الفعلي ومخزونها وحالتها.",
+      "noVariants": "لا توجد متغيرات بعد. استخدم المولّد أعلاه لإنشاء أول متغير.",
+      "combination": "التركيبة",
+      "effectivePrice": "السعر الفعلي",
+      "usesParentPrice": "يستخدم سعر المنتج الأساسي",
+      "selectVariant": "اختر المتغير",
+      "editVariant": "تعديل المتغير",
+      "editVariantDescription": "تُطبَّق التغييرات فوراً ويتحقق منها الخادم، بما في ذلك تكرار الكود والباركود والتركيبة.",
+      "fallbackHint": "اتركه فارغاً لاستخدام سعر المنتج الأساسي",
+      "variantUpdated": "تم تحديث المتغير",
+      "variantActivated": "تم تفعيل المتغير",
+      "variantDeactivated": "تم إلغاء تفعيل المتغير",
+      "bulkEditSelected": "تم تحديد {count} من المتغيرات",
+      "noChange": "بدون تغيير",
+      "lowStockThreshold": "حد المخزون المنخفض",
+      "applyBulkEdit": "تطبيق على المحدد",
+      "applying": "جارٍ التطبيق…",
+      "deleteValueTitle": "حذف قيمة الخيار",
+      "deleteValueDescription": "هل تريد حذف \"{value}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "forceDeleteTitle": "القيمة مستخدمة في متغيرات نشطة",
+      "forceDeleteDescription": "القيمة \"{value}\" مستخدمة في {count} متغير نشط. سيؤدي حذفها إلى إلغاء تفعيل تلك المتغيرات حتى لا تبقى بتركيبة ناقصة.",
+      "forceDeleteConfirm": "إلغاء تفعيل المتغيرات والحذف",
+      "valueDeleted": "تم حذف القيمة",
+      "valueDeletedWithDeactivation": "تم حذف القيمة وإلغاء تفعيل {count} متغير"
+    },
+    "images": {
+      "productGalleryTitle": "معرض صور المنتج",
+      "productGalleryDescription": "الصور المعروضة لهذا المنتج عندما لا تنطبق صورة خاصة بمتغير معين.",
+      "variantGalleryTitle": "صور المتغيرات",
+      "variantGalleryDescription": "صور خاصة بمتغير واحد. لها الأولوية على معرض المنتج لهذا المتغير.",
+      "selectVariant": "المتغير",
+      "noImages": "لا توجد صور بعد.",
+      "imageUrl": "رابط الصورة",
+      "altText": "النص البديل",
+      "sourceUrl": "رابط المصدر",
+      "addImage": "إضافة صورة",
+      "imageAdded": "تمت إضافة الصورة",
+      "imageDeleted": "تم حذف الصورة",
+      "saveError": "تعذر حفظ الصورة.",
+      "urlValidation": "أدخل رابط صورة صالحاً يبدأ بـ http أو https.",
+      "rightsConfirmedLabel": "الحقوق مؤكدة",
+      "rightsConfirmedHint": "أكّد هذا فقط إذا كان لدى X Dental Store إذن بنشر هذه الصورة للعامة.",
+      "reviewOnlyLabel": "للمراجعة فقط — غير منشورة",
+      "reviewOnlyBanner": "لهذا المنتج صور بانتظار تأكيد الحقوق. لا تُعرض هذه الصور للعملاء أبداً.",
+      "primary": "أساسية",
+      "setPrimary": "تعيين كصورة أساسية",
+      "confirmRights": "تأكيد الحقوق",
+      "markReviewOnly": "وضع علامة للمراجعة فقط",
+      "moveUp": "تحريك لأعلى",
+      "moveDown": "تحريك لأسفل",
+      "source": "المصدر",
+      "deleteImageTitle": "حذف الصورة",
+      "deleteImageDescription": "ستتم إزالة هذه الصورة نهائياً من المعرض."
+    },
+    "catalogImport": {
+      "title": "استيراد الكتالوج",
+      "description": "استيراد كتالوج المنتجات بمعاينة أولاً. لن يتم إنشاء أو تحديث أو حذف أي سجل حتى تراجع وتؤكد.",
+      "viewHistory": "عرض السجل",
+      "sourceSystem": "نظام المصدر",
+      "filename": "اسم الملف",
+      "entitiesToInclude": "الكيانات المطلوب تضمينها",
+      "uploadTitle": "١. الرفع",
+      "uploadDescription": "أدخل صفوفاً منسّقة لكل نوع كيان. يقبل هذا الاستيراد التجريبي مصفوفات JSON فقط؛ وستُضاف طريقة متوافقة مع CSV/Excel بعد اعتماد ملف العمل.",
+      "technicalFormatLabel": "استيراد JSON تقني",
+      "technicalFormatExplanation": "صيغة الاستيراد التقنية هذه مخصصة للمسؤولين ولاختبارات التكامل. ستتم إضافة استيراد ملف Excel المخصص للعميل في مرحلة بيانات المنتجات التالية.",
+      "excel": {
+        "title": "استيراد ملف Excel (تجريبي)",
+        "description": "قم برفع ملف Excel (xlsx.) المعتمد لاستيراد تجريبي مخصص للمسؤولين يعتمد على المعاينة أولاً. يتم التحقق من إصدار القالب والأوراق والعناوين المطلوبة، ثم تُعرض النتائج في نفس جدول المعاينة أدناه - لا يتم إنشاء أو تعديل أو حذف أي شيء حتى تراجع وتؤكد.",
+        "chooseFile": "ملف Excel (xlsx.)",
+        "selectedFile": "الملف المحدد: {name}",
+        "fileRequired": "اختر ملف Excel بصيغة xlsx. للمعاينة."
+      },
+      "entityType": {
+        "BRANDS": "العلامات التجارية",
+        "CATEGORIES": "التصنيفات",
+        "PRODUCTS": "المنتجات",
+        "PRODUCT_OPTIONS": "خيارات المنتج",
+        "OPTION_VALUES": "قيم الخيارات",
+        "VARIANTS": "المتغيرات",
+        "VARIANT_OPTION_VALUES": "قيم خيارات المتغيرات",
+        "IMAGES": "الصور",
+        "INVENTORY": "المخزون"
+      },
+      "jsonError": {
+        "invalidJson": "هذا النص ليس بصيغة JSON صحيحة.",
+        "mustBeArray": "أدخل مصفوفة JSON من الصفوف.",
+        "mustBeObjectArray": "يجب أن يكون كل صف كائن JSON."
+      },
+      "markMissingInactive": "وضع علامة على السجلات المفقودة كغير نشطة",
+      "markMissingInactiveUnavailable": "غير متاح بعد في عقد الاستيراد هذا. معطّل دائماً.",
+      "sourceSystemRequired": "أدخل نظام المصدر.",
+      "noRowsProvided": "أضف صفاً واحداً على الأقل لكيان مُضمَّن.",
+      "runPreview": "تشغيل المعاينة",
+      "previewing": "جارٍ تشغيل المعاينة…",
+      "dryRunNotice": "هذا يتحقق من صفوفك ويصنّفها فقط. لا يتم إنشاء أو تحديث أو حذف أي سجل في الكتالوج.",
+      "previewError": "تعذر إنشاء المعاينة.",
+      "previewTitle": "٢-٣. المعاينة والتأكيد",
+      "previewDescription": "راجع الإجراء المقترح لكل صف قبل تطبيق أي شيء.",
+      "stalePreview": "تغيّرت بياناتك المرفوعة منذ إنشاء هذه المعاينة. شغّل معاينة جديدة قبل التطبيق.",
+      "totalRows": "إجمالي الصفوف",
+      "action": {
+        "CREATE": "إنشاء",
+        "UPDATE": "تحديث",
+        "SKIP": "تخطي",
+        "CONFLICT": "تعارض",
+        "ERROR": "خطأ"
+      },
+      "warnings": "تحذيرات",
+      "warning": "تحذير",
+      "allRows": "الكل",
+      "rowFilterLabel": "تصفية الصفوف حسب الإجراء",
+      "columnEntity": "الكيان",
+      "columnRow": "الصف",
+      "columnExternalId": "المعرّف الخارجي",
+      "columnSku": "كود المنتج",
+      "columnAction": "الإجراء",
+      "columnMessages": "الرسائل",
+      "duplicateCombinationLabel": "تركيبة متغير مكررة",
+      "noRowsForFilter": "لا توجد صفوف مطابقة لهذا الفلتر.",
+      "confirmTitle": "٤. التأكيد والتطبيق",
+      "confirmSummary": "سيتم إنشاء {create} سجل وتحديث {update} سجل لنظام المصدر \"{source}\". لا يمكن التراجع عن هذا من هذه الشاشة.",
+      "confirmCheckbox": "لقد راجعت هذه المعاينة وأؤكد أنه يجب تطبيقها.",
+      "gateReason": {
+        "NO_PREVIEW": "شغّل معاينة أولاً.",
+        "ALREADY_APPLIED": "تم تطبيق هذه الدفعة بالفعل.",
+        "HAS_ERRORS": "عالج كل صفوف الخطأ قبل التطبيق.",
+        "HAS_CONFLICTS": "عالج كل صفوف التعارض قبل التطبيق.",
+        "STALE_PREVIEW": "هذه المعاينة قديمة. شغّل معاينة جديدة.",
+        "CONFIRMATION_REQUIRED": "حدد مربع التأكيد لتفعيل زر التطبيق."
+      },
+      "applyImport": "تطبيق الاستيراد",
+      "applying": "جارٍ التطبيق…",
+      "applyError": "تعذر تطبيق الاستيراد.",
+      "applySuccess": "تم تطبيق الاستيراد بنجاح",
+      "cancelPreview": "تجاهل المعاينة",
+      "resultTitle": "٥. النتيجة",
+      "resultDescription": "تم تطبيق هذه الدفعة. النتيجة أدناه نهائية ولا يمكن التراجع عنها جزئياً.",
+      "appliedHeadline": "تم تطبيق الاستيراد بنجاح",
+      "batchId": "معرّف الدفعة",
+      "appliedAt": "وقت التطبيق",
+      "actor": "طبّقه",
+      "viewImportedProducts": "عرض المنتجات",
+      "startAnother": "بدء استيراد آخر",
+      "history": {
+        "title": "سجل الاستيراد",
+        "description": "كل معاينة وتطبيق لاستيراد الكتالوج، لأغراض التدقيق.",
+        "backToImport": "العودة إلى استيراد الكتالوج",
+        "loadError": "تعذر تحميل سجل الاستيراد.",
+        "filename": "اسم الملف",
+        "status": "الحالة",
+        "createdBy": "أنشأه",
+        "previewDate": "تاريخ المعاينة",
+        "noBatches": "لا توجد عمليات استيراد بعد.",
+        "untitled": "رفع بدون اسم",
+        "rowLevelTitle": "تفاصيل الصفوف",
+        "batchStatus": {
+          "PREVIEW": "معاينة",
+          "APPLIED": "مطبّقة",
+          "FAILED": "فشلت"
+        }
+      }
+    },
+    "flashSale": {
+      "title": "تخفيضات سريعة",
+      "description": "إعداد العرض المحدود المعروض في قسم التخفيضات السريعة بالصفحة الرئيسية.",
+      "addFlashSale": "إضافة عرض سريع",
+      "editFlashSale": "تعديل العرض السريع",
+      "deleteFlashSale": "حذف العرض السريع",
+      "createFlashSale": "إنشاء عرض سريع",
+      "product": "المنتج",
+      "selectProduct": "اختر منتجاً",
+      "salePrice": "سعر العرض السريع",
+      "originalPrice": "السعر الأصلي",
+      "startsAt": "يبدأ في",
+      "endsAt": "ينتهي في",
+      "active": "مفعّل",
+      "displayOrder": "ترتيب العرض",
+      "statusColumn": "الحالة",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "statuses": {
+        "active": "نشط",
+        "scheduled": "مجدوَل",
+        "expired": "انتهى العرض",
+        "inactive": "غير نشط"
+      },
+      "createdSuccess": "تم إنشاء العرض السريع بنجاح",
+      "updatedSuccess": "تم تحديث العرض السريع بنجاح",
+      "deletedSuccess": "تم حذف العرض السريع بنجاح",
+      "noFlashSales": "لا توجد عروض سريعة معدّة بعد",
+      "refresh": "تحديث",
+      "loading": "جارٍ تحميل العروض السريعة...",
+      "loadError": "تعذر تحميل العروض السريعة. يرجى المحاولة مرة أخرى.",
+      "saveError": "تعذر حفظ العرض السريع.",
+      "deleteError": "تعذر حذف العرض السريع.",
+      "saving": "جارٍ الحفظ...",
+      "deleting": "جارٍ الحذف...",
+      "saveChanges": "حفظ التغييرات",
+      "formDescription": "اختر منتجاً وحدّد سعر العرض السريع وجدول موعد العرض في الصفحة الرئيسية.",
+      "checkoutBehavior": "يُطبَّق أولاً أقل سعر مؤهل من العروض السريعة، ثم يقيّم إتمام الطلب العروض الأخرى المؤهلة على الإجمالي الفرعي بعد التخفيض.",
+      "overlapWarning": "يتداخل هذا الجدول مع {count} سجل عروض سريعة آخر للمنتج نفسه. يمكن الحفظ، وسيُطبَّق أقل سعر مؤهل.",
+      "deleteConfirmation": "هل أنت متأكد من حذف العرض السريع لـ {name}؟",
+      "validation": {
+        "product": "اختر منتجاً لهذا العرض السريع.",
+        "salePrice": "أدخل سعر عرض سريع أكبر من صفر.",
+        "salePriceTooHigh": "يجب أن يكون سعر العرض أقل من السعر الحالي للمنتج.",
+        "startsAt": "اختر تاريخ ووقت البداية.",
+        "endsAt": "اختر تاريخ ووقت النهاية.",
+        "endsAtBeforeStart": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية."
+      }
+    },
+    "orders": {
+      "title": "طلبات الإدارة",
+      "description": "راجع طلبات العملاء وتحقق من التفاصيل وحدّث حالة الطلب.",
+      "viewOrder": "عرض الطلب",
+      "detailTitle": "تفاصيل الطلب",
+      "detailEyebrow": "مراجعة طلب الإدارة",
+      "closeDetails": "إغلاق تفاصيل الطلب",
+      "loading": "جارٍ تحميل الطلبات...",
+      "loadingDetails": "جارٍ تحميل تفاصيل الطلب...",
+      "loadError": "تعذر تحميل الطلبات. يرجى المحاولة مرة أخرى.",
+      "detailError": "تعذر تحميل تفاصيل الطلب.",
+      "empty": "لا توجد طلبات عملاء حتى الآن.",
+      "noSearchResults": "لم يتم العثور على طلبات لهذا البحث.",
+      "retry": "إعادة المحاولة",
+      "currentStatus": "الحالة الحالية",
+      "paymentStatus": "حالة الدفع",
+      "customerDetails": "بيانات العميل",
+      "shippingDetails": "بيانات الشحن",
+      "paymentAndNotes": "الدفع والملاحظات",
+      "paymentMethod": "طريقة الدفع",
+      "deliveryNotes": "ملاحظات التوصيل",
+      "orderNotes": "ملاحظات الطلب",
+      "notProvided": "غير متوفر",
+      "items": "عناصر الطلب",
+      "quantity": "الكمية: {quantity}",
+      "subtotal": "الإجمالي الفرعي",
+      "originalSubtotal": "إجمالي المنتجات الأصلي",
+      "productPromotionSavings": "توفير العرض السريع",
+      "effectiveSubtotal": "إجمالي المنتجات بعد العروض",
+      "shippingBeforeDiscount": "الشحن قبل الخصم",
+      "deliveryOfferDiscount": "خصم عرض التوصيل",
+      "vipShippingDiscount": "توفير توصيل VIP",
+      "monetaryPromotion": "عرض الطلب",
+      "shippingPromotion": "عرض الشحن المجاني",
+      "finalShipping": "الشحن النهائي",
+      "totalSavings": "إجمالي التوفير",
+      "pointsRedeemed": "النقاط المستخدمة",
+      "walletCreditUsed": "رصيد المحفظة المستخدم",
+      "remainingCod": "المتبقي للدفع عند الاستلام",
+      "legacyPricing": "تم إنشاء هذا الطلب قبل تفعيل تفاصيل لقطات التسعير.",
+      "shipping": "الشحن",
+      "total": "الإجمالي",
+      "confirmOrder": "تأكيد الطلب",
+      "verifyOrder": "التحقق من الطلب",
+      "rejectOrder": "رفض الطلب",
+      "cancelOrder": "إلغاء الطلب",
+      "markPreparing": "تحديد كقيد التجهيز",
+      "markOutForDelivery": "تحديد كخارج للتوصيل",
+      "markDelivered": "تحديد كتم التوصيل",
+      "markCashCollected": "تحديد النقد كمُحصّل",
+      "confirmReject": "هل تريد رفض هذا الطلب؟ سيتم إشعار العميل.",
+      "confirmCancel": "هل تريد إلغاء هذا الطلب؟ سيتم إشعار العميل.",
+      "confirmedMessage": "تم تأكيد الطلب.",
+      "rejectedMessage": "تم رفض الطلب.",
+      "canceledMessage": "تم إلغاء الطلب.",
+      "statusUpdatedMessage": "تم تحديث حالة الطلب إلى {status}.",
+      "cashCollectedMessage": "تم تسجيل تحصيل الدفع النقدي.",
+      "paymentUpdateError": "تعذر تحديث حالة الدفع.",
+      "updateError": "تعذر تحديث حالة الطلب.",
+      "columns": {
+        "order": "الطلب",
+        "customer": "العميل",
+        "items": "العناصر",
+        "total": "الإجمالي",
+        "date": "التاريخ",
+        "status": "الحالة",
+        "payment": "الدفع",
+        "actions": "الإجراءات"
+      },
+      "statuses": {
+        "pendingReview": "بانتظار المراجعة",
+        "confirmed": "مؤكد",
+        "preparing": "قيد التجهيز",
+        "outForDelivery": "خارج للتوصيل",
+        "delivered": "تم التوصيل",
+        "verified": "تم التحقق",
+        "rejected": "مرفوض",
+        "canceled": "ملغي"
+      },
+      "paymentStatuses": {
+        "pendingCollection": "بانتظار التحصيل",
+        "paid": "مدفوع"
+      }
+    },
+    "contactMessages": {
+      "title": "رسائل التواصل",
+      "description": "الرسائل الواردة من نموذج التواصل العام، بما في ذلك الزوار.",
+      "loadError": "تعذر تحميل رسائل التواصل.",
+      "updateError": "تعذر تحديث حالة الرسالة.",
+      "markReviewed": "تمت المراجعة",
+      "markResolved": "تم الحل",
+      "empty": "لا توجد رسائل تواصل بعد.",
+      "registeredCustomer": "عميل مسجّل"
+    }
+  },
+  "quoteWorkflow": {
+    "quotes": "عروض الأسعار",
+    "quote": "عرض السعر",
+    "requestQuote": "اطلب عرض سعر",
+    "quoteRequest": "طلب عرض سعر",
+    "myQuotes": "عروض الأسعار الخاصة بي",
+    "quoteDetails": "تفاصيل عرض السعر",
+    "sendQuoteResponse": "إرسال رد عرض السعر",
+    "saveDraftResponse": "حفظ مسودة الرد",
+    "supplierReview": "مراجعة المورد",
+    "customerMessage": "رسالة العميل",
+    "adminResponse": "رد الإدارة",
+    "quotedPrice": "السعر المعروض",
+    "viewMyQuotes": "عرض عروض الأسعار الخاصة بي",
+    "openSupportChat": "فتح محادثة الدعم",
+    "responseSent": "تم إرسال رد عرض السعر",
+    "draftSaved": "تم حفظ مسودة الرد",
+    "requestSubmitted": "تم إرسال طلب عرض السعر {quoteNumber}",
+    "noQuotes": "لم يتم العثور على عروض أسعار",
+    "loading": "جارٍ تحميل عروض الأسعار...",
+    "loadingDetails": "جارٍ تحميل تفاصيل عرض السعر...",
+    "loadError": "تعذر تحميل عروض الأسعار. يرجى المحاولة مرة أخرى.",
+    "detailLoadError": "تعذر تحميل تفاصيل عرض السعر.",
+    "requestError": "تعذر إرسال طلب عرض السعر.",
+    "updateError": "تعذر تحديث عرض السعر.",
+    "statusUpdated": "تم تحديث حالة عرض السعر",
+    "retry": "إعادة المحاولة",
+    "refresh": "تحديث",
+    "searchQuotes": "البحث في عروض الأسعار",
+    "filterStatus": "التصفية حسب الحالة",
+    "allStatuses": "كل الحالات",
+    "submitRequest": "إرسال طلب عرض السعر",
+    "submitting": "جارٍ الإرسال...",
+    "productOrRequest": "المنتج أو الطلب",
+    "productRequired": "أدخل وصف المنتج أو الطلب.",
+    "selectedOptions": "الخيارات المحددة",
+    "customerDescription": "راجع طلبات عروض الأسعار الفعلية والردود والأسعار ومحادثات الدعم المرتبطة.",
+    "adminDescription": "راجع طلبات عروض الأسعار من العملاء وافتح التفاصيل وأرسل ردودًا محفوظة.",
+    "itemSummary": "{count} عناصر · إجمالي الكمية {quantity}",
+    "priceValue": "{price} ج.م",
+    "quantityValue": "الكمية: {quantity}",
+    "backToQuotes": "العودة إلى عروض الأسعار",
+    "requestedItems": "المنتجات المطلوبة",
+    "awaitingResponse": "لم يرسل فريق الدعم ردًا بعد.",
+    "notProvided": "غير متوفر",
+    "notFound": "عرض السعر غير موجود",
+    "pending": "قيد الانتظار",
+    "summary": "ملخص عرض السعر",
+    "items": "العناصر",
+    "totalQuantity": "إجمالي الكمية",
+    "linkedDiscussion": "المحادثة المرتبطة",
+    "adminReview": "مراجعة عرض السعر للإدارة",
+    "customer": "العميل",
+    "responseMessage": "رسالة الرد",
+    "responseRequired": "اكتب ردًا قبل الحفظ أو الإرسال.",
+    "statusActions": "إجراءات الحالة",
+    "products": "المنتجات",
+    "owner": "المسؤول",
+    "supportTeam": "فريق الدعم",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "statuses": {
+      "pending": "قيد الانتظار",
+      "supplier_review": "مراجعة المورد",
+      "draft_response": "مسودة الرد",
+      "sent": "تم الإرسال",
+      "accepted": "مقبول",
+      "rejected": "مرفوض",
+      "canceled": "ملغي"
+    }
+  },
+  "productAutocomplete": {
+    "searchProducts": "البحث عن المنتجات",
+    "startTyping": "ابدأ الكتابة للبحث عن المنتجات",
+    "noMatches": "لا توجد منتجات مطابقة",
+    "useCustomRequest": "يمكنك الاحتفاظ بهذا النص واستخدامه كطلب مخصص.",
+    "selectedProduct": "المنتج المحدد",
+    "productRequired": "أدخل اسم المنتج.",
+    "quantityRequired": "يجب ألا تقل الكمية عن 1."
+  },
   "footer": {
     "description": "شريكك الموثوق لمستلزمات وأدوات طب الأسنان ومنتجات العيادات، لخدمة العيادات والأطباء في المنطقة.",
     "newsletterTitle": "تابع أحدث المنتجات والعروض",
     "newsletterBody": "اشترك لتصلك تحديثات المنتجات والعروض الأسبوعية وأخبار مستلزمات الأسنان.",
     "subscribed": "تم اشتراكك. شكرًا لك.",
+    "subscribeError": "تعذر إتمام الاشتراك. يرجى المحاولة مرة أخرى.",
     "emailPlaceholder": "your@email.com",
     "copyright": "© 2026 X Dental Store. جميع الحقوق محفوظة.",
     "creditPrefix": "تم تصميم وتطوير الموقع بواسطة",
@@ -144,7 +1191,9 @@
     "privacy": "سياسة الخصوصية",
     "terms": "شروط الخدمة",
     "contact": {
-      "ordersWhatsApp": "واتساب الطلبات"
+      "ordersWhatsApp": "واتساب الطلبات",
+      "mainSupport": "الدعم الرئيسي",
+      "branch": "الفرع"
     },
     "sections": {
       "shop": "التسوق",
@@ -185,6 +1234,25 @@
     "cta": "تسوق العرض",
     "secondary": "لاحقاً",
     "close": "إغلاق العرض المجدول",
+    "types": {
+      "informational": "معلومات",
+      "percentageDiscount": "خصم بنسبة مئوية",
+      "fixedDiscount": "خصم بقيمة ثابتة",
+      "coupon": "كوبون خصم",
+      "freeDelivery": "توصيل مجاني",
+      "custom": "حملة"
+    },
+    "automaticCheckout": "يُطبّق تلقائياً عند إتمام الطلب.",
+    "couponInstruction": "أدخل هذا الكود في سلة التسوق قبل إتمام الطلب.",
+    "freeDeliveryAutomatic": "يُطبّق تلقائياً على التوصيل العادي والسريع المؤهل.",
+    "checkoutUnaffected": "لا تغيّر هذه الحملة إجمالي المبلغ عند إتمام الطلب.",
+    "minimumOrder": "الحد الأدنى المؤهل للطلب: {amount}",
+    "endsOn": "ينتهي في {date}{time}",
+    "validOn": "صالح في {date}{time}",
+    "weeklySchedule": "متاح كل {days}{time}",
+    "couponCode": "كود الخصم",
+    "copyCode": "نسخ الكود",
+    "copied": "تم النسخ",
     "weekly": {
       "monday": {
         "badge": "خصم 15%",
@@ -230,19 +1298,78 @@
       }
     }
   },
+  "flashSale": {
+    "title": "تخفيضات سريعة",
+    "endsIn": "ينتهي العرض خلال",
+    "days": "أيام",
+    "hours": "ساعات",
+    "minutes": "دقائق",
+    "seconds": "ثوانٍ",
+    "viewProduct": "عرض المنتج",
+    "saleEnded": "انتهى العرض",
+    "savePercentage": "وفر {percentage}٪"
+  },
   "home": {
     "heroBadge": "مستلزمات أسنان موثوقة",
     "heroTitle": "منتجات أسنان متميزة للعيادات والأطباء",
     "heroBody": "نوفر أدوات أسنان عالية الجودة ومستلزمات عيادات وعلامات تجارية موثوقة في مكان واحد، بأسعار تنافسية وتوصيل يعتمد عليه.",
     "browseProducts": "تصفح المنتجات",
     "infoStrip": {
-      "ariaLabel": "مزايا X Dental Store",
-      "products": "+500 منتج",
-      "brands": "+50 علامة موثوقة",
-      "delivery": "توصيل سريع",
-      "quoteSupport": "دعم عروض الأسعار",
-      "supplyLists": "قوائم توريد للعيادات",
-      "specialRequests": "طلبات خاصة"
+      "ariaLabel": "شركاء الدفع"
+    },
+    "promotionalFlyers": {
+      "ariaLabel": "نشرات X Dental Store الترويجية",
+      "slideLabel": "النشرة الترويجية {current} من {total}",
+      "dotsLabel": "التنقل بين النشرات الترويجية",
+      "goToSlide": "عرض النشرة الترويجية {number}",
+      "previous": "النشرة الترويجية السابقة",
+      "next": "النشرة الترويجية التالية"
+    },
+    "paymentPlans": {
+      "eyebrow": "شركاء التمويل",
+      "title": "خطط دفع مرنة",
+      "subtitle": "نعمل على إعداد خيارات تمويل مرنة بالتعاون مع شركاء موثوقين في مجال التكنولوجيا المالية لمساعدة العيادات على تخطيط مشترياتها بثقة أكبر.",
+      "status": "قيد الإعداد",
+      "cta": "استكشف الخطط",
+      "previous": "العرض السابق",
+      "next": "العرض التالي",
+      "pagination": "التنقل بين شركاء التمويل",
+      "goTo": "الانتقال إلى الشريك",
+      "checkoutNote": "هذه الخطط لأغراض تعريفية وليست متاحة بعد عند إتمام الطلب. يظل الدفع عند الاستلام طريقة الدفع المتاحة حاليًا.",
+      "detailsNote": "لا تزال شروط الشريك والأهلية والرسوم والتوافر قيد الإعداد. لا توجد أي وسيلة تمويل مفعلة في صفحة إتمام الطلب حاليًا.",
+      "partners": {
+        "valu": {
+          "title": "تمويل مرن للعيادات",
+          "highlight": "تفاصيل الخطط قريبًا",
+          "description": "نعمل على إعداد خيارات تمويل محتملة من valU لمشتريات العيادات المؤهلة، وفقًا لشروط الشريك وموافقته النهائية."
+        },
+        "seven": {
+          "title": "تخطيط أذكى للمشتريات",
+          "highlight": "سيتم إعلان الشروط لاحقًا",
+          "description": "نستكشف خيارات تقسيط من seven قد تساعد العيادات على تخطيط المشتريات المؤهلة بمرونة أكبر."
+        },
+        "tru": {
+          "title": "طرق أكثر لإدارة التكاليف",
+          "highlight": "سيتم تأكيد التوافر",
+          "description": "يجري إعداد تفاصيل خطط الدفع من TRU لدعم مشتريات العيادات بمرونة أكبر بعد تأكيد الشروط النهائية."
+        },
+        "fawry": {
+          "title": "وصول مريح إلى خيارات الدفع",
+          "highlight": "الخيارات قيد المراجعة",
+          "description": "نستكشف خيارات دفع مدعومة من Fawry للطلبات المؤهلة، وسيتم إعلان التوافر بعد تأكيده."
+        },
+        "paymob": {
+          "title": "خيارات دفع رقمية",
+          "highlight": "تفاصيل الربط قيد الإعداد",
+          "description": "نعمل على إعداد وسائل دفع محتملة مدعومة من Paymob، بينما يظل إتمام الطلب متاحًا بنظام الدفع عند الاستلام."
+        }
+      }
+    },
+    "campaigns": {
+      "eyebrow": "الحملات الحالية",
+      "title": "حملات العيادات",
+      "subtitle": "اكتشف حملات مستلزمات الأسنان الحالية وعروض الشركاء والعروض الترويجية محدودة المدة.",
+      "viewAll": "تسوق الحملات"
     },
     "stats": {
       "products": "منتج",
@@ -260,12 +1387,13 @@
       "weeklyTitle": "عروض الأسبوع",
       "weeklySubtitle": "خصومات محدودة على مستلزمات الأسنان اليومية واحتياجات العيادة.",
       "whyTitle": "لماذا تختار العيادات X Dental Store",
-      "whySubtitle": "أدوات عملية ودعم موثوق لتسهيل شراء مستلزمات الأسنان.",
+      "whySubtitle": "قيمة أفضل وجودة موثوقة وخدمة مريحة مصممة لتلبية الاحتياجات اليومية لعيادات الأسنان.",
       "bestSellersTitle": "الأكثر مبيعًا",
       "bestSellersSubtitle": "منتجات شائعة تطلبها العيادات وأطباء الأسنان.",
       "trustedBrandsEyebrow": "شركاؤنا",
       "trustedBrandsTitle": "علامات تجارية موثوقة",
       "trustedBrandsSubtitle": "تصفح مستلزمات أسنان من علامات وموردين تثق بهم العيادات والأطباء.",
+      "viewBrandProductsAriaLabel": "عرض منتجات {brand}",
       "bestServiceBadge": "أفضل خدمة",
       "recommendedTitle": "موصى به لعيادتك",
       "recommendedSubtitle": "منتجات مختارة حسب احتياجات العيادات وإجراءات الأسنان اليومية.",
@@ -274,18 +1402,18 @@
       "viewFastDelivery": "عرض منتجات التوصيل السريع"
     },
     "features": {
-      "authenticTitle": "منتجات أصلية",
-      "authenticBody": "نوفر منتجات أسنان موثوقة من علامات وموردين يمكن الاعتماد عليهم.",
-      "pricesTitle": "أسعار تنافسية",
-      "pricesBody": "احصل على ما تحتاجه عيادتك بأسعار عادلة وعملية ومنافسة.",
-      "deliveryTitle": "توصيل سريع",
-      "deliveryBody": "توصيل سريع يعتمد عليه للحفاظ على مخزون عيادتك وتشغيلها بسلاسة.",
-      "rangeTitle": "تشكيلة واسعة",
-      "rangeBody": "من الأدوات إلى مستلزمات العيادة، ستجد كل ما تحتاجه في مكان واحد.",
-      "orderingTitle": "طلب سهل",
-      "orderingBody": "تصفح المنتجات واطلب عروض أسعار أو أكمل طلبك بخطوات بسيطة.",
-      "supportTitle": "دعم للعيادات",
-      "supportBody": "نفهم احتياجات عيادات الأسنان ونساعدك على اختيار المستلزمات المناسبة."
+      "authenticTitle": "أسعار أفضل",
+      "authenticBody": "احصل على منتجات أسنان موثوقة بأسعار تنافسية تساعد عيادتك على الشراء بكفاءة أكبر.",
+      "pricesTitle": "جودة ممتازة",
+      "pricesBody": "تسوّق مستلزمات أسنان مختارة بعناية من علامات تجارية موثوقة وموردين يمكن الاعتماد عليهم.",
+      "deliveryTitle": "توصيل موثوق",
+      "deliveryBody": "يساعد التوصيل الموثوق في الحفاظ على تزويد عيادتك واستمرار العمل اليومي دون تأخيرات غير ضرورية.",
+      "rangeTitle": "توصيل في نفس اليوم ضمن النطاق",
+      "rangeBody": "يمكن للعيادات الواقعة ضمن نطاق التوصيل المجدول استلام الطلبات المؤهلة في اليوم نفسه، وفقًا للتوافر وموعد انتهاء استقبال الطلبات اليومي.",
+      "orderingTitle": "خيارات دفع مرنة",
+      "orderingBody": "يجري إعداد المزيد من وسائل الدفع وخيارات التقسيط لجعل مشتريات العيادة أسهل وأكثر مرونة.",
+      "supportTitle": "طلب سهل ورعاية ما بعد البيع",
+      "supportBody": "اطلب عبر عملية إلكترونية بسيطة واحصل على دعم مستمر بشأن استفسارات المنتجات واحتياجات ما بعد البيع."
     },
     "categoryDescriptions": {
       "endodontics": "مبارد علاج الجذور وأدوات الحشو ومستلزمات الإندو الأساسية.",
@@ -311,7 +1439,8 @@
       "newsletterEyebrow": "العروض والتحديثات",
       "newsletterTitle": "احصل على تحديثات المنتجات والعروض الأسبوعية",
       "newsletterBody": "اشترك لتصلك المنتجات الجديدة والعروض وتحديثات مستلزمات الأسنان.",
-      "subscribed": "تم اشتراكك - شكرًا لك!"
+      "subscribed": "تم اشتراكك - شكرًا لك!",
+      "subscribeError": "تعذر إتمام الاشتراك. يرجى المحاولة مرة أخرى."
     }
   },
   "products": {
@@ -325,6 +1454,12 @@
     "sortLabel": "ترتيب المنتجات",
     "category": "التصنيف",
     "brand": "العلامة التجارية",
+    "searchBrands": "ابحث عن علامة تجارية",
+    "clearBrands": "مسح العلامات",
+    "noBrandsFound": "لم يتم العثور على علامات تجارية",
+    "loadingBrands": "جارٍ تحميل العلامات التجارية",
+    "brandResults": "نتائج العلامات التجارية",
+    "brandsSelected": "تم تحديد {count}",
     "priceRange": "نطاق السعر",
     "availability": "التوفر",
     "offers": "العروض",
@@ -422,7 +1557,13 @@
         "name": "طقم مفكات زرعات",
         "category": "زراعة الأسنان"
       }
-    }
+    },
+    "toggleSubcategories": "إظهار أو إخفاء الفئات الفرعية",
+    "toggleCategoryGroup": "إظهار أو إخفاء التصنيفات الفرعية ضمن {category}",
+    "selectedCategories": "التصنيفات المحددة",
+    "selectedCategoryCount": "تم تحديد {count} من فلاتر التصنيفات",
+    "selectedFilterCount": "تم تحديد {count} من الفلاتر",
+    "removeCategoryFilter": "إزالة فلتر {category}"
   },
   "categories": {
     "items": {
@@ -440,6 +1581,15 @@
       "restorative": "مواد الترميم",
       "instruments": "أدوات الأسنان",
       "consumables": "المستهلكات",
+      "prosthodontics": "التركيبات السنية",
+      "perio-surgery": "اللثة والجراحة",
+      "equipments": "الأجهزة",
+      "burs-stones": "المبارد والأحجار",
+      "bleaching": "تبييض الأسنان",
+      "dental-lab": "مختبر الأسنان",
+      "implant": "زراعة الأسنان",
+      "oral-care-system": "العناية بالفم والأسنان",
+      "pedodontics": "طب أسنان الأطفال",
       "equipment": "الأجهزة",
       "surgery": "الجراحة",
       "implantology": "زراعة الأسنان",
@@ -448,6 +1598,163 @@
       "lab-supplies": "مستلزمات المعمل",
       "radiology": "الأشعة",
       "disposables": "مستهلكات"
+    }
+  },
+  "aboutPage": {
+    "actions": {
+      "browseProducts": "تصفح المنتجات",
+      "requestQuote": "اطلب عرض سعر"
+    },
+    "hero": {
+      "eyebrow": "عن X Dental Store",
+      "fullTitle": "شراء أذكى لمستلزمات الأسنان للعيادات والمتخصصين.",
+      "titleLine1": "شراء أذكى",
+      "titleLine2": "لمستلزمات الأسنان",
+      "titleLine3": "للعيادات والمتخصصين",
+      "description": "وُجد X Dental Store لجعل مشتريات العيادة أكثر وضوحًا، من خلال كتالوجات منظمة وقوائم توريد محفوظة ودعم عروض الأسعار والمساعدة في الطلبات لفرق طب الأسنان.",
+      "imageAlt": "منتجات ومستلزمات أسنان",
+      "benefitsLabel": "مزايا X Dental Store",
+      "tags": {
+        "trustedBrands": "علامات تجارية موثوقة",
+        "clinicSupplyLists": "قوائم توريد العيادة",
+        "quoteSupport": "دعم عروض الأسعار",
+        "fastReordering": "إعادة طلب أسرع",
+        "verifiedSuppliers": "موردون موثوقون",
+        "specialRequests": "طلبات خاصة",
+        "easyProductDiscovery": "اكتشاف سهل للمنتجات",
+        "orderSupport": "دعم الطلبات"
+      }
+    },
+    "intro": {
+      "eyebrow": "من نحن",
+      "title": "أكثر من مجرد متجر",
+      "titleSecond": "شريك توريد لعيادتك.",
+      "description": "نساعد عيادات الأسنان والمتخصصين على الوصول إلى المنتجات التي يحتاجون إليها للممارسة اليومية والعلاجات المتخصصة والمشتريات المتكررة. صُممت منصتنا لجعل اكتشاف المنتجات والطلب وعروض الأسعار وإعادة الطلب أسهل وأكثر تنظيمًا."
+    },
+    "clinicNeeds": {
+      "eyebrow": "مصمم للعيادات",
+      "title": "كل ما تحتاجه عيادتك،",
+      "titleSecond": "منظم في",
+      "titleStrong": "مكان واحد.",
+      "imageAlt": "علاج أسنان داخل عيادة",
+      "items": {
+        "dailyEssentials": {
+          "title": "مستلزمات العيادة اليومية",
+          "description": "تصفح المستهلكات والمنتجات أحادية الاستخدام والمنتجات كثيرة الاستعمال لعمليات العيادة اليومية."
+        },
+        "treatmentSpecific": {
+          "title": "منتجات مخصصة للعلاجات",
+          "description": "اعثر على خيارات منظمة للترميم وعلاج الجذور وتقويم الأسنان والجراحة والاحتياجات المتخصصة."
+        },
+        "repeatPurchasing": {
+          "title": "المشتريات المتكررة",
+          "description": "احفظ المنتجات وأنشئ قوائم التوريد وأعد طلب مستلزمات العيادة بسرعة أكبر."
+        },
+        "specialRequests": {
+          "title": "الطلبات الخاصة وعروض الأسعار",
+          "description": "أرسل قائمة منتجاتك أو طلب التوريد وسيساعدك فريقنا في إعداد عرض سعر واضح."
+        }
+      }
+    },
+    "whyChoose": {
+      "eyebrow": "لماذا تختارنا",
+      "title": "طريقة أفضل لشراء",
+      "titleSecond": "مستلزمات الأسنان.",
+      "description": "في X Dental Store لا نكتفي بتوفير المنتجات، بل ندعم العيادات والمتخصصين بعلامات تجارية موثوقة وأسعار تنافسية وتجربة شراء سلسة وموثوقة.",
+      "carouselLabel": "لماذا تختار X Dental Store",
+      "showCard": "اعرض {title}",
+      "items": {
+        "trustedBrands": {
+          "title": "علامات تجارية موثوقة",
+          "description": "احصل على منتجات من علامات وموردي أسنان موثوقين."
+        },
+        "organizedShopping": {
+          "title": "تسوق منظم",
+          "description": "تصفح حسب التصنيف أو العلامة التجارية أو التخصص أو نوع العرض أو احتياج العيادة."
+        },
+        "clinicTools": {
+          "title": "أدوات للعيادة",
+          "description": "استخدم المفضلة وقوائم التوريد وعروض الأسعار وطلبات المنتجات لإدارة المشتريات."
+        },
+        "fasterReordering": {
+          "title": "إعادة طلب أسرع",
+          "description": "استخدم الطلبات السابقة وقوائم التوريد المحفوظة لإعادة طلب المستلزمات بجهد أقل."
+        },
+        "support": {
+          "title": "دعم عند الحاجة",
+          "description": "احصل على مساعدة بشأن المنتجات والطلبات والتوصيل وعروض الأسعار وأسئلة التوفر."
+        }
+      }
+    },
+    "promise": {
+      "eyebrow": "وعدنا",
+      "title": "منتجات موثوقة.",
+      "titleSecond": "دعم واضح.",
+      "titleThird": "سير عمل أفضل للعيادة.",
+      "description": "صُمم X Dental Store لتسهيل شراء مستلزمات الأسنان للعيادات، من التصنيفات المنظمة والموردين الموثوقين إلى دعم عروض الأسعار والأدوات التي تساعد الفرق على إعادة الطلب بسرعة.",
+      "items": {
+        "curatedProducts": {
+          "title": "منتجات أسنان مختارة بعناية",
+          "description": "ننظم مستلزمات العيادة والأدوات والمستهلكات والمنتجات المتخصصة ليجد أطباء الأسنان ما يحتاجون إليه بسرعة."
+        },
+        "supplierNetwork": {
+          "title": "شبكة موردين موثوقة",
+          "description": "يركز كتالوجنا على علامات وموردي أسنان موثوقين ومختارين للاستخدام المهني في العيادات."
+        },
+        "orderingSupport": {
+          "title": "دعم عروض الأسعار والطلب",
+          "description": "من أسئلة المنتجات إلى طلبات أسعار الكميات الكبيرة، يساعد فريقنا العيادات على اتخاذ قرارات شراء أوضح."
+        },
+        "reordering": {
+          "title": "مصمم لإعادة طلب العيادة",
+          "description": "تساعد المفضلة وقوائم التوريد وأدوات الحساب العيادات على تقليل العمل المتكرر وإعادة طلب المستلزمات اليومية بجهد أقل."
+        }
+      }
+    },
+    "workflow": {
+      "eyebrow": "مشتريات العيادة",
+      "title": "مصمم لطريقة شراء",
+      "titleSecond": "العيادات الفعلية.",
+      "navigationLabel": "خطوات مشتريات العيادة",
+      "goToStep": "انتقل إلى {step}",
+      "steps": {
+        "wishlist": {
+          "label": "الخطوة 1",
+          "title": "المفضلة",
+          "description": "احفظ المنتجات التي تريد مقارنتها أو إعادة طلبها أو نقلها إلى قوائم التوريد لاحقًا.",
+          "imageAlt": "منتجات أسنان جاهزة للإضافة إلى مفضلة العيادة"
+        },
+        "supplyLists": {
+          "label": "الخطوة 2",
+          "title": "قوائم التوريد",
+          "description": "أنشئ قوائم قابلة لإعادة الاستخدام للمستلزمات الشهرية أو احتياجات الفروع أو سير العمل المتخصص.",
+          "imageAlt": "طبيب أسنان يراجع منتجات للعيادة"
+        },
+        "quotes": {
+          "label": "الخطوة 3",
+          "title": "عروض الأسعار",
+          "description": "اطلب أسعارًا للطلبات الكبيرة أو المشتريات المتكررة أو احتياجات العيادة الخاصة.",
+          "imageAlt": "مستلزمات أسنان منظمة للمشتريات المتكررة"
+        },
+        "productSupport": {
+          "label": "الخطوة 4",
+          "title": "طلبات المنتجات والدعم",
+          "description": "اطلب من فريقنا التحقق من توفر المنتجات غير المدرجة حاليًا، أو تتبع الطلبات وتذاكر الدعم من حسابك.",
+          "imageAlt": "عيادة أسنان يدعمها X Dental Store"
+        }
+      }
+    },
+    "contact": {
+      "eyebrow": "تواصل معنا",
+      "title": "تواصل مع",
+      "titleSecond": "فريقنا مباشرة",
+      "description": "اختر أسهل طريقة للتواصل معنا لأسئلة المنتجات أو تحديثات الطلبات أو عروض الأسعار أو دعم العيادة.",
+      "actions": {
+        "call": "اتصل بنا",
+        "email": "راسلنا",
+        "whatsapp": "دعم واتساب",
+        "visit": "الفرع / المخزن"
+      }
     }
   },
   "categoriesPage": {
@@ -470,23 +1777,66 @@
       "Brands": "العلامات التجارية",
       "Clinic Essentials": "مستلزمات العيادة"
     },
+    "helpEyebrow": "مشتريات العيادة",
     "helpTitle": "كيف يساعد",
     "helpTitleSecond": "X Dental Store عيادتك",
     "helpIntro": "من قوائم التوريد المحفوظة إلى طلب عروض الأسعار، يساعد X Dental Store العيادات على الطلب أسرع وإدارة المستلزمات بمجهود أقل.",
     "step1": "الخطوة 1",
     "stepTitle": "تصفح حسب التصنيف",
     "stepBody": "اعثر على منتجات الأسنان منظمة حسب التخصص ونوع العلاج واحتياجات العيادة.",
-    "imageAlt": "مستلزمات أسنان"
+    "imageAlt": "مستلزمات أسنان",
+    "workflow": {
+      "navigationLabel": "خطوات شراء مستلزمات العيادة",
+      "goToStep": "انتقل إلى {step}",
+      "steps": {
+        "step1": {
+          "label": "الخطوة 1",
+          "title": "تصفح حسب التصنيف",
+          "description": "اعثر على منتجات الأسنان مرتبة حسب التخصص ونوع العلاج واحتياجات العيادة اليومية.",
+          "imageAlt": "تصنيف مستلزمات عيادة الأسنان"
+        },
+        "step2": {
+          "label": "الخطوة 2",
+          "title": "احفظ في قوائم التوريد",
+          "description": "احتفظ بالمنتجات المستخدمة باستمرار جاهزة لإعادة الطلب أو المقارنة أو طلب عروض الأسعار.",
+          "imageAlt": "أدوات أسنان لقوائم توريد العيادة"
+        },
+        "step3": {
+          "label": "الخطوة 3",
+          "title": "اجمع النقاط وافتح المكافآت",
+          "description": "اجمع النقاط مع الطلبات المكتملة، وتابع رصيد المكافآت ورصيد المتجر، واستخدم القيمة المؤهلة عند الدفع.",
+          "imageAlt": "مكافآت متاحة لمشتريات العيادة المكتملة",
+          "walletLink": "المكافآت والمحفظة",
+          "checkoutLink": "الانتقال إلى الدفع"
+        },
+        "step4": {
+          "label": "الخطوة 4",
+          "title": "أتمم الشراء وتتبّع الطلبات",
+          "description": "أكّد طلبك، واستخدم النقاط أو المكافآت، وتتبّع التوصيل من حسابك.",
+          "imageAlt": "منتجات أسنان جاهزة لإتمام الشراء والتوصيل"
+        }
+      }
+    }
   },
   "brandsPage": {
     "featuredEyebrow": "علامات تجارية مميزة",
     "featuredTitle": "اكتشف أكثر علامات وموردي الأسنان طلبًا لدينا.",
     "searchPlaceholder": "ابحث باسم العلامة التجارية",
+    "noResultsTitle": "لا توجد علامات تجارية مطابقة.",
+    "noResultsBody": "جرّب اسمًا مختلفًا أو تحقق من الإملاء.",
+    "paginationLabel": "التنقل بين صفحات العلامات التجارية",
+    "previousPage": "السابق",
+    "nextPage": "التالي",
     "statusLabel": "تصفية العلامات حسب الحالة",
     "dateLabel": "تصفية العلامات حسب التاريخ",
     "sortLabel": "ترتيب العلامات",
     "heroTitleLine1": "علامات أسنان",
     "heroTitleLine2": "موثوقة",
+    "heroBody": "استكشف مورّدي ومصنّعي منتجات الأسنان حسب العلامة التجارية والتخصص وتصنيف المنتج.",
+    "brandCount": "أكثر من 50 علامة أسنان موثوقة",
+    "supplierTitleLine1": "الموردون",
+    "supplierTitleLine2": "والشركات المصنّعة",
+    "supplierBody": "اعثر على منتجات من علامات أسنان موثوقة وقارن بين الخيارات داخل الكتالوج.",
     "over": "أكثر من",
     "allIn": "كلها في",
     "onePlace": "مكان واحد",
@@ -495,6 +1845,14 @@
   "contactPage": {
     "toastTitle": "تم إرسال الرسالة",
     "toastBody": "سيتواصل معك فريقنا في أقرب وقت ممكن.",
+    "accountAccess": {
+      "title": "مساعدة الوصول إلى الحساب",
+      "description": "أدخل بريدًا إلكترونيًا يمكننا التواصل معك من خلاله واشرح مشكلة الوصول. لا يعيد هذا النموذج تفعيل الحساب تلقائيًا.",
+      "subjectLabel": "موضوع الدعم",
+      "subjectValue": "مساعدة الوصول إلى الحساب",
+      "successTitle": "تم استلام الطلب",
+      "successBody": "تم استلام طلب المساعدة في الوصول إلى الحساب. سيراجع فريقنا الطلب ويتواصل معك باستخدام البيانات المقدمة."
+    },
     "heroTitle": "دعم متخصص للمنتجات والطلبات وعروض الأسعار",
     "heroBody": "لديك سؤال عن منتج أو طلب أو عرض سعر أو احتياجات عيادتك؟ فريقنا جاهز لمساعدتك في اختيار المنتجات المناسبة ودعم عيادتك بوضوح.",
     "supplySupport": "دعم مستلزمات العيادة",
@@ -542,24 +1900,594 @@
     "faqTitleSecond": "",
     "faqBody": "اعثر على إجابات سريعة عن عروض الأسعار وقوائم التوريد وطلبات المنتجات وأدوات الحساب.",
     "viewMoreFaqs": "عرض المزيد من الأسئلة",
-    "faqs": {
-      "quoteBeforeOrdering": {
-        "question": "هل يمكنني طلب عرض سعر قبل الشراء؟",
-        "answer": "نعم. يمكنك طلب عرض سعر للمنتجات قبل إتمام الطلب، خصوصًا للكميات الكبيرة أو الأسعار الخاصة."
+    "sending": "جارٍ الإرسال...",
+    "toastErrorTitle": "لم يتم إرسال الرسالة",
+    "toastErrorBody": "تعذر إرسال رسالتك. يرجى المحاولة مرة أخرى أو الاتصال بنا مباشرة."
+  },
+  "privacyPage": {
+    "seoTitle": "سياسة الخصوصية | X Dental Store",
+    "seoDescription": "اقرأ كيف تجمع X Dental Store المعلومات المتعلقة بالحسابات والطلبات والمدفوعات والتوصيل والدعم وخدمات الموقع، وكيف تستخدمها وتحميها وتشاركها.",
+    "eyebrow": "السياسات القانونية",
+    "title": "سياسة الخصوصية",
+    "description": "تعرّف على كيفية جمع X Dental Store لمعلوماتك واستخدامها وحمايتها ومشاركتها.",
+    "lastUpdatedLabel": "آخر تحديث",
+    "lastUpdatedDate": "يوليو 2026",
+    "sections": {
+      "introduction": {
+        "title": "مقدمة",
+        "paragraph1": "توضح سياسة الخصوصية هذه كيفية قيام X Dental Store بجمع المعلومات واستخدامها وتخزينها وحمايتها ومشاركتها عند زيارتك لموقعنا الإلكتروني، أو إنشاء حساب، أو تصفح المنتجات، أو طلب عروض أسعار، أو تقديم طلبات شراء، أو استخدام قوائم التوريد، أو التواصل مع الدعم."
       },
-      "saveRepeatedLists": {
-        "question": "هل يمكن للعيادات حفظ قائمة مشتريات شهرية أو متكررة؟",
-        "answer": "نعم. يمكن للعيادات استخدام قوائم التوريد لحفظ المنتجات التي يتم طلبها باستمرار وإعادة طلبها بسهولة لاحقًا."
+      "informationCollected": {
+        "title": "المعلومات التي نجمعها",
+        "paragraph1": "قد تتضمن معلومات الحساب اسمك بالكامل، وعنوان بريدك الإلكتروني، ورقم هاتفك، وتفضيلات الحساب، وتخصص العيادة أو التخصص الرئيسي الذي اخترته، وبيانات المصادقة اللازمة لإنشاء حسابك وإدارته. ينبغي معالجة كلمات المرور وبيانات المصادقة بأمان وتخزينها باستخدام أساليب التجزئة أو التشفير وفقًا لأفضل الممارسات الأمنية؛ وينبغي ألا تخزن X Dental Store كلمات المرور كنص عادي.",
+        "paragraph2": "قد تتضمن معلومات العيادة والطلبات اسم العيادة، وعنوان التوصيل، وبيانات الفوترة عند جمعها، وسجل الطلبات، وطلبات عروض الأسعار، وطلبات المنتجات، وقوائم التوريد، ونشاط قائمة المفضلة وسلة التسوق، والعلامات التجارية أو التصنيفات أو المنتجات المفضلة.",
+        "paragraph3": "قد تتضمن معلومات الدفع حالة وسيلة الدفع، ومراجع المعاملات، وحالة تأكيد الدفع. لا تحتاج X Dental Store إلى تخزين أرقام البطاقات كاملةً عندما يعالج مزود دفع خارجي بيانات الدفع الحساسة، وقد يتعامل هؤلاء المزودون مع بيانات الدفع وفقًا لسياساتهم الخاصة.",
+        "paragraph4": "قد تتضمن معلومات التواصل الرسائل المرسلة عبر نماذج الاتصال، وطلبات الدعم، ورسائل واتساب، وسجلات المكالمات أو البريد الإلكتروني، والملاحظات، والمراجعات، والمحتوى المرفوع، أو غير ذلك من المعلومات التي تختار إرسالها إلينا.",
+        "paragraph5": "قد تتضمن المعلومات التقنية ومعلومات الاستخدام عنوان بروتوكول الإنترنت (IP)، ونوع المتصفح والجهاز، والصفحات التي تمت زيارتها، وعبارات البحث، والتفاعلات مع المنتجات أو التصنيفات، وملفات تعريف الارتباط، والتخزين المحلي، وسجلات الأخطاء، ومعلومات الموقع التقريبي من متصفحك أو جهازك أو شبكتك حيثما كانت متاحة."
       },
-      "sourceUnlistedProduct": {
-        "question": "هل يمكنكم المساعدة في توفير منتج غير مدرج؟",
-        "answer": "نعم. يمكنك إرسال طلب منتج، ويمكن للفريق مراجعة مدى توفره أو اقتراح بدائل."
+      "informationUse": {
+        "title": "كيفية استخدامنا للمعلومات",
+        "paragraph1": "تستخدم X Dental Store المعلومات لإنشاء حسابات المستخدمين وإدارتها، ومعالجة الطلبات وطلبات عروض الأسعار، وإدارة قوائم التوريد وسلال التسوق وقوائم المفضلة والمشتريات المتكررة وطلبات المنتجات، وتنسيق التوصيل، وتقديم دعم العملاء.",
+        "paragraph2": "قد نستخدم المعلومات أيضًا لتخصيص توصيات المنتجات، بما في ذلك أساسيات العيادة استنادًا إلى تخصص العيادة، وللتواصل بشأن الطلبات والتوصيل والدعم والعروض وتحديثات الحساب، وتحسين أداء الموقع وتجربة المستخدم، ومنع الاحتيال أو إساءة الاستخدام، وحماية الأمن، والوفاء بالالتزامات القانونية أو المحاسبية أو الضريبية أو التشغيلية."
+      },
+      "specialtyPersonalization": {
+        "title": "تخصيص المحتوى حسب تخصص العيادة",
+        "paragraph1": "قد تستخدم X Dental Store تخصص العيادة الذي تم اختياره أثناء التسجيل أو المحفوظ في ملفك الشخصي لتخصيص توصيات المنتجات وجعل أدوات مشتريات العيادة أكثر ملاءمة.",
+        "paragraph2": "قد يؤثر ذلك في أقسام مثل أساسيات العيادة، والمنتجات الموصى بها، واقتراحات إعادة الطلب، وإبراز التصنيفات، أو غيرها من مزايا اكتشاف المنتجات. إذا تغير تخصصك، فقد تتمكن من تحديثه من خلال أدوات حسابك أو التواصل مع الدعم للحصول على المساعدة، وفقًا للمزايا المتاحة حاليًا."
+      },
+      "cookies": {
+        "title": "ملفات تعريف الارتباط والتقنيات المشابهة",
+        "paragraph1": "قد يستخدم الموقع ملفات تعريف الارتباط والتخزين المحلي وتقنيات مشابهة للإبقاء على تسجيل دخول المستخدمين، وتذكر التفضيلات، وإدارة نشاط سلة التسوق وقائمة المفضلة، ودعم الأمن، وتحسين الأداء، وفهم كيفية استخدام الموقع.",
+        "paragraph2": "يمكنك التحكم في ملفات تعريف الارتباط من خلال إعدادات متصفحك. إذا حظرت ملفات تعريف الارتباط أو حذفتها، فقد لا تعمل بعض مزايا الموقع كما هو متوقع، بما في ذلك جلسات الحساب، والتفضيلات المحفوظة، وسلوك سلة التسوق، وبعض مزايا التخصيص."
+      },
+      "informationSharing": {
+        "title": "كيفية مشاركتنا للمعلومات",
+        "paragraph1": "قد تشارك X Dental Store المعلومات مع الموردين والموزعين وشركات الشحن ومزودي الخدمات اللوجستية ومزودي خدمات الدفع والاستضافة وقواعد البيانات والبريد الإلكتروني والرسائل النصية القصيرة وواتساب والدعم والتحليلات والأداء والأمن والخدمات القانونية أو المحاسبية أو التجارية، حيثما يلزم لتشغيل الموقع وتلبية طلبات العملاء.",
+        "paragraph2": "قد تتم مشاركة المعلومات أيضًا مع السلطات القانونية أو التنظيمية عندما يقتضي القانون ذلك، أو مع المستشارين المتخصصين عند الحاجة لأغراض محاسبية أو قانونية أو ضريبية أو متعلقة بالامتثال أو الأعمال.",
+        "paragraph3": "لا تبيع X Dental Store المعلومات الشخصية للمستخدمين إلى المعلنين."
+      },
+      "thirdPartyServices": {
+        "title": "خدمات الجهات الخارجية",
+        "paragraph1": "قد يستخدم الموقع خدمات جهات خارجية لمعالجة المدفوعات، والتوصيل والخدمات اللوجستية، والبريد الإلكتروني أو المراسلة، والاستضافة، والبنية التحتية لقواعد البيانات، والتحليلات، والخرائط، وأدوات الأمن، والروابط الخارجية، أو غيرها من الخدمات التشغيلية.",
+        "paragraph2": "قد تجمع خدمات الجهات الخارجية المعلومات أو تعالجها وفقًا لشروطها وسياسات الخصوصية الخاصة بها. ينبغي للمستخدمين مراجعة تلك السياسات عند الاقتضاء، ولا سيما فيما يتعلق بخدمات الدفع والتوصيل والمراسلة والمواقع الخارجية."
+      },
+      "dataSecurity": {
+        "title": "أمن البيانات",
+        "paragraph1": "تستخدم X Dental Store تدابير تقنية وتنظيمية معقولة مصممة لحماية المعلومات، بما في ذلك ممارسات المصادقة الآمنة، وضوابط الوصول المحدود، وممارسات الاستضافة وقواعد البيانات الآمنة، وبروتوكول HTTPS حيثما ينطبق، وتجزئة كلمات المرور.",
+        "paragraph2": "لا يوجد نظام إلكتروني أو قاعدة بيانات أو وسيلة نقل آمنة تمامًا. وعلى الرغم من عملنا على حماية المعلومات، لا تستطيع X Dental Store ضمان عدم وقوع وصول غير مصرح به أو فقدان أو إساءة استخدام أو مشكلات تقنية مطلقًا."
+      },
+      "dataRetention": {
+        "title": "الاحتفاظ بالبيانات",
+        "paragraph1": "تحتفظ X Dental Store بالمعلومات فقط للمدة اللازمة بصورة معقولة لإدارة الحسابات، وسجل الطلبات، ودعم العملاء، والأغراض القانونية والمحاسبية والضريبية، ومنع الاحتيال، والأمن، وعمليات الأعمال.",
+        "paragraph2": "قد تختلف مدد الاحتفاظ بحسب نوع المعلومات، والغرض من الاحتفاظ بها، والمتطلبات القانونية، والاحتياجات التشغيلية، وما إذا كان الحساب أو الطلب أو الطلب المقدم أو مسألة الدعم لا تزال نشطة."
+      },
+      "userRights": {
+        "title": "حقوق المستخدم وخياراته",
+        "paragraph1": "مع مراعاة القانون المعمول به، يجوز للمستخدمين طلب الوصول إلى معلوماتهم الشخصية، أو تصحيح المعلومات غير الدقيقة، أو حذف معلومات معينة، أو إغلاق الحساب، أو إلغاء الاشتراك في الاتصالات التسويقية، أو تحديث تفضيلات التواصل.",
+        "paragraph2": "قد يلزم الاحتفاظ ببعض السجلات عندما تكون مطلوبة لسجل الطلبات، أو سجلات الدعم، أو المحاسبة، أو الضرائب، أو منع الاحتيال، أو الامتثال القانوني، أو معالجة النزاعات، أو عمليات الأعمال المشروعة."
+      },
+      "marketing": {
+        "title": "الاتصالات التسويقية",
+        "paragraph1": "قد يتلقى المستخدمون تحديثات المنتجات والعروض والرسائل الترويجية وإعلانات الخدمة عندما يوافقون على ذلك أو عندما يسمح القانون المعمول به بهذه الاتصالات.",
+        "paragraph2": "يجوز للمستخدمين إلغاء الاشتراك في الرسائل التسويقية أو مطالبة X Dental Store بإيقاف الاتصالات الترويجية. وقد يستمر إرسال الرسائل المتعلقة بالمعاملات والمرتبطة بالطلبات والتوصيل ونشاط الحساب والأمن وعروض الأسعار والطلبات المقدمة والدعم عند الضرورة."
+      },
+      "children": {
+        "title": "خصوصية الأطفال",
+        "paragraph1": "X Dental Store مخصصة للعيادات ومتخصصي طب الأسنان والمستخدمين البالغين. الموقع غير مخصص للأطفال، وينبغي ألا ينشئ الأطفال حسابات أو يقدموا طلبات شراء أو يرسلوا معلومات شخصية عبر الموقع."
+      },
+      "internationalTransfers": {
+        "title": "نقل البيانات دوليًا",
+        "paragraph1": "قد يعالج بعض مزودي خدمات الاستضافة أو قواعد البيانات أو الدفع أو البريد الإلكتروني أو المراسلة أو التحليلات أو الدعم أو غيرها من الخدمات المعلومات أو يخزنونها خارج مصر أو خارج بلد المستخدم.",
+        "paragraph2": "عند استخدام المعالجة الدولية، ستستخدم X Dental Store ضمانات معقولة حيثما ينطبق، وستعمل مع مزودي خدمات يدعمون ممارسات مناسبة لحماية البيانات."
+      },
+      "businessTransfers": {
+        "title": "نقل الأعمال",
+        "paragraph1": "إذا دخلت X Dental Store في عملية اندماج أو استحواذ أو إعادة هيكلة أو تمويل أو بيع أصول أو معاملة تجارية مشابهة، فقد يتم نقل معلومات المستخدمين أو مراجعتها كجزء من تلك المعاملة، مع مراعاة ضمانات السرية والحماية القانونية المناسبة حيثما ينطبق."
+      },
+      "policyChanges": {
+        "title": "التغييرات على سياسة الخصوصية",
+        "paragraph1": "قد تحدّث X Dental Store سياسة الخصوصية هذه من وقت إلى آخر. وسيتم نشر النسخ المحدثة في هذه الصفحة مع تاريخ تحديث منقح.",
+        "paragraph2": "استمرار استخدام الموقع أو الخدمات بعد نشر سياسة خصوصية محدثة يعني إقرارك بالسياسة المحدثة."
+      },
+      "contactInformation": {
+        "title": "معلومات التواصل",
+        "paragraph1": "للأسئلة أو الطلبات المتعلقة بالخصوصية، تواصل مع X Dental Store عبر نموذج الاتصال في الموقع، أو واتساب على الرقم 01035777335، أو في القاهرة، مصر. وسيتم نشر عنوان العمل المسجل النهائي وصندوق بريد الخصوصية بعد المراجعة القانونية وإعداد بيئة الإنتاج."
       }
+    },
+    "sidebar": {
+      "title": "هل لديك أسئلة؟",
+      "description": "إذا كانت لديك أي أسئلة حول سياسة الخصوصية هذه أو كيفية التعامل مع معلوماتك، فسيسعد فريق الدعم لدينا بمساعدتك.",
+      "cta": "تواصل مع الدعم"
+    }
+  },
+  "termsPage": {
+    "seoTitle": "شروط الخدمة | X Dental Store",
+    "seoDescription": "اقرأ الشروط التي تحكم استخدام X Dental Store والطلبات والمدفوعات والتوصيل والمرتجعات والحسابات وخدمات الموقع.",
+    "eyebrow": "السياسات القانونية",
+    "title": "شروط الخدمة",
+    "description": "يرجى قراءة شروط الخدمة هذه بعناية قبل استخدام X Dental Store.",
+    "lastUpdatedLabel": "آخر تحديث",
+    "lastUpdatedDate": "يوليو 2026",
+    "sections": {
+      "introductionAcceptance": {
+        "title": "المقدمة وقبول الشروط",
+        "paragraph1": "توضح شروط الخدمة هذه القواعد التي تسري عند وصولك إلى X Dental Store أو استخدامها، بما في ذلك موقعنا الإلكتروني، وكتالوج المنتجات، وإتمام الشراء، وأدوات الحساب، ودعم عروض الأسعار، وقوائم التوريد، وطلبات المنتجات، والإشعارات، والخدمات ذات الصلة.",
+        "paragraph2": "باستخدام X Dental Store، أو إنشاء حساب، أو تقديم طلب شراء، أو طلب عرض سعر، أو التواصل معنا عبر الموقع، فإنك توافق على هذه الشروط وعلى سياسة الخصوصية الخاصة بنا. إذا لم توافق، فيرجى عدم استخدام الموقع أو الخدمات."
+      },
+      "services": {
+        "title": "نبذة عن خدمات X Dental Store",
+        "paragraph1": "توفر X Dental Store تجربة تجارة إلكترونية لمنتجات طب الأسنان ومستلزمات العيادات والأدوات والمواد الاستهلاكية والعلامات التجارية والتصنيفات وأدوات الشراء المصممة لعيادات الأسنان والمتخصصين.",
+        "paragraph2": "قد تُباع المنتجات مباشرةً من X Dental Store أو تتاح من خلال موردين أو موزعين أو علامات تجارية أو شركات شحن أو مزودي خدمات شركاء. وعندما يشارك شركاء، قد تساعد X Dental Store في تسهيل اكتشاف المنتجات والطلب والدفع والدعم وتنسيق التوصيل."
+      },
+      "ordersAvailability": {
+        "title": "الطلبات وتوفر المنتجات",
+        "paragraph1": "يجوز للمستخدمين تقديم طلبات شراء أو طلب عروض أسعار أو إرسال طلبات منتجات عبر الموقع، وذلك رهناً بتوفر المنتجات وقبول الطلب.",
+        "paragraph2": "قد تتغير أسعار المنتجات وأوصافها وصورها وخصوماتها ومستويات المخزون وتغليفها وتوفرها دون إشعار مسبق. وتُقدم صور المنتجات وأوصافها للإرشاد، وقد لا تطابق دائمًا المنتج النهائي الذي يتم تسليمه مطابقة تامة.",
+        "paragraph3": "يجوز لـ X Dental Store رفض الطلب أو إلغاؤه أو تصحيحه أو تعديله عند الضرورة، بما في ذلك عندما يكون المنتج غير متوفر، أو يكون السعر غير صحيح، أو تتضمن معلومات المنتج خطأً، أو يتعذر تأكيد الدفع، أو تكون تفاصيل التوصيل غير مكتملة، أو يبدو الطلب احتياليًا أو غير سليم."
+      },
+      "pricingPayment": {
+        "title": "التسعير والدفع",
+        "paragraph1": "تُعرض الأسعار بالعملة المعمول بها والمبيّنة على الموقع. وقد تُطبق ضرائب أو رسوم توصيل أو مصاريف مناولة أو رسوم أخرى بحسب الطلب والموقع.",
+        "paragraph2": "يتم الدفع حاليًا بنظام الدفع عند الاستلام: يحصل فريق X Dental Store المبلغ عند تسليم طلبك. وستظهر عند إتاحتها في صفحة إتمام الشراء أي وسائل دفع إضافية يتم تقديمها لاحقًا.",
+        "paragraph3": "لا يعني تقديم الطلب دائمًا قبوله نهائيًا. فإذا تم اكتشاف مشكلة في المخزون أو التسعير أو المورد أو التوصيل أو معلومات المنتج بعد تقديم الطلب، يجوز لـ X Dental Store التواصل معك لتصحيح المشكلة أو عرض بديل أو تعديل الطلب أو إلغائه."
+      },
+      "delivery": {
+        "title": "التوصيل",
+        "paragraph1": "قد تختلف مدة التوصيل بناءً على توفر المنتج، وموقع العيادة، وإجراءات المورد، وتأكيد الطلب، والعطلات، والطقس، وحركة المرور، أو عوامل تشغيلية أخرى.",
+        "paragraph2": "يتولى فريق X Dental Store توصيل الطلبات، وسيتواصل معك لتأكيد تفاصيل التوصيل. وتُقدم تقديرات التوصيل للتيسير ولا تكون مضمونة ما لم يتم تأكيدها صراحةً كتابةً.",
+        "paragraph3": "لا تتحمل X Dental Store مسؤولية التأخيرات الناجمة عن أحداث خارجة عن نطاق سيطرتها المعقولة، بما في ذلك تأخر المورد، أو بيانات التوصيل غير الصحيحة، أو المسائل الجمركية أو التنظيمية، أو أحداث القوة القاهرة، أو غيرها من الظروف الخارجية."
+      },
+      "returns": {
+        "title": "المرتجعات والمبالغ المستردة والإلغاءات",
+        "paragraph1": "ينبغي للعملاء التواصل مع دعم X Dental Store بشأن طلبات الإلغاء أو الإرجاع أو الاستبدال أو استرداد المبلغ. وتتوقف الأهلية على نوع المنتج، وحالة الطلب، وحالة الصنف، وسياسة المورد، والقانون المعمول به، وأي قيود متعلقة بالنظافة أو السلامة.",
+        "paragraph2": "قد لا تكون بعض المنتجات الطبية أو الخاصة بطب الأسنان أو المعقمة أو الاستهلاكية أو الحساسة للحرارة أو المصنوعة حسب الطلب أو المختومة مؤهلة للإرجاع بعد فتحها أو استخدامها أو تلفها أو إزالة ختمها أو تركيبها أو تلوثها أو انتهاء صلاحيتها أو التعامل معها بطريقة تؤثر في السلامة أو صلاحيتها لإعادة البيع.",
+        "paragraph3": "قد تتم معالجة المبالغ المستردة أو الأرصدة أو الاستبدالات أو الإلغاءات المعتمدة من خلال وسيلة الدفع الأصلية أو وسيلة أخرى تعتمدها X Dental Store، مع مراعاة أي مدد معالجة مطبقة واستقطاعات يسمح بها القانون."
+      },
+      "accounts": {
+        "title": "حسابات المستخدمين",
+        "paragraph1": "قد تتطلب بعض مزايا الموقع حسابًا، بما في ذلك أدوات مشتريات العيادة، وقوائم التوريد، والبيانات المحفوظة، وتتبع عروض الأسعار، وسجل الطلبات، وطلبات المنتجات، ومزايا قائمة المفضلة، ودعم الحساب.",
+        "paragraph2": "يتحمل المستخدمون مسؤولية الحفاظ على أمان بيانات تسجيل الدخول إلى الحساب وعن جميع الأنشطة التي تتم من خلال حسابهم. وإذا اشتبهت في وصول غير مصرح به، فينبغي التواصل مع X Dental Store على الفور.",
+        "paragraph3": "يجب على المستخدمين تقديم معلومات دقيقة وحديثة وكاملة، بما في ذلك بيانات التواصل ومعلومات التوصيل وبيانات العيادة والمعلومات المتعلقة بالدفع عند الحاجة."
+      },
+      "professionalUse": {
+        "title": "استخدام العيادات والمتخصصين",
+        "paragraph1": "تخدم X Dental Store عيادات الأسنان والمتخصصين في طب الأسنان والمشترين ذوي الصلة. ويتحمل المستخدمون مسؤولية التأكد من أن أي منتج يشترونه مناسب للاستخدام السريري أو المعملي أو التعليمي أو المهني المقصود.",
+        "paragraph2": "لا تحل X Dental Store محل الحكم المهني أو التدريب السريري أو تعليمات الشركة المصنّعة أو المتطلبات التنظيمية أو المشورة الطبية أو الخاصة بطب الأسنان. وتظل مسؤولية اختيار المنتج وتخزينه والتعامل معه واستخدامه والتخلص منه على عاتق المستخدم والعيادة أو المتخصص المعني.",
+        "paragraph3": "يجب على المستخدمين الامتثال لجميع اللوائح المعمول بها المتعلقة بطب الأسنان والطب والسلامة والتخزين ومكافحة العدوى والتراخيص والاستخدام، والتي تسري على موقعهم وممارستهم المهنية."
+      },
+      "websiteUse": {
+        "title": "قواعد استخدام الموقع",
+        "paragraph1": "لا يجوز للمستخدمين إساءة استخدام الموقع أو الخدمات. وتشمل الأنشطة المحظورة الاختراق، واستخراج البيانات آليًا، والجمع الآلي، والهندسة العكسية، والتدخل في تشغيل الموقع، وتجاوز إجراءات الأمن، ونسخ التصميم أو التعليمات البرمجية، وتقديم معلومات زائفة، وإساءة استخدام العروض، أو استخدام الموقع لأغراض غير قانونية أو ضارة.",
+        "paragraph2": "يجوز لـ X Dental Store تعليق الوصول إلى الموقع أو مزايا الحساب أو تقييده أو إنهاؤه إذا اعتقدنا بصورة معقولة أن المستخدم أساء استخدام الخدمة، أو خالف هذه الشروط، أو أضر بمستخدم آخر، أو أنشأ مخاطر تشغيلية، أو تصرف بصورة غير قانونية."
+      },
+      "userContent": {
+        "title": "محتوى المستخدم والملاحظات",
+        "paragraph1": "يجوز للمستخدمين إرسال مراجعات أو رسائل أو طلبات دعم أو طلبات منتجات أو صور أو تعليقات أو ملاحظات أو غير ذلك من المحتوى عبر الموقع أو قنوات التواصل ذات الصلة. ويظل المستخدمون مسؤولين عن دقة ما يرسلونه وقانونيته وملاءمته.",
+        "paragraph2": "بإرسال الملاحظات أو الاقتراحات، فإنك تسمح لـ X Dental Store باستخدامها لتحسين المنتجات والخدمات ومزايا الموقع وإجراءات عمل الدعم وتجربة العملاء دون استحقاق تعويض، ما لم يتم الاتفاق على خلاف ذلك كتابةً بصورة منفصلة.",
+        "paragraph3": "يجوز لـ X Dental Store إزالة المحتوى غير الدقيق أو غير القانوني أو المسيء أو المضلل أو السري أو المنتهك للحقوق أو الترويجي أو غير الملائم بأي صورة أخرى، أو تقييده أو رفضه."
+      },
+      "communications": {
+        "title": "الاتصالات",
+        "paragraph1": "عند إنشاء حساب أو تقديم طلب شراء أو طلب عرض سعر أو إرسال طلب دعم أو استخدام X Dental Store بأي طريقة أخرى، قد تتلقى اتصالات تتعلق بالطلبات والتوصيل ونشاط الحساب والدعم وعروض الأسعار وطلبات المنتجات والعروض والتذكيرات أو تحديثات الخدمة.",
+        "paragraph2": "قد تُرسل الاتصالات عبر البريد الإلكتروني أو المكالمات الهاتفية أو الرسائل النصية القصيرة أو واتساب أو الإشعارات الفورية أو الرسائل داخل الحساب أو غيرها من القنوات المتاحة. وقد تُطبق رسوم الرسائل والبيانات بحسب مزود الخدمة وخطتك."
+      },
+      "offers": {
+        "title": "العروض والخصومات والقسائم",
+        "paragraph1": "قد تكون العروض والخصومات والقسائم وعروض التوصيل المجاني والحزم ومكافآت الولاء وغيرها من المزايا الترويجية مقيدة بالوقت أو المخزون أو المنتج أو التصنيف أو المستخدم أو العيادة أو الموقع أو وسيلة الدفع أو شروط أخرى.",
+        "paragraph2": "يجوز لـ X Dental Store تعديل العروض الترويجية أو إلغاؤها أو إنهاؤها أو تقييدها أو رفضها عند الضرورة، بما في ذلك حالات الخطأ أو إساءة الاستخدام أو الاشتباه في الاحتيال أو مشكلات المخزون أو التغييرات التشغيلية.",
+        "paragraph3": "ليس للقسائم والأرصدة الترويجية قيمة نقدية ما لم يُذكر خلاف ذلك صراحةً، وقد لا تكون قابلة للتحويل أو الاسترداد أو الجمع مع عروض أخرى إلا إذا سمحت X Dental Store بذلك."
+      },
+      "thirdParty": {
+        "title": "منتجات الجهات الخارجية والموردون والروابط",
+        "paragraph1": "قد تقدم جهات خارجية بعض المنتجات أو العلامات التجارية أو الموردين أو الشركات المصنّعة أو مزودي خدمات الدفع أو مزودي خدمات التوصيل أو الأدوات أو الروابط الخارجية. وقد تسري شروطهم وضماناتهم وسياساتهم وتعليماتهم وممارسات الخصوصية الخاصة بهم.",
+        "paragraph2": "لا تتحمل X Dental Store مسؤولية شروط الجهات الخارجية أو سياساتها أو ادعاءات المنتجات أو انقطاعات الخدمة أو أداء التوصيل أو تغييرات الشركات المصنّعة أو المواقع الخارجية، إلا بالقدر الذي يقتضيه القانون المعمول به أو توافق عليه X Dental Store صراحةً."
+      },
+      "intellectualProperty": {
+        "title": "الملكية الفكرية",
+        "paragraph1": "إن اسم X Dental Store وتصميم الموقع وتخطيطه وواجهته وشعاره ونصوصه وصوره وأيقوناته ورسوماته وطريقة عرض المنتجات وبرامجه وإجراءات العمل وغيرها من مواد الموقع مملوكة لـ X Dental Store أو مستخدمة بموجب ترخيص.",
+        "paragraph2": "لا يجوز للمستخدمين نسخ محتوى الموقع أو تصميمه أو برامجه أو علامته التجارية أو إعادة إنتاجه أو تعديله أو توزيعه أو بيعه أو نسخه بصورة مطابقة أو استخراج بياناته أو إعادة استخدامه أو إنشاء أعمال مشتقة منه دون إذن كتابي مسبق من X Dental Store أو صاحب الحقوق المعني."
+      },
+      "availabilityDisclaimer": {
+        "title": "توفر الخدمة وإخلاء المسؤولية",
+        "paragraph1": "تقدم X Dental Store الموقع والخدمات على أساس الإتاحة. ونسعى إلى إبقاء معلومات المنتجات والأسعار والمخزون وأدوات الحساب ووظائف الموقع دقيقة وموثوقة، لكننا لا نضمن أن تكون الخدمة دائمًا بلا انقطاع أو أخطاء، أو محدثة بالكامل، أو خالية من المشكلات التقنية.",
+        "paragraph2": "تُقدم معلومات المنتجات وصورها وتوفرها وأوصافها للإرشاد، وقد تختلف بسبب تحديثات الموردين أو تغييرات الشركات المصنّعة أو اختلافات التغليف أو استبدال المخزون أو قيود العرض."
+      },
+      "liability": {
+        "title": "تحديد المسؤولية",
+        "paragraph1": "إلى أقصى حد يسمح به القانون المعمول به، لا تتحمل X Dental Store مسؤولية الأضرار غير المباشرة أو العرضية أو الخاصة أو العقابية أو التبعية، بما في ذلك خسارة الأرباح أو انقطاع الأعمال أو فقدان البيانات أو توقف العيادة أو الضرر بالسمعة أو الخسارة الناتجة عن استخدام الموقع أو الخدمات أو تعذر استخدامها.",
+        "paragraph2": "عندما لا يكون استبعاد المسؤولية ممكنًا، تقتصر مسؤولية X Dental Store على أقصى حد يسمح به القانون المعمول به وعلى الظروف المحددة للطلب أو الخدمة المعنية."
+      },
+      "indemnification": {
+        "title": "التعويض",
+        "paragraph1": "يوافق المستخدمون على حماية X Dental Store وفريقها والجهات التابعة لها ومزودي خدماتها وشركائها وإعفائهم من المطالبات أو الخسائر أو المسؤوليات أو الأضرار أو التكاليف أو المصروفات الناشئة عن إساءة استخدام الموقع، أو مخالفة هذه الشروط، أو نشاط غير قانوني، أو انتهاك حقوق الغير، أو تقديم معلومات غير دقيقة، أو الاستخدام غير السليم للمنتج من جانب المستخدم."
+      },
+      "termination": {
+        "title": "الإنهاء",
+        "paragraph1": "يجوز للمستخدمين التوقف عن استخدام X Dental Store في أي وقت. ويجوز لـ X Dental Store تعليق الوصول إلى الموقع أو مزايا الحساب أو العروض أو الخدمات أو تقييده أو إنهاؤه إذا خالف المستخدم هذه الشروط، أو أنشأ مخاطر، أو أساء استخدام الخدمة، أو تصرف بطريقة قد تضر بـ X Dental Store أو الموردين أو العملاء أو مزودي الخدمات.",
+        "paragraph2": "لا يؤثر الإنهاء في الالتزامات التي ينبغي بصورة معقولة أن تستمر بعد انتهاء الوصول، بما في ذلك التزامات الدفع وقيود الملكية الفكرية وحدود المسؤولية والأحكام المتعلقة بالنزاعات."
+      },
+      "termsChanges": {
+        "title": "التغييرات على هذه الشروط",
+        "paragraph1": "يجوز لـ X Dental Store تحديث هذه الشروط من وقت إلى آخر. وستُنشر الشروط المحدثة في هذه الصفحة مع تاريخ تحديث منقح. ويعني استمرار استخدام الموقع أو الخدمات بعد نشر التغييرات قبولك للشروط المحدثة."
+      },
+      "governingLaw": {
+        "title": "القانون الحاكم",
+        "paragraph1": "يُقصد أن تخضع هذه الشروط للقوانين المعمول بها في مصر، ما لم تنص النسخة القانونية النهائية على اختصاص قضائي آخر. وينبغي مراجعة هذه الصياغة وتأكيدها من مستشار قانوني قبل نشرها كسياسة نهائية."
+      },
+      "contactInformation": {
+        "title": "معلومات التواصل",
+        "paragraph1": "للأسئلة المتعلقة بهذه الشروط، تواصل مع X Dental Store عبر نموذج الاتصال في الموقع، أو واتساب على الرقم 01035777335، أو في القاهرة، مصر. وسيتم نشر عنوان العمل المسجل النهائي وصندوق بريد الدعم بعد المراجعة القانونية وإعداد بيئة الإنتاج."
+      }
+    },
+    "sidebar": {
+      "title": "هل لديك أسئلة؟",
+      "description": "إذا كانت لديك أي أسئلة حول شروط الخدمة هذه، فسيسعد فريق الدعم لدينا بمساعدتك.",
+      "cta": "تواصل مع الدعم"
+    }
+  },
+  "howToOrderPage": {
+    "seoTitle": "كيفية الطلب | X Dental Store",
+    "seoDescription": "تعرّف على كيفية تصفح المنتجات وطلب عروض الأسعار واختيار وسائل الدفع وتتبع طلبك لدى X Dental Store.",
+    "eyebrow": "دليل الطلب",
+    "title": "كيفية الطلب",
+    "description": "اتبع خطوات بسيطة لتصفح المنتجات وطلب عروض الأسعار واستلام مستلزمات عيادتك.",
+    "supportCta": "تواصل مع الدعم",
+    "quickSteps": {
+      "browse": {
+        "title": "تصفح المنتجات",
+        "description": "استكشف المنتجات حسب التصنيف أو العلامة التجارية أو التخصص، أو استخدم البحث."
+      },
+      "cartQuote": {
+        "title": "أضف إلى السلة / اطلب عرض سعر",
+        "description": "اختر الطلب العادي أو اطلب عرض سعر للمنتجات الخاصة."
+      },
+      "paymentDelivery": {
+        "title": "تأكيد الدفع والتوصيل",
+        "description": "راجع تفاصيل إتمام الطلب وأدخل بيانات التوصيل."
+      },
+      "receive": {
+        "title": "استلم طلبك",
+        "description": "تابع تحديثات الطلب وتواصل مع الدعم عند الحاجة."
+      }
+    },
+    "orderSteps": {
+      "browseProducts": {
+        "title": "تصفح المنتجات",
+        "description": "تصفح مستلزمات طب الأسنان حسب التصنيف أو العلامة التجارية أو التخصص، أو استخدم البحث. يمكنك استكشاف أساسيات العيادة والأدوات والمواد الاستهلاكية والمعدات وعلامات طب الأسنان الموثوقة."
+      },
+      "productDetails": {
+        "title": "افتح تفاصيل المنتج",
+        "description": "افتح أي منتج لمراجعة تفاصيله وصوره وعلامته التجارية وسعره إن كان متاحًا وحالة توفره قبل إضافته إلى طلبك."
+      },
+      "cartOrQuote": {
+        "title": "أضف إلى السلة أو اطلب عرض سعر",
+        "description": "بالنسبة إلى المنتجات العادية، يمكنك إضافة الأصناف مباشرةً إلى سلة التسوق. أما الكميات الكبيرة والآلات والمنتجات الخاصة أو الأصناف التي تحتاج إلى تأكيد، فيمكنك طلب عرض سعر قبل الشراء."
+      },
+      "account": {
+        "title": "أنشئ حسابًا أو سجّل الدخول",
+        "description": "يساعدك إنشاء حساب على إدارة الطلبات وعروض الأسعار وقوائم التوريد والمنتجات المحفوظة ومعلومات العيادة والمشتريات المتكررة."
+      },
+      "payment": {
+        "title": "اختر وسيلة الدفع",
+        "description": "الدفع عند الاستلام هو وسيلة الدفع النشطة عند الإطلاق. ادفع لفريق X Dental Store عند تسليم طلبك."
+      },
+      "deliveryDetails": {
+        "title": "أكّد تفاصيل التوصيل",
+        "description": "أضف عنوان التوصيل ورقم الهاتف وأي ملاحظات مهمة للتوصيل. يرجى التأكد من صحة بيانات التواصل حتى يتمكن فريق توصيل X Dental Store من الوصول إليك."
+      },
+      "confirmation": {
+        "title": "تأكيد الطلب",
+        "description": "بعد تقديم طلبك، قد تؤكد X Dental Store توفر المنتجات والأسعار والدفع عند الاستلام وتفاصيل التوصيل قبل الشحن."
+      },
+      "tracking": {
+        "title": "استلم طلبك وتتبعه",
+        "description": "يمكنك متابعة تحديثات طلبك من خلال حسابك، أو التواصل مع الدعم باستخدام رقم الطلب إذا احتجت إلى مساعدة."
+      }
+    },
+    "help": {
+      "eyebrow": "هل تحتاج إلى مساعدة؟",
+      "title": "يمكن لفريق الدعم لدينا إرشادك في طلبك من البداية إلى النهاية.",
+      "description": "تواصل معنا إذا احتجت إلى مساعدة في اختيار المنتجات أو تأكيد توفرها أو متابعة عرض سعر أو عملية توصيل."
+    }
+  },
+  "shippingDeliveryPage": {
+    "seoTitle": "الشحن والتوصيل | X Dental Store",
+    "seoDescription": "تعرّف على نطاق توصيل X Dental Store والشحن القياسي ومنتجات التوصيل السريع والدفع عند الاستلام والتعامل مع المنتجات الخاصة ودعم التوصيل.",
+    "eyebrow": "التوصيل",
+    "title": "الشحن والتوصيل",
+    "description": "تعرّف على كيفية توصيل X Dental Store لمستلزمات الأسنان ومنتجات التوصيل السريع والطلبات الخاصة بالعيادات.",
+    "lastUpdatedLabel": "آخر تحديث",
+    "lastUpdatedDate": "يوليو 2026",
+    "contactSupport": "تواصل مع الدعم",
+    "fastProducts": {
+      "eyebrow": "التوصيل السريع",
+      "title": "منتجات التوصيل السريع",
+      "description": "تكون بعض المنتجات المختارة مؤهلة للتوصيل في اليوم نفسه أو اليوم التالي عند توافرها في المخزون وضمن مناطق التغطية المدعومة.",
+      "viewAll": "عرض جميع منتجات التوصيل السريع",
+      "emptyTitle": "ستظهر منتجات التوصيل السريع هنا قريبًا.",
+      "emptyDescription": "تظهر هنا المنتجات المصنفة في الكتالوج على أنها متاحة للتوصيل السريع.",
+      "badge": "توصيل سريع",
+      "cardDescription": "مؤهل للتوصيل في اليوم نفسه أو اليوم التالي بحسب المخزون والموقع.",
+      "outOfStock": "غير متوفر",
+      "viewProduct": "عرض المنتج"
+    },
+    "steps": {
+      "confirmOrder": {
+        "title": "تأكيد طلبك",
+        "description": "نتحقق عند الحاجة من التفاصيل الأساسية، مثل التوفر والعنوان ورقم الهاتف ووسيلة الدفع."
+      },
+      "prepareDispatch": {
+        "title": "التجهيز والإرسال",
+        "description": "تُعبأ المنتجات المؤهلة وتُسلّم إلى فريق توصيل X Dental Store وفقًا لاحتياجات التعامل مع المنتج."
+      },
+      "receiveDelivery": {
+        "title": "استلام طلبك",
+        "description": "يرجى فحص الشحنة عند وصولها والتواصل سريعًا مع الدعم إذا كان هناك ما يحتاج إلى مراجعة."
+      }
+    },
+    "sections": {
+      "coverage": {
+        "title": "نطاق التوصيل",
+        "paragraph1": "توفر X Dental Store خدمة التوصيل إلى المواقع المدعومة في مصر من خلال فريق التوصيل الداخلي. وقد يختلف التوفر والتكلفة والتوقيت بحسب المدينة أو المحافظة ونوع المنتج وحجم الطلب وتوافر المخزون.",
+        "paragraph2": "قد تتطلب بعض المنتجات تأكيد التوصيل قبل الشحن، خاصةً عندما يتضمن الطلب تعاملًا خاصًا أو منتجات مرتفعة القيمة أو محدودة المخزون."
+      },
+      "confirmation": {
+        "title": "تأكيد الطلب",
+        "paragraph1": "تُجهز الطلبات للتوصيل بعد تأكيدها. وفي بعض الحالات، قد يتواصل فريقنا معك للتحقق من توافر المنتج أو تفاصيل العنوان أو رقم الهاتف أو وسيلة الدفع أو متطلبات التوصيل الخاصة.",
+        "paragraph2": "يساعد التأكيد على تقليل أخطاء التوصيل وضمان تجهيز المنتجات الصحيحة لطلب عيادتك."
+      },
+      "standard": {
+        "title": "التوصيل القياسي",
+        "paragraph1": "يستغرق التوصيل القياسي عادةً من يومي عمل إلى خمسة أيام عمل بحسب الموقع ونطاق توصيل X Dental Store وتوافر المنتج ووقت تأكيد الطلب.",
+        "paragraph2": "قد يستغرق التوصيل إلى المناطق النائية أو خلال فترات الازدحام وقتًا أطول."
+      },
+      "fastDelivery": {
+        "title": "منتجات التوصيل السريع",
+        "paragraph1": "تحظى المنتجات المميزة بعلامة «توصيل سريع» بأولوية التوصيل في اليوم نفسه أو اليوم التالي، بحسب توافر المخزون ووقت تأكيد الطلب وموقع التوصيل.",
+        "paragraph2": "ينطبق التوصيل السريع على منتجات ومناطق مدعومة محددة فقط، ولا يكون مضمونًا للمناطق غير المدعومة أو الطلبات غير المؤكدة.",
+        "bullet1": "المنتج مميز بعلامة «توصيل سريع».",
+        "bullet2": "المنتج متوفر في المخزون.",
+        "bullet3": "تم تأكيد الطلب قبل الموعد اليومي المحدد.",
+        "bullet4": "عنوان التوصيل ضمن نطاق التوصيل السريع المدعوم.",
+        "bullet5": "اكتمل الدفع أو تأكيد الطلب."
+      },
+      "fees": {
+        "title": "رسوم الشحن",
+        "paragraph1": "قد تختلف رسوم التوصيل بحسب الوجهة ووزن المنتج وحجمه وتحصيل الدفع عند الاستلام والتوصيل العاجل أو التعامل الخاص.",
+        "paragraph2": "قد تظهر رسوم التوصيل للمنتجات القياسية أثناء إتمام الطلب. أما المنتجات الخاصة، فقد يؤكد فريقنا تكلفة الشحن قبل الإرسال."
+      },
+      "cashOnDelivery": {
+        "title": "الدفع عند الاستلام",
+        "paragraph1": "قد يتوفر الدفع عند الاستلام لطلبات ومواقع محددة.",
+        "paragraph2": "قد تقيّد X Dental Store الدفع عند الاستلام للمنتجات مرتفعة القيمة أو الطلبات الخاصة أو المعدات الكبيرة أو المنتجات التي تتطلب تعاملًا خاصًا. وقد يُطلب الدفع مقدمًا أو تأكيد إضافي لبعض الطلبات."
+      },
+      "specialProducts": {
+        "title": "المنتجات الخاصة وعرض سعر الشحن",
+        "paragraph1": "تتطلب بعض منتجات الأسنان تعاملًا خاصًا، ولا يمكن دائمًا توصيلها عبر عملية التوصيل القياسية لدى X Dental Store.",
+        "paragraph2": "قد تتطلب الآلات الكبيرة والمعدات الثقيلة والأدوات القابلة للكسر والسوائل والمواد الهلامية والمطهرات والمواد الكيميائية والمواد اللاصقة والأدوات مرتفعة القيمة ومواد الأسنان المقيدة عرض سعر للشحن قبل الإرسال.",
+        "cta": "اطلب تأكيد الشحن من الدعم."
+      },
+      "failedDelivery": {
+        "title": "تعذر التوصيل وإعادة الجدولة",
+        "paragraph1": "إذا تعذر على فريق توصيل X Dental Store الوصول إليك، أو كانت تفاصيل العنوان غير صحيحة، فقد يتأخر التوصيل أو يُعاد جدولته أو يُعاد الطلب.",
+        "paragraph2": "قد تُطبق رسوم توصيل إضافية على محاولات التوصيل المتكررة أو الطلبات المعادة بعد أن يؤكد الفريق التفاصيل معك."
+      },
+      "orderIssues": {
+        "title": "المنتجات التالفة أو الناقصة أو الخاطئة",
+        "paragraph1": "يرجى فحص طلبك عند وصوله.",
+        "paragraph2": "إذا كان أحد المنتجات تالفًا أو ناقصًا أو مختلفًا عن طلبك، فتواصل مع فريق الدعم في أقرب وقت ممكن وأرسل رقم طلبك وصورًا واضحة. ويرجى الاحتفاظ بالعبوة الأصلية حتى تتم مراجعة المشكلة."
+      },
+      "delays": {
+        "title": "تأخر التوصيل",
+        "paragraph1": "قد يتأخر التوصيل بسبب قدرة الفريق أو العطلات الرسمية أو الطقس أو المواقع النائية أو تفاصيل العنوان الخاطئة أو تعذر الوصول إلى العميل أو توافر المنتج أو أحداث خارجة عن سيطرتنا."
+      },
+      "updates": {
+        "title": "تحديثات السياسة",
+        "paragraph1": "يجوز لـ X Dental Store تحديث سياسة الشحن والتوصيل هذه من وقت إلى آخر مع تغير نطاق التوصيل والرسوم والقواعد التشغيلية."
+      }
+    },
+    "sidebar": {
+      "title": "هل تحتاج إلى تأكيد؟",
+      "description": "تواصل مع الدعم قبل طلب الآلات الكبيرة أو السوائل أو المواد الكيميائية أو المنتجات القابلة للكسر أو مستلزمات العيادة العاجلة."
+    }
+  },
+  "returnsPolicyPage": {
+    "seoTitle": "سياسة الاسترجاع | X Dental Store",
+    "seoDescription": "تعرّف على كيفية تعامل X Dental Store مع طلبات الاسترجاع والاستبدال والمنتجات التالفة والمبالغ المستردة وقواعد إرجاع المنتجات الخاصة.",
+    "eyebrow": "الدعم",
+    "title": "سياسة الاسترجاع",
+    "description": "تعرّف على كيفية التعامل مع طلبات الاسترجاع والاستبدال والمنتجات التالفة وطلبات استرداد الأموال.",
+    "contactSupport": "تواصل مع الدعم",
+    "steps": {
+      "contactSupport": {
+        "title": "تواصل مع الدعم",
+        "description": "أرسل رقم الطلب وتفاصيل المنتج وسبب طلب الاسترجاع أو الاستبدال."
+      },
+      "reviewEligibility": {
+        "title": "مراجعة الأهلية",
+        "description": "يراجع فريقنا حالة المنتج وسياسات المورد وملاحظات شركة الشحن ومتطلبات الاسترجاع المطبقة."
+      },
+      "confirmResolution": {
+        "title": "تأكيد الاسترجاع أو الحل",
+        "description": "عند الموافقة، يؤكد فريق الدعم الخطوة التالية أو خيار الاستبدال أو طريقة استرداد المبلغ أو الحل البديل."
+      }
+    },
+    "sections": {
+      "requests": {
+        "title": "طلبات الاسترجاع",
+        "paragraph1": "لطلب استرجاع أو استبدال، يرجى التواصل مع دعم X Dental Store وإرسال رقم طلبك وتفاصيل المنتج وسبب الطلب. سيراجع فريقنا الطلب ويؤكد الخطوات التالية."
+      },
+      "period": {
+        "title": "فترة الاسترجاع",
+        "paragraph1": "يجب تقديم طلبات الاسترجاع خلال فترة الاسترجاع المعتمدة التي تؤكدها X Dental Store. وقد تختلف مهلة الاسترجاع النهائية بحسب نوع المنتج وسياسة المورد والقواعد المطبقة."
+      },
+      "conditions": {
+        "title": "شروط الاسترجاع",
+        "paragraph1": "ينبغي عادةً أن تكون المنتجات المرتجعة غير مستخدمة وغير مفتوحة وفي عبوتها الأصلية، وكاملة بجميع الملحقات والملصقات والكتيبات أو العناصر المرفقة.",
+        "paragraph2": "قد لا تكون المنتجات المتضررة بسبب سوء الاستخدام أو التخزين غير السليم أو تعامل العميل مؤهلة للاسترجاع."
+      },
+      "nonReturnable": {
+        "title": "المنتجات غير القابلة للاسترجاع",
+        "paragraph1": "لأسباب تتعلق بالسلامة والنظافة، قد لا تكون بعض منتجات الأسنان مؤهلة للاسترجاع بعد فتحها أو إزالة ختمها أو استخدامها أو تركيبها أو طلبها بصورة خاصة.",
+        "bullet1": "المواد الاستهلاكية المفتوحة أو المستخدمة",
+        "bullet2": "المنتجات المعقمة بعد فتحها أو إزالة ختمها",
+        "bullet3": "السوائل والمواد الهلامية والمطهرات والمواد الكيميائية والمواد اللاصقة",
+        "bullet4": "المنتجات الحساسة لدرجة الحرارة أو لظروف التخزين",
+        "bullet5": "المنتجات المخصصة أو المطلوبة بصورة خاصة",
+        "bullet6": "الآلات أو المعدات بعد التركيب أو الاستخدام",
+        "bullet7": "المنتجات المتضررة بسبب سوء استخدام العميل",
+        "bullet8": "المنتجات التي انتهت صلاحيتها بعد استلام العميل ولم يُبلغ عنها فورًا"
+      },
+      "orderIssues": {
+        "title": "المنتجات التالفة أو الناقصة أو الخاطئة",
+        "paragraph1": "إذا وصل طلبك تالفًا أو ناقصًا أو مختلفًا عما طلبته، فيرجى التواصل مع الدعم في أقرب وقت ممكن. أرفق رقم طلبك وصورًا واضحة للمنتج والعبوة ووصفًا موجزًا للمشكلة."
+      },
+      "refunds": {
+        "title": "المبالغ المستردة",
+        "paragraph1": "تعتمد الموافقة على استرداد المبلغ وطريقته وتوقيته على حالة المنتج ومراجعة المورد وتفاصيل الطلب.",
+        "paragraph2": "يتولى فريق X Dental Store مباشرةً معالجة المبالغ المستردة المعتمدة، وسيتواصل معك لتأكيد ترتيب الاسترداد المتاح."
+      },
+      "exchanges": {
+        "title": "الاستبدال",
+        "paragraph1": "قد يتوفر الاستبدال للمنتجات المؤهلة إذا كان البديل المطلوب متوفرًا في المخزون. وإذا لم يتوفر المنتج البديل، فقد يقترح الفريق حلًا بديلًا."
+      },
+      "shippingFees": {
+        "title": "رسوم شحن الاسترجاع",
+        "paragraph1": "قد تعتمد رسوم شحن الاسترجاع على سبب الاسترجاع.",
+        "paragraph2": "إذا كان الاسترجاع بسبب منتج خاطئ أو ناقص أو تالف نتيجة خطأ من X Dental Store أو المورد أو التعامل أثناء التوصيل، فسيراجع الدعم الحالة. وإذا كان الاسترجاع بسبب تفضيل العميل أو معلومات غير صحيحة قدمها العميل، فقد تُطبق رسوم توصيل الاسترجاع."
+      },
+      "specialOrders": {
+        "title": "الطلبات الخاصة والآلات",
+        "paragraph1": "قد تخضع المنتجات المطلوبة بصورة خاصة والآلات والمعدات الكبيرة والعناصر المركبة والطلبات القائمة على عروض الأسعار لقواعد منفصلة للإلغاء والاستبدال والاسترجاع.",
+        "paragraph2": "قد تتطلب هذه العناصر المراجعة والموافقة قبل قبول أي استرجاع أو رد للمبلغ."
+      },
+      "updates": {
+        "title": "تحديثات السياسة",
+        "paragraph1": "يجوز لـ X Dental Store تحديث سياسة الاسترجاع هذه من وقت إلى آخر مع تغير قواعد الموردين وسياسات التوصيل وتصنيفات المنتجات وعمليات الأعمال."
+      }
+    },
+    "sidebar": {
+      "title": "قبل الاسترجاع",
+      "description": "قد تختلف فترات الاسترجاع والقيود الخاصة بالتصنيفات بحسب نوع المنتج. وسيؤكد فريق الدعم الخطوات الدقيقة لطلبك.",
+      "notice": "تواصل مع الدعم قبل إعادة أي منتج أسنان أو آلة أو طلب خاص أو منتج حساس للنظافة."
+    }
+  },
+  "trackOrderPage": {
+    "seoTitle": "تتبع طلبك | X Dental Store",
+    "seoDescription": "تتبع طلبك لدى X Dental Store من خلال حسابك أو تواصل مع الدعم باستخدام رقم الطلب للحصول على تحديثات التوصيل.",
+    "eyebrow": "تتبع الطلب",
+    "title": "تتبع طلبك",
+    "description": "أدخل رقم الطلب ورقم هاتف العميل لعرض أحدث حالة للطلب لدى X Dental Store.",
+    "viewOrders": "عرض طلباتي",
+    "contactSupport": "تواصل مع الدعم",
+    "form": {
+      "eyebrow": "البحث العام عن الطلب",
+      "title": "تحقّق من حالة طلبك الحالية",
+      "description": "استخدم رقم الطلب ورقم الهاتف اللذين أُدخلا عند تقديم الطلب.",
+      "orderNumberLabel": "رقم الطلب",
+      "orderNumberPlaceholder": "مثال: ORD-ABC123",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "مثال: 01012345678",
+      "phoneNote": "تُقبل صيغ أرقام الهاتف المحمول المصرية مثل 010… و‎+20… و0020….",
+      "submit": "تتبع الطلب",
+      "loading": "جارٍ التحقق من الطلب…",
+      "orderNumberRequired": "أدخل رقم الطلب.",
+      "orderNumberInvalid": "أدخل رقم طلب صالحًا.",
+      "phoneRequired": "أدخل رقم هاتف العميل.",
+      "phoneInvalid": "أدخل رقم هاتف محمول مصريًا صالحًا.",
+      "notFound": "تعذر العثور على طلب مطابق لهذه البيانات.",
+      "rateLimited": "تم إجراء محاولات تتبع كثيرة. يرجى الانتظار ثم المحاولة مرة أخرى.",
+      "privacyTitle": "يتم التحقق من بياناتك بأمان",
+      "privacyDescription": "لا يمكن عرض حالة الطلب الحالية إلا عند تطابق رقم الطلب ورقم هاتف العميل."
+    },
+    "result": {
+      "title": "تم العثور على الطلب",
+      "orderNumber": "رقم الطلب",
+      "orderDate": "تاريخ الطلب",
+      "currentStatus": "الحالة الحالية",
+      "lastUpdate": "آخر تحديث للطلب",
+      "deliveryNote": "تتم إدارة تحديثات التوصيل حاليًا من خلال X Dental Store."
+    },
+    "steps": {
+      "signIn": {
+        "title": "تسجيل الدخول",
+        "description": "استخدم الحساب المرتبط بالطلب حتى تعرض لوحة التحكم سجل طلباتك."
+      },
+      "openOrders": {
+        "title": "افتح طلباتي",
+        "description": "راجع الطلبات الحالية والمشتريات السابقة وتفاصيل الطلب وتحديثات التوصيل المتاحة."
+      },
+      "checkStatus": {
+        "title": "تحقّق من الحالة أو تواصل مع الدعم",
+        "description": "عند وجود أي استفسار، تواصل مع الدعم واذكر رقم الطلب وبيانات التواصل."
+      }
+    },
+    "sections": {
+      "account": {
+        "title": "تتبع من حسابك",
+        "paragraph1": "سجّل الدخول إلى حسابك لدى X Dental Store لعرض سجل طلباتك وحالة الطلب الحالية وتفاصيل الطلب ومعلومات الدفع وتحديثات التوصيل عند توفرها.",
+        "cta": "عرض طلباتي"
+      },
+      "help": {
+        "title": "هل تحتاج إلى مساعدة في تتبع طلب؟",
+        "paragraph1": "إذا لم تجد طلبك أو احتجت إلى مساعدة في تتبعه، فتواصل مع فريق الدعم وأرسل رقم الطلب ورقم الهاتف والبريد الإلكتروني المستخدم عند تقديم الطلب.",
+        "cta": "تواصل مع الدعم"
+      },
+      "information": {
+        "title": "معلومات الطلب المطلوبة",
+        "paragraph1": "لمساعدتنا على التحقق من طلبك بسرعة، يرجى تجهيز رقم الطلب وبيانات التواصل وأي رسالة تأكيد تلقيتها من X Dental Store.",
+        "bullet1": "رقم الطلب",
+        "bullet2": "الاسم الكامل",
+        "bullet3": "رقم الهاتف",
+        "bullet4": "عنوان البريد الإلكتروني",
+        "bullet5": "عنوان التوصيل",
+        "bullet6": "وسيلة الدفع عند الحاجة"
+      },
+      "statuses": {
+        "title": "حالات التتبع",
+        "paragraph1": "تُعرض حالات الطلب في حسابك على مراحل بسيطة حتى تتمكن من معرفة موضع طلبك في عملية المراجعة."
+      },
+      "courier": {
+        "title": "تتبع شركة الشحن",
+        "paragraph1": "إذا كان تتبع شركة الشحن متاحًا لطلبك، فقد يظهر رقم التتبع أو تحديث شركة الشحن في حسابك أو يشاركه معك فريق الدعم.",
+        "paragraph2": "يعتمد تتبع شركة الشحن على شريك التوصيل وحالة الطلب ومدى توفر مرجع تتبع لتلك الشحنة."
+      },
+      "publicNotice": {
+        "title": "إشعار التتبع العام",
+        "paragraph1": "ستتوفر خدمة البحث العام عن الطلبات قريبًا. وفي الوقت الحالي، يرجى تسجيل الدخول لعرض طلباتك أو التواصل مع الدعم باستخدام رقم الطلب."
+      }
+    },
+    "statuses": {
+      "pending": {
+        "label": "قيد الانتظار",
+        "description": "تم استلام طلبك وهو في انتظار المراجعة."
+      },
+      "sent": {
+        "label": "أُرسل إلى المورد أو النظام",
+        "description": "أُرسل طلبك إلى المورد أو النظام أو الفريق الداخلي للتأكيد."
+      },
+      "confirmed": {
+        "label": "مؤكد",
+        "description": "تم التحقق من طلبك وقبوله."
+      },
+      "rejected": {
+        "label": "مرفوض",
+        "description": "تعذر إكمال الطلب بعد المراجعة."
+      },
+      "canceled": {
+        "label": "ملغي",
+        "description": "أُلغي الطلب قبل اكتماله."
+      }
+    },
+    "sidebar": {
+      "title": "هل تحتاج إلى مزيد من المساعدة؟",
+      "description": "افتح صفحة طلباتي لعرض تفاصيل الحساب الكاملة، أو تواصل مع الدعم إذا احتجت إلى مساعدة بشأن طلب."
     }
   },
   "faqsPage": {
     "eyebrow": "مركز المساعدة",
-    "heroTitle": "إجابات واضحة لأسئلتك",
+    "heroTitle": "الأسئلة الشائعة",
+    "headerCta": "تواصل مع الدعم",
     "heroBody": "اعثر على إرشادات عملية عن عروض الأسعار وقوائم التوريد وطلبات المنتجات وأدوات الحساب المتاحة لعيادتك.",
     "categoryNavLabel": "تصفح تصنيفات الأسئلة الشائعة",
     "libraryEyebrow": "دليل الأسئلة الشائعة",
@@ -647,11 +2575,17 @@
     "length": "الطول",
     "size": "المقاس",
     "stockReady": "متوفر - جاهز للشحن",
+    "lowStockWithCount": "كمية محدودة — متبقي {count} فقط",
     "stockNotify": "غير متوفر - أخطرني عند التوفر",
+    "outOfStock": "غير متوفر",
+    "outOfStockRequestHelp": "اطلب هذا المنتج وسيتابع فريقنا معك بشأن موعد توفره.",
     "notifyMe": "أخطرني",
     "requestProduct": "طلب المنتج",
+    "productName": "اسم المنتج",
+    "submitRequest": "إرسال الطلب",
     "productRequestSent": "تم إرسال طلب المنتج إلى الدعم.",
     "productRequestFailed": "تعذر إرسال الطلب. يرجى المحاولة مرة أخرى.",
+    "viewProductRequests": "عرض طلبات المنتجات",
     "openSupportChat": "فتح محادثة الدعم",
     "messageSupport": "مراسلة الدعم",
     "quoteStarted": "تم بدء طلب عرض سعر لـ {name}.",
@@ -692,7 +2626,42 @@
     "toggleWishlist": "تبديل المفضلة",
     "viewProductImage": "عرض صورة المنتج {number}"
   },
+  "floatingSupport": {
+    "title": "دعم العملاء",
+    "subtitle": "راسل فريق دعم X Dental",
+    "openChat": "فتح محادثة دعم العملاء",
+    "recentThreads": "محادثات الدعم الأخيرة",
+    "selectConversation": "اختر محادثة",
+    "newConversation": "محادثة جديدة",
+    "newConversationHelp": "أخبرنا كيف يمكننا مساعدتك. سيؤدي إرسال رسالتك الأولى إلى إنشاء محادثة دعم.",
+    "generalSubject": "طلب دعم عام",
+    "startConversation": "بدء المحادثة",
+    "send": "إرسال الرسالة",
+    "refresh": "تحديث الرسائل",
+    "messagePlaceholder": "اكتب رسالة...",
+    "openSupportCenter": "فتح مركز الدعم",
+    "noThreads": "لا توجد محادثات دعم حتى الآن.",
+    "noMessages": "لا توجد رسائل في هذه المحادثة حتى الآن.",
+    "messageRequired": "يرجى كتابة رسالة أولاً.",
+    "loadFailed": "تعذر تحميل محادثات الدعم. يرجى المحاولة مرة أخرى.",
+    "sendFailed": "تعذر إرسال رسالتك. يرجى المحاولة مرة أخرى.",
+    "autoAcknowledgement": "شكرًا لتواصلك مع X Dental Store. تم استلام رسالتك وسيقوم فريق الدعم بالرد عليك في أقرب وقت."
+  },
   "cart": {
+    "syncErrorTitle": "لم يتم حفظ السلة",
+    "syncErrorBody": "ما زالت سلتك ظاهرة هنا، لكن تعذر حفظها في حسابك. يرجى المحاولة مرة أخرى.",
+    "quantityLimitTitle": "تم الوصول إلى الحد الأقصى للكمية",
+    "maximumAlreadyInCart": "لديك بالفعل أقصى كمية متاحة في سلة التسوق.",
+    "onlyCurrentlyAvailable": "المتاح حاليًا {count} فقط.",
+    "availableQuantityChanged": "تغيرت الكمية المتاحة. حدّث هذا المنتج قبل إتمام الطلب.",
+    "insufficientStockProduct": "المتاح حاليًا {count} وحدة فقط من {name}.",
+    "adjustToAvailable": "ضبط الكمية حسب المتاح",
+    "productUnavailable": "هذا المنتج غير متاح حاليًا.",
+    "stockChangedTitle": "تغيرت الكمية المتاحة",
+    "addedTitle": "تمت الإضافة إلى السلة",
+    "addedDescription": "تمت إضافة {name} إلى سلة التسوق.",
+    "couponComingSoonHint": "سيتم تفعيل الكوبونات بعد إضافة قواعد الحملات الفعلية من فريق المتجر.",
+    "couponInactive": "حملات الكوبونات غير مفعّلة بعد.",
     "emptyTitle": "سلتك فارغة",
     "emptyBody": "أضف مستلزمات الأسنان لمراجعة الكميات أو طلب عرض سعر أو إتمام الطلب.",
     "checkoutEmpty": "سلتك فارغة. أضف منتجات قبل بدء إتمام الطلب.",
@@ -712,6 +2681,7 @@
     "couponClinicOnly": "كود CLINIC15 ينطبق فقط على مستلزمات العيادة.",
     "couponNotEligible": "هذا الكوبون غير مؤهل للسلة الحالية.",
     "couponApplied": "تم تطبيق كود {code}.",
+    "couponValidStrongerPromotion": "الكود {code} صالح، ولكن يوجد عرض أقوى مؤهل يمنحك حاليًا السعر الأفضل.",
     "couponDemoHint": "أكواد تجريبية متاحة: WELCOME10 (حد أدنى EGP 500)، SAVE100 (حد أدنى EGP 1,000)، FREESHIP (حد أدنى EGP 1,000)، CLINIC15 (مستلزمات العيادة فقط، حد أدنى مؤهل EGP 1,500).",
     "removeCoupon": "إزالة",
     "discount": "الخصم",
@@ -769,6 +2739,12 @@
     "moreTitle": "تحتاج مستلزمات إضافية؟",
     "moreBody": "تصفح منتجات يتم طلبها عادة مع مشترياتك الأخيرة."
   },
+  "welcomeRewards": {
+    "headline": "احصل على EGP {value} على طلبك الأول",
+    "description": "أنشئ حسابك في X Dental Store واحصل على {points} نقطة ترحيبية (EGP {value}) لاستخدامها في أول عملية شراء مؤهلة، ثم واصل جمع المزيد من النقاط مع كل طلب مكتمل.",
+    "cta": "أنشئ حسابك واحصل على {points} نقطة",
+    "note": "صالحة لمدة {days} يومًا على مشتريات المنتجات المؤهلة بقيمة EGP {minimum} أو أكثر، ولا يمكن استخدام النقاط في الشحن."
+  },
   "checkout": {
     "title": "إتمام الطلب",
     "intro": "أكمل بيانات طلبك واختر طريقة التوصيل والدفع المناسبة.",
@@ -816,7 +2792,8 @@
     "freeShipping": "شحن مجاني",
     "pts": "نقاط",
     "paymentMethod": "طريقة الدفع",
-    "cashNote": "ادفع نقدًا عند استلام الطلب. يرجى تجهيز المبلغ المطلوب.",
+    "cashNote": "ادفع نقدًا عند توصيل طلبك بواسطة فريق X Dental Store.",
+    "internalDeliveryNote": "سيتولى فريق X Dental Store توصيل الطلب، وسيتواصل معك فريقنا لتأكيد تفاصيل التوصيل.",
     "cardNumber": "رقم البطاقة",
     "cardExpiry": "الشهر / السنة",
     "cardName": "الاسم على البطاقة",
@@ -842,6 +2819,7 @@
       "firstNameRequired": "الاسم الأول مطلوب.",
       "lastNameRequired": "اسم العائلة مطلوب.",
       "phoneRequired": "رقم الهاتف مطلوب.",
+      "phoneInvalid": "أدخل رقم هاتف محمول مصريًا صالحًا.",
       "emailRequired": "البريد الإلكتروني مطلوب.",
       "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا.",
       "governorateRequired": "المحافظة مطلوبة.",
@@ -864,10 +2842,44 @@
     "orderReady": "سيتم حفظ طلبك بأمان عند تأكيده.",
     "placingOrder": "جارٍ تأكيد الطلب...",
     "createFailed": "تعذر إنشاء طلبك. يرجى مراجعة البيانات والمحاولة مرة أخرى.",
+    "idempotencyConflict": "تغيّرت بيانات محاولة إتمام الطلب. راجع طلبك ثم أرسله مرة أخرى.",
+    "idempotencyUnavailable": "حماية إعادة محاولة إتمام الطلب الآمنة غير متاحة. حدّث الصفحة ثم حاول مرة أخرى.",
+    "networkResultUnknown": "تعذر تأكيد النتيجة. أبقِ صفحة إتمام الطلب مفتوحة وحاول مرة أخرى؛ ستُعاد المحاولة نفسها بأمان.",
     "redirectingToCart": "سلتك فارغة. جارٍ الرجوع إلى السلة.",
     "itemsReview": "العناصر",
     "itemsSubtotal": "إجمالي العناصر",
+    "originalProductsSubtotal": "إجمالي المنتجات الأصلي",
+    "productPromotionSavings": "توفير العرض السريع",
+    "shippingBeforeDiscount": "الشحن قبل الخصم",
+    "deliveryOfferDiscount": "خصم عرض التوصيل",
+    "vipShippingDiscount": "توفير توصيل VIP",
+    "freeShippingApplied": "تم تطبيق الشحن المجاني",
+    "finalShipping": "الشحن النهائي",
+    "totalSavings": "إجمالي التوفير",
+    "pricingReviewUnavailable": "مراجعة التسعير الآمنة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+    "priceChangedReview": "تغير السعر قبل الإرسال. راجع الإجمالي المحدّث ثم أكّد الطلب مرة أخرى.",
+    "deliveryOfferLocationTitle": "موقع عرض التوصيل",
+    "deliveryOfferLocationLabel": "موقع عرض التوصيل",
+    "manualAddressNoZoneOffer": "استخدام عنوان التوصيل اليدوي",
+    "deliveryOfferLocationHelp": "اختر موقع عيادة محفوظًا للتحقق من عروض التوصيل المرتبطة بالموقع، أو استخدم عنوان التوصيل اليدوي دون عرض مرتبط بالمنطقة.",
+    "manualAddressNoZoneOfferHelp": "لا تُطبق عروض التوصيل المرتبطة بالموقع على العناوين اليدوية.",
+    "savedLocationZoneStatus": "يتم التحقق من الموقع المحفوظ المختار ومنطقة التوصيل الخاصة به بأمان عند الدفع.",
     "secureNote": "بيانات طلبك آمنة ولن تُستخدم إلا لمعالجة عملية الشراء.",
+    "vipDiscount": "ميزة VIP",
+    "rewards": {
+      "title": "المكافآت والمحفظة",
+      "pointsLabel": "استبدال نقاط المكافآت",
+      "pointsAvailable": "{points} متاحة - الحد الأقصى {maximum}",
+      "pointsRule": "100 نقطة = 10 جنيه. تُستخدم النقاط للمنتجات فقط ولا يمكنها دفع الشحن.",
+      "welcomeMinimumRule": "تتطلب نقاط الترحيب منتجات مؤهلة بقيمة لا تقل عن {minimum} جنيه، وتنتهي صلاحيتها بعد {days} يومًا.",
+      "walletLabel": "استخدام رصيد المتجر",
+      "walletAvailable": "المتاح: {amount}",
+      "walletRule": "يمكن لرصيد المتجر تغطية المنتجات والشحن، ويظل أي مبلغ متبقٍ للدفع عند الاستلام.",
+      "useMaximum": "استخدام الحد الأقصى",
+      "pointsRedeemed": "النقاط المستخدمة",
+      "walletUsed": "رصيد المحفظة المستخدم",
+      "remainingCod": "المتبقي للدفع عند الاستلام"
+    },
     "fallbackAddress": {
       "building": "270C فيلا، النورث أكاديمي،",
       "street": "شارع أنور،",
@@ -936,15 +2948,20 @@
     "viewOrders": "عرض طلباتي",
     "continueShopping": "متابعة التسوق",
     "loading": "جارٍ تحميل طلبك...",
-    "notFound": "تعذر العثور على تأكيد طلب صالح."
+    "notFound": "تعذر العثور على تأكيد طلب صالح.",
+    "pricingTitle": "التسعير المؤكد"
   },
   "auth": {
     "serviceUnavailable": "خدمة تسجيل الدخول غير متاحة حاليًا. يرجى المحاولة لاحقًا.",
     "login": {
+      "forgotHelpTitle": "لإعادة تعيين كلمة المرور، يرجى التواصل مع دعم X Dental.",
+      "forgotWhatsApp": "واتساب",
+      "forgotPhone": "الهاتف",
       "toastTitle": "مرحبًا بعودتك",
       "toastDescription": "يتم تحويلك إلى لوحة التحكم...",
       "invalidTitle": "تعذر تسجيل الدخول",
-      "invalidDescription": "تحقق من بريدك الإلكتروني وكلمة المرور ثم حاول مرة أخرى.",
+      "invalidDescription": "لم نتمكن من تسجيل دخولك باستخدام هذه البيانات. تحقق من البريد الإلكتروني وكلمة المرور، أو استخدم مساعدة الوصول إلى الحساب إذا كنت بحاجة إلى استعادة الوصول.",
+      "accountAccessHelp": "مساعدة الوصول إلى الحساب",
       "sideTitle": "مرحبًا بعودتك إلى مركز توريد عيادتك.",
       "sideBody": "سجّل الدخول لإدارة طلباتك ومراجعة المستلزمات المحفوظة والحفاظ على سير عمل عيادتك.",
       "sideCaption": "مستلزمات أسهل",
@@ -971,6 +2988,19 @@
       "fullName": "الاسم بالكامل",
       "fullNamePlaceholder": "أدخل اسمك بالكامل",
       "phonePlaceholder": "+20 100 000 0000",
+      "clinicSpecialty": "تخصص العيادة",
+      "clinicSpecialtyPlaceholder": "اختر تخصص العيادة",
+      "clinicSpecialtyRequired": "اختر تخصص العيادة للمتابعة.",
+      "clinicLocations": "مواقع العيادات",
+      "clinicLocationsPlaceholder": "اختر مواقع عياداتك",
+      "clinicLocationsAddAnother": "أضف موقعًا آخر",
+      "clinicLocationsSearch": "ابحث في مناطق التوصيل",
+      "clinicLocationsEmpty": "لم يتم العثور على مناطق توصيل.",
+      "clinicLocationsOtherLabel": "اسم المنطقة الأخرى",
+      "clinicLocationsOtherPlaceholder": "اكتب منطقة العيادة",
+      "clinicLocationsRequired": "اختر موقع عيادة واحدًا على الأقل للمتابعة.",
+      "clinicLocationsOtherRequired": "أدخل منطقة عيادتك عند اختيار أخرى.",
+      "clinicLocationsLoadError": "تعذر تحميل مناطق التوصيل. يرجى المحاولة مرة أخرى.",
       "confirmPassword": "تأكيد كلمة المرور",
       "hideConfirmPassword": "إخفاء تأكيد كلمة المرور",
       "showConfirmPassword": "إظهار تأكيد كلمة المرور",
@@ -985,6 +3015,15 @@
       "toastTitle": "تم إنشاء الحساب بنجاح",
       "toastDescription": "يتم تحويلك إلى لوحة التحكم..."
     }
+  },
+  "deliveryAlerts": {
+    "locationNeededTitle": "أضف موقع عيادتك",
+    "locationNeededDescription": "احفظ منطقة توصيل عيادتك لعرض خدمات التوصيل المتاحة والعروض المرتبطة بالموقع.",
+    "updateProfile": "تحديث الملف الشخصي",
+    "more": "أخرى",
+    "orderBefore": "اطلب قبل الساعة {time}",
+    "dismiss": "إغلاق تنبيه التوصيل",
+    "hideForToday": "إخفاء لليوم"
   },
   "notFound": {
     "title": "404 الصفحة غير موجودة",
@@ -1059,6 +3098,11 @@
   },
   "accountPages": {
     "address": {
+      "addAddressComingSoon": "إضافة عنوان (قريبًا)",
+      "comingSoonDescription": "العناوين المحفوظة غير مفعّلة بعد. حاليًا، يرجى إدخال عنوان التوصيل عند إتمام الطلب.",
+      "emptyTitle": "لا توجد عناوين محفوظة بعد",
+      "emptyBody": "سيتوفر حفظ العناوين في حسابك قريبًا. حتى ذلك الحين، يتم إدخال عنوان التوصيل مع كل طلب عند إتمام الشراء، ويؤكده فريقنا معك قبل التوصيل.",
+      "browseProducts": "تصفح المنتجات",
       "addAddress": "إضافة عنوان",
       "addNew": "إضافة جديد",
       "addNewAddress": "إضافة عنوان جديد",
@@ -1091,6 +3135,10 @@
       "title": "دفتر العناوين"
     },
     "branches": {
+      "addBranchComingSoon": "إضافة فرع (قريبًا)",
+      "comingSoonDescription": "ستتوفر فروع العيادة قريبًا للعيادات التي لديها مواقع توصيل متعددة.",
+      "emptyTitle": "إدارة الفروع قادمة قريبًا",
+      "emptyBody": "ستتمكن من حفظ مواقع متعددة لعيادتك واختيار أحدها عند إتمام الطلب. حتى ذلك الحين، يرجى إضافة تفاصيل الفرع في ملاحظات التوصيل أو التواصل مع الدعم.",
       "addBranch": "إضافة فرع",
       "addNewBranch": "إضافة فرع جديد",
       "branch": "الفرع",
@@ -1146,14 +3194,20 @@
       "subtotal": "الإجمالي الفرعي",
       "summary": "الملخص",
       "total": "الإجمالي",
-      "viewDetails": "عرض التفاصيل"
+      "viewDetails": "عرض التفاصيل",
+      "saving": "جارٍ الحفظ...",
+      "comingSoon": "قريبًا"
     },
     "dashboard": {
       "metrics": {
-        "activeOrders": "الطلبات النشطة",
+      "activeOrders": "الطلبات النشطة",
+      "openOrders": "الطلبات المفتوحة",
         "pendingQuotes": "عروض الأسعار المعلقة",
         "wishlistItems": "عناصر المفضلة",
-        "xPoints": "نقاط X"
+      "xPoints": "نقاط X",
+      "availablePoints": "النقاط المتاحة",
+      "pointsWorth": "بقيمة {amount}",
+      "pendingPoints": "{points} نقطة معلقة حتى التسليم"
       },
       "overviewEyebrow": "نظرة عامة على الحساب",
       "purchasingToolsTitle": "أدوات شراء العيادة",
@@ -1194,6 +3248,22 @@
       "quickActionsBody": "مهام سريعة لإدارة طلبات العيادة وعمليات الشراء",
       "quickActionsTitle": "إجراءات سريعة",
       "recentOrdersTitle": "أحدث الطلبات",
+      "vipBenefitsTitle": "مزايا VIP الخاصة بك",
+    "vipBenefitsDescription": "مزايا فئة VIP التلقائية الخاصة بك مفعّلة ويتحقق منها الخادم عند الدفع.",
+    "vipAutomaticEarning": "نقطتان لكل EGP 10 بعد توصيل الطلب",
+    "vipAutomaticStandard": "التوصيل القياسي مجاني",
+    "vipAutomaticFast": "التوصيل السريع يُحسب فقط بفرق الترقية",
+    "vipAutomaticPickup": "الاستلام مجاني",
+    "vipAdditionalBenefits": "المزايا الإضافية المخصصة",
+      "vipPromoCode": "الكود الشخصي الخاص بك",
+      "vipMinimumOrder": "الحد الأدنى للطلب: {amount}",
+    "vipNoBenefits": "لا توجد ميزة إضافية مخصصة حاليًا.",
+      "rewardsWalletLink": "المكافآت والمحفظة",
+      "dataLoadError": "تعذّر تحميل بعض بيانات الحساب.",
+      "dataLoadRetry": "إعادة المحاولة",
+    "pendingWelcomePoints": "{points} نقطة ترحيبية معلقة",
+    "pendingPurchasePoints": "تصبح {points} نقطة من الشراء متاحة بعد التوصيل",
+      "viewRewardsBalances": "عرض النقاط ورصيد المتجر والنشاط",
       "welcome": "أهلاً بعودتك، {name}",
       "accountSupportToolsTitle": "أدوات الحساب والدعم",
       "accountSupportToolsDescription": "أدر بيانات حسابك والمكافآت والإشعارات وطلبات الدعم.",
@@ -1230,12 +3300,27 @@
       "emptyDescription": "ستظهر تحديثات الحساب الجديدة هنا.",
       "emptyTitle": "لا توجد تحديثات جديدة",
       "eyebrow": "تحديثات الحساب",
+      "latest": "أحدث الإشعارات",
+      "markAsRead": "تحديد كمقروء",
       "markAllAsReadCount": "تحديد الكل كمقروء ({count})",
       "markedAllRead": "تم تحديد كل الإشعارات كمقروءة.",
       "loadFailed": "تعذر تحميل الإشعارات.",
+      "newNotification": "إشعار جديد",
+      "noNotifications": "لا توجد إشعارات بعد.",
+      "open": "فتح",
+      "relative": {
+        "justNow": "الآن",
+        "oneMinuteAgo": "منذ دقيقة واحدة",
+        "minutesAgo": "منذ {count} دقائق",
+        "oneHourAgo": "منذ ساعة واحدة",
+        "hoursAgo": "منذ {count} ساعات",
+        "yesterday": "أمس"
+      },
       "updateFailed": "تعذر تحديث الإشعارات.",
       "title": "الإشعارات",
-      "unreadNotification": "إشعار غير مقروء"
+      "unreadCount": "{count} غير مقروءة",
+      "unreadNotification": "إشعار غير مقروء",
+      "viewAll": "عرض كل الإشعارات"
     },
     "orders": {
       "completePayment": "إكمال الدفع",
@@ -1248,6 +3333,7 @@
         "notFound": "لم يتم العثور على الطلب",
         "orderStatus": "حالة الطلب",
         "paymentInfo": "معلومات الدفع",
+        "paymentStatus": "حالة الدفع",
         "placedOn": "تم الطلب في {date}",
         "reorderItems": "إعادة طلب العناصر",
         "shippingInfo": "معلومات الشحن",
@@ -1260,6 +3346,7 @@
       "loading": "جارٍ تحميل الطلبات...",
       "loadError": "تعذر تحميل الطلبات. يرجى المحاولة مرة أخرى.",
       "noProducts": "لا توجد منتجات",
+      "paymentStatus": "الدفع: {status}",
       "placedOn": "تم الطلب {date}",
       "reorder": "إعادة الطلب",
       "searchLabel": "البحث في الطلبات",
@@ -1340,8 +3427,10 @@
       "notesPlaceholder": "أضف مقاس المنتج أو الدرجة أو الملفات أو تفضيل المورد.",
       "productName": "اسم المنتج",
       "productNamePlaceholder": "مثال: M3-Pro Gold Rotary Files Double",
+      "productRequired": "أدخل اسم المنتج.",
       "quantityNeeded": "الكمية المطلوبة",
       "quantityPlaceholder": "عبوتان",
+      "quantityRequired": "أدخل كمية لا تقل عن 1.",
       "requestCount": "{count} طلبات",
       "requestProduct": "طلب منتج",
       "requestTitle": "طلب {requestNumber}",
@@ -1356,6 +3445,19 @@
       "changePhoto": "تغيير الصورة",
       "chooseProfilePhoto": "اختيار صورة الملف الشخصي",
       "clinicName": "اسم العيادة",
+      "clinicNamePlaceholder": "أدخل اسم العيادة",
+      "clinicSpecialty": "تخصص العيادة",
+      "clinicLocations": "مواقع العيادة",
+      "clinicLocationsDescription": "نستخدم هذه المواقع فقط لعرض عروض التوصيل المناسبة لعيادتك.",
+      "clinicLocationsPlaceholder": "اختر مواقع عياداتك",
+      "clinicLocationsAddAnother": "أضف موقعًا آخر",
+      "clinicLocationsSearch": "ابحث في مناطق التوصيل",
+      "clinicLocationsEmpty": "لم يتم العثور على مناطق توصيل.",
+      "clinicLocationsOtherLabel": "اسم المنطقة الأخرى",
+      "clinicLocationsOtherPlaceholder": "اكتب منطقة العيادة",
+      "clinicLocationsRequired": "اختر موقع عيادة واحدًا على الأقل.",
+      "clinicLocationsOtherRequired": "أدخل منطقة العيادة عند اختيار أخرى.",
+      "clinicLocationsLoadError": "تعذر تحميل مناطق التوصيل. يرجى المحاولة مرة أخرى.",
       "contactInformation": "معلومات التواصل",
       "contactInformationDescription": "استخدم بيانات تواصل يمكن الوصول إليها لتأكيد الطلبات وعروض الأسعار ودعم التوصيل.",
       "description": "حدّث بياناتك الشخصية ومعلومات التواصل.",
@@ -1364,20 +3466,34 @@
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
       "messages": {
+        "profileSaveFailed": "تعذر حفظ تغييرات الملف الشخصي. يرجى المحاولة مرة أخرى.",
+        "nameRequired": "يرجى إدخال اسمك.",
         "changesDiscarded": "تم تجاهل التغييرات.",
+        "clinicNameTooLong": "يجب ألا يزيد اسم العيادة على 120 حرفًا.",
+        "clinicNameWhitespace": "لا يمكن أن يتكوّن اسم العيادة من مسافات فقط.",
         "photoSelected": "تم اختيار صورة الملف الشخصي \"{fileName}\".",
         "profileSaved": "تم حفظ تغييرات الملف الشخصي."
       },
       "personalInformation": "المعلومات الشخصية",
       "personalInformationDescription": "حافظ على تحديث اسمك ودورك وتفاصيل العيادة.",
       "phoneNumber": "رقم الهاتف",
+      "photoAlt": "صورة الملف الشخصي",
+      "photoInvalidFile": "الملف المحدد لا يحتوي على صورة صالحة.",
+      "photoInvalidType": "اختر صورة بصيغة JPEG أو PNG أو WebP.",
+      "photoTooLarge": "يجب ألا يتجاوز حجم صورة الملف الشخصي 5 ميجابايت.",
+      "photoUploadFailed": "تعذر رفع صورة الملف الشخصي. يرجى المحاولة مرة أخرى.",
+      "photoUploadSuccess": "تم تحديث صورة الملف الشخصي بنجاح.",
       "professionalRole": "الدور المهني",
       "selectedPhoto": "الصورة المحددة: {fileName}",
       "title": "إعدادات الملف الشخصي",
+      "uploadingPhoto": "جارٍ الرفع...",
       "verifiedAccount": "حساب موثق",
       "verifiedEmail": "بريد الحساب موثق.",
       "whatsappHelper": "يُستخدم فقط لدعم الطلبات والتوصيل عند الحاجة.",
-      "whatsappNumber": "رقم واتساب"
+      "whatsappNumber": "رقم واتساب",
+      "emailReadOnly": "لتغيير البريد الإلكتروني لحسابك، يرجى التواصل مع الدعم.",
+      "fieldComingSoon": "سيتوفر حفظ هذا الحقل قريبًا.",
+      "changePhotoComingSoon": "تغيير الصورة (قريبًا)"
     },
     "quotes": {
       "acceptedLabel": "تم القبول:",
@@ -1458,6 +3574,10 @@
       "youSave": "توفر: {amount}"
     },
     "settings": {
+      "wrongCurrentPassword": "كلمة المرور الحالية غير صحيحة.",
+      "passwordChangeFailed": "تعذر تغيير كلمة المرور. يرجى المحاولة مرة أخرى.",
+      "preferencesComingSoon": "إعدادات التفضيلات غير مفعّلة بعد وسيتم تفعيلها قريبًا.",
+      "accountActionFailed": "تعذر تحديث طلب الحساب. يرجى المحاولة مرة أخرى.",
       "accountActions": "إجراءات الحساب",
       "accountActionsDescription": "أدر إجراءات الحساب الحساسة.",
       "activeSessions": "الجلسات النشطة",
@@ -1475,13 +3595,13 @@
       "currency": "العملة",
       "currentPassword": "كلمة المرور الحالية",
       "deactivateAccount": "تعطيل الحساب",
-      "deactivateAccountDescription": "يبدأ هذا طلب تعطيل الحساب. يمكنك التواصل مع الدعم لاحقاً إذا احتجت إلى استعادة الحساب.",
+      "deactivateAccountDescription": "بعد موافقة المسؤول وإكمال الطلب، لن يعود الحساب متاحًا وسيتم إلغاء جميع الجلسات، مع بقاء الطلبات وسجلات الأعمال محفوظة.",
       "deactivateAccountQuestion": "تعطيل الحساب؟",
-      "deactivationSubmitted": "تم إرسال طلب تعطيل الحساب.",
+      "deactivationSubmitted": "تم إرسال طلب تعطيل حسابك لمراجعة المسؤول.",
       "deleteAccount": "حذف الحساب",
-      "deleteAccountDescription": "يبدأ هذا طلب حذف الحساب. قد لا تكون الطلبات وعروض الأسعار وقوائم التوريد والبيانات المحفوظة متاحة بعد معالجة الطلب.",
+      "deleteAccountDescription": "يتطلب الحذف مراجعة المسؤول. عند إكماله، تُخفى بيانات الملف الشخصي المباشرة مع الحفاظ على سجلات المعاملات اللازمة لتشغيل المتجر.",
       "deleteAccountQuestion": "حذف الحساب؟",
-      "deletionSubmitted": "تم إرسال طلب حذف الحساب.",
+      "deletionSubmitted": "تم إرسال طلب حذف حسابك لمراجعة المسؤول.",
       "description": "أدر تفضيلات الحساب والأمان والإشعارات واللغة وخيارات الخصوصية.",
       "eyebrow": "إدارة الحساب",
       "language": "اللغة",
@@ -1495,7 +3615,6 @@
       "notificationPreferencesDescription": "اختر تحديثات الحساب التي تريد استلامها.",
       "orderUpdates": "تحديثات الطلبات",
       "password": "كلمة المرور",
-      "passwordChanged": "تم تغيير كلمة المرور بنجاح.",
       "passwordHint": "استخدم 8 أحرف على الأقل.",
       "passwordMismatch": "كلمة المرور الجديدة والتأكيد غير متطابقين.",
       "passwordSecurity": "كلمة المرور والأمان",
@@ -1516,7 +3635,50 @@
       "title": "الإعدادات",
       "unsubscribeAnytime": "يمكنك إلغاء الاشتراك في الرسائل التسويقية في أي وقت.",
       "useOrderHistory": "استخدام سجل الطلبات لاقتراحات إعادة الطلب",
-      "weeklyOffers": "عروض أسبوعية"
+      "weeklyOffers": "عروض أسبوعية",
+      "passwordAdvice": "استخدم كلمة مرور قوية لا تستخدمها في أي مكان آخر.",
+      "arabic": "العربية",
+      "lastActive": "آخر نشاط",
+      "legacySessionNotice": "هذه جلسة تطوير قديمة تسبق نظام تتبع الجلسات الآمن. سجّل الدخول مرة واحدة من جديد لإدارة جميع الأجهزة.",
+      "loadFailed": "تعذر تحميل إعداداتك. يرجى المحاولة مرة أخرى.",
+      "marketingConsentNote": "الرسائل التسويقية متوقفة حتى تختار الاشتراك صراحةً. رسائل المعاملات والدعم منفصلة.",
+      "noTrackedSessions": "لا توجد جلسات متتبعة متاحة بعد.",
+      "notificationPreferenceNote": "تنطبق هذه الخيارات على الإشعارات الاختيارية المستقبلية. تظل تنبيهات الأمان مفعلة دائمًا.",
+      "otherSessionsRevoked": "تم تسجيل خروج {count} من الأجهزة الأخرى.",
+      "passwordChanged": "تم تغيير كلمة المرور بنجاح وتسجيل خروج {count} من الأجهزة الأخرى.",
+      "privacyPreferenceNote": "تم حفظ اختياراتك الآن. ستلتزم بها ميزات التوصيات المخصصة عند إضافتها.",
+      "saveFailed": "تعذر حفظ تفضيلك. يرجى المحاولة مرة أخرى.",
+      "saveFailedTitle": "لم يتم حفظ التفضيل",
+      "sessionActionFailed": "تعذر تسجيل خروج الجلسة.",
+      "sessionRevoked": "تم تسجيل خروج الجهاز المحدد.",
+      "signOutOtherDevices": "تسجيل خروج الأجهزة الأخرى",
+      "thisDevice": "هذا الجهاز",
+      "accountRequestReason": "السبب (اختياري)",
+      "accountRequestDetails": "تفاصيل إضافية (اختياري)",
+      "typeDeleteConfirmation": "اكتب DELETE لتأكيد طلب الحذف الخاضع للمراجعة.",
+      "confirmDeactivationRequest": "أفهم أن حسابي لن يصبح غير متاح إلا بعد موافقة المسؤول وإكمال الطلب.",
+      "accountRequestSubmitted": "تم إرسال طلب حسابك لمراجعة المسؤول.",
+      "accountRequestAlreadyActive": "يوجد بالفعل طلب نشط من هذا النوع. تظهر حالته الحالية أدناه.",
+      "accountRequestCanceled": "تم إلغاء طلب حسابك.",
+      "accountRequestHistory": "طلبات حسابك",
+      "cancelAccountRequest": "إلغاء الطلب",
+      "reviewerResponse": "رد المراجع",
+      "approvedDeactivationExplanation": "تمت الموافقة على طلبك وهو بانتظار التنفيذ من قِبل المسؤول. سيظل حسابك نشطًا حتى اكتمال الإجراء.",
+      "approvedDeletionExplanation": "تمت الموافقة على طلب الحذف وهو بانتظار التنفيذ النهائي. سيظل حسابك متاحًا حتى يُكمل المسؤول عملية الحذف وإخفاء الهوية.",
+      "completedDeactivationExplanation": "تم تعطيل حسابك. لاستعادة الوصول، تواصل مع دعم X Dental Store. يجب أن يراجع المسؤول الطلب ويعيد تفعيل الحساب. ستحتاج إلى تسجيل الدخول مرة أخرى بعد إعادة التفعيل.",
+      "accountAccessHelp": "مساعدة الوصول إلى الحساب",
+      "accountRequestTypes": {
+        "deactivation": "تعطيل الحساب",
+        "deletion": "حذف الحساب"
+      },
+      "accountRequestStatuses": {
+        "pending": "قيد الانتظار",
+        "underReview": "قيد المراجعة",
+        "approved": "تمت الموافقة — بانتظار التنفيذ",
+        "rejected": "مرفوض",
+        "canceled": "ملغي",
+        "completed": "مكتمل"
+      }
     },
     "statuses": {
       "searching": "جارٍ البحث"
@@ -1554,6 +3716,8 @@
           "optionsSelected": "تم تحديد خيارات المنتج.",
           "productAdded": "تمت إضافة {name} إلى هذه القائمة.",
           "productRemoved": "تمت إزالة المنتج من هذه القائمة.",
+          "quoteItemLimit": "يمكن أن يتضمن طلب عرض السعر ما يصل إلى 50 منتجًا مختلفًا.",
+          "quoteNeedsProducts": "أضف منتجًا واحدًا على الأقل قبل طلب عرض سعر.",
           "quoteSubmitted": "تم إرسال طلب عرض سعر لـ {name}.",
           "reset": "تمت إعادة القائمة إلى نسختها المحفوظة.",
           "saved": "تم حفظ تغييرات القائمة.",
@@ -1699,8 +3863,10 @@
         "outOfStock": "غير متوفر",
         "paid": "مدفوع",
         "pending": "معلق",
+        "pendingCollection": "بانتظار التحصيل",
         "pendingPayment": "بانتظار الدفع",
         "pendingReview": "بانتظار المراجعة",
+        "preparing": "قيد التجهيز",
         "processing": "قيد المعالجة",
         "refunded": "مسترد",
         "rejected": "مرفوض",
@@ -1871,6 +4037,13 @@
       "notifications": {
         "orderProcessingTitle": "الطلب #ORD-2023-1102 قيد المعالجة",
         "orderProcessingMessage": "تم تأكيد طلبك ويتم الآن تجهيزه للتوصيل.",
+        "orderStatusUpdatedTitle": "تم تحديث حالة الطلب",
+        "orderPendingMessage": "طلبك قيد المراجعة.",
+        "orderConfirmedTitle": "تم تأكيد الطلب",
+        "orderRejectedTitle": "تم رفض الطلب",
+        "orderRejectedMessage": "تعذر تأكيد طلبك. يرجى التواصل مع الدعم إذا كنت بحاجة إلى مساعدة.",
+        "orderCanceledTitle": "تم إلغاء الطلب",
+        "orderCanceledMessage": "تم إلغاء طلبك. تواصل مع الدعم إذا كانت لديك أي أسئلة.",
         "quoteApprovedTitle": "تمت الموافقة على عرض السعر #XQ-2038",
         "quoteApprovedMessage": "عرض السعر جاهز للمراجعة وسينتهي في 30 يوليو 2025.",
         "checkingSupplierTitle": "نحن نتحقق من توفر المورد",
@@ -1924,6 +4097,17 @@
       }
     },
     "wallet": {
+      "comingSoonDescription": "المحفظة والمكافآت غير مفعّلة بعد. ستظهر نقاطك ورصيد محفظتك هنا عند إطلاق برنامج المكافآت.",
+      "notActiveNotice": "برنامج المكافآت غير مفعّل بعد. لا يمكن كسب النقاط أو استبدالها حاليًا، ولا يمكن استخدام رصيد المحفظة عند الدفع.",
+      "pointsBalance": "النقاط",
+      "walletBalance": "رصيد المحفظة",
+      "pendingRewards": "المكافآت المعلقة",
+      "rewardsStatus": "حالة المكافآت",
+      "notActiveShort": "غير مفعّل بعد",
+      "whatToExpectTitle": "ماذا تتوقع",
+      "expectEarn": "اكسب نقاطًا على الطلبات المكتملة عند بدء البرنامج.",
+      "expectRedeem": "استبدل النقاط ورصيد المحفظة عند إتمام الطلب.",
+      "expectHistory": "تابع سجل الكسب والاستبدال الكامل هنا.",
       "availablePoints": "النقاط المتاحة",
       "availableRewards": "المكافآت المتاحة",
       "availableRewardsDescription": "استخدم المكافآت والقسائم عندما تكون مؤهلة أثناء الدفع.",
@@ -1953,7 +4137,46 @@
       "title": "المحفظة والنقاط",
       "useAtCheckout": "استخدام عند الدفع",
       "usePointsAtCheckout": "استخدام النقاط عند الدفع",
-      "viewRewards": "عرض المكافآت"
+      "viewRewards": "عرض المكافآت",
+      "rewardsWalletTitle": "المكافآت والمحفظة",
+      "realDescription": "تابع النقاط المكتسبة ورصيد المتجر المقوّم بالجنيه. النقاط مكافآت للاستخدام المؤهل عند الدفع وليست أموالاً نقدية.",
+  "eligibleRewardValue": "قيمة المكافأة المؤهلة",
+  "rewardValue": "قيمة المكافأة",
+  "pendingHelp": "تصبح نقاط الشراء متاحة بعد توصيل الطلب.",
+  "expires": "تنتهي في",
+      "loadError": "تعذر تحميل بيانات المكافآت. حاول مرة أخرى.",
+      "loading": "جارٍ تحميل المكافآت والمحفظة…",
+      "temporarilyPaused": "استخدام المكافآت متوقف مؤقتًا. أرصدتك وسجلك محفوظان بأمان.",
+      "pointsActivity": "نشاط النقاط",
+      "walletActivity": "نشاط المحفظة",
+      "noPointsActivity": "لا يوجد نشاط نقاط حتى الآن.",
+      "noWalletActivity": "لا يوجد نشاط للمحفظة حتى الآن.",
+      "programRules": "كيف تعمل المكافآت",
+      "earningRules": "كسب النقاط",
+      "redemptionRules": "استخدام النقاط",
+      "standardEarnRule": "يكسب العميل العادي نقطة واحدة عن كل 10 جنيهات مكتملة من الإنفاق المؤهل في الطلبات التي تم توصيلها.",
+      "vipEarnRule": "يكسب عميل VIP نقطتين عن كل 10 جنيهات مكتملة من الإنفاق المؤهل في الطلبات التي تم توصيلها.",
+      "redemptionRuleBody": "استخدم النقاط بمضاعفات 100 نقطة؛ حيث تمنح كل 100 نقطة قيمة مؤهلة قدرها 10 جنيهات، بحد أقصى 20% من إجمالي المنتجات. تنتهي صلاحية النقاط بعد 12 شهرًا من تفعيلها.",
+      "welcomeRuleBody": "تتاح نقاط الترحيب فورًا، وتنتهي بعد {days} يومًا، وتتطلب منتجات مؤهلة بقيمة لا تقل عن {minimum} جنيه.",
+      "notCashNotice": "لا يمكن سحب النقاط أو رصيد المتجر أو تحويلهما. يُستخدم رصيد المحفظة فقط في طلبات X Dental Store.",
+      "activity": {
+        "welcomePending": "نقاط الترحيب معلقة",
+        "welcomeActivated": "تم تفعيل نقاط الترحيب",
+        "welcomeGranted": "تم منح نقاط الترحيب",
+        "welcomeRestore": "تمت استعادة نقاط الترحيب",
+        "orderEarn": "نقاط مكتسبة من الطلب",
+        "redemption": "نقاط مستخدمة",
+        "restore": "نقاط مستعادة",
+        "reversal": "نقاط معكوسة",
+        "expiration": "نقاط منتهية",
+        "adjustment": "تسوية نقاط",
+        "refundCredit": "رصيد استرداد معتمد",
+        "promotionalCredit": "رصيد متجر ترويجي",
+        "adminCredit": "تمت إضافة رصيد متجر",
+        "adminDebit": "تسوية رصيد متجر",
+        "orderPayment": "استخدام المحفظة في الطلب",
+        "walletRestore": "استعادة رصيد المحفظة"
+      }
     },
     "wishlist": {
       "addAllToCart": "إضافة الكل إلى السلة",
@@ -1962,6 +4185,8 @@
       "emptyDescription": "احفظ المنتجات من الكتالوج بالنقر على أيقونة القلب.",
       "emptyTitle": "قائمة المفضلة فارغة",
       "eyebrow": "المنتجات المحفوظة",
+      "loadErrorDescription": "تعذّر تحميل المنتجات المحفوظة لديك. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+      "loadErrorTitle": "تعذّر تحميل قائمة المفضلة",
       "messages": {
         "addedToCart": "تمت إضافة {count} منتجات من المفضلة إلى السلة.",
         "cleared": "تم مسح المفضلة.",
@@ -1969,6 +4194,7 @@
       },
       "noSavedProductsDescription": "جرّب تغيير عبارة البحث أو فلتر المخزون للعثور على منتج محفوظ آخر.",
       "noSavedProductsTitle": "لم يتم العثور على منتجات محفوظة",
+      "retry": "إعادة المحاولة",
       "recommendedDescription": "اكتشف مستلزمات الأسنان التي تحفظها العيادات وتعيد طلبها عادة.",
       "recommendedTitle": "موصى به لعيادتك",
       "searchLabel": "البحث في المفضلة",
@@ -1976,6 +4202,9 @@
       "sortLabel": "ترتيب المفضلة",
       "stockFilterLabel": "تصفية المفضلة حسب المخزون",
       "title": "المفضلة"
+    },
+    "featureUnavailable": {
+      "contactSupport": "تواصل مع الدعم"
     }
   }
 }

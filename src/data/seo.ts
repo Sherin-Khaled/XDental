@@ -7,6 +7,12 @@ export type SeoPageKey =
   | "about"
   | "contact"
   | "faqs"
+  | "howToOrder"
+  | "privacy"
+  | "terms"
+  | "shippingDelivery"
+  | "returnsPolicy"
+  | "trackOrder"
   | "cart"
   | "checkout"
   | "login"
@@ -28,6 +34,12 @@ export const seoPages: Record<SeoPageKey, { path: string; robots: RobotsDirectiv
   about: { path: "/about", robots: "index, follow" },
   contact: { path: "/contact", robots: "index, follow" },
   faqs: { path: "/faqs", robots: "index, follow" },
+  howToOrder: { path: "/how-to-order", robots: "index, follow" },
+  privacy: { path: "/privacy", robots: "index, follow" },
+  terms: { path: "/terms", robots: "index, follow" },
+  shippingDelivery: { path: "/shipping-delivery", robots: "index, follow" },
+  returnsPolicy: { path: "/returns-policy", robots: "index, follow" },
+  trackOrder: { path: "/track-order", robots: "index, follow" },
   cart: { path: "/cart", robots: "noindex, nofollow" },
   checkout: { path: "/checkout", robots: "noindex, nofollow" },
   login: { path: "/login", robots: "noindex, nofollow" },

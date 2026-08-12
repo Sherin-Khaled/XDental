@@ -1,24 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import {
-  Bell,
-  FileText,
-  Heart,
-  Package,
-  LifeBuoy,
-} from "lucide-react";
+import { Bell } from "lucide-react";
 import { Container } from "@/components/dental/Container";
 import { AccountSidebar } from "@/components/dental/AccountSidebar";
 import { Button } from "@/components/dental/Button";
+import { NotificationIconBadge } from "@/components/dental/NotificationIconBadge";
+import { ScheduledPromotionPlacement } from "@/components/dental/ScheduledPromotionPlacement";
 import { useLanguage } from "@/context/LanguageContext";
+import { useNotifications } from "@/context/NotificationContext";
 import { accountT, accountValue } from "@/lib/accountI18n";
-import { cn } from "@/lib/utils";
 import {
-  getMyNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  type ApiNotification,
-} from "@/services/notifications";
+  formatNotificationRelativeTime,
+  getNotificationCategory,
+  getNotificationTone,
+  type NotificationTone,
+} from "@/lib/notificationPresentation";
+import { cn } from "@/lib/utils";
+import type { ApiNotification } from "@/services/notifications";
 
 type NotificationItem = {
   id: string;
@@ -30,6 +28,8 @@ type NotificationItem = {
   type: "order" | "quote" | "product-request" | "wishlist" | "offers" | "support" | "account";
   isRead: boolean;
   targetUrl?: string;
+  tone: NotificationTone;
+  notification: ApiNotification;
 };
 
 type NotificationFilter =
@@ -43,7 +43,7 @@ type NotificationFilter =
   | "account";
 
 // Development fixture retained for visual reference only; live account data always comes from the API.
-const developmentNotificationFixtures: NotificationItem[] = [
+const developmentNotificationFixtures: Array<Omit<NotificationItem, "tone" | "notification">> = [
   {
     id: "n-1",
     title: "Order #ORD-2023-1102 is processing",
@@ -157,32 +157,20 @@ const notificationFilters: { value: NotificationFilter; label: string }[] = [
   { value: "account", label: "Account" },
 ];
 
-function relativeTime(date: string) {
-  const elapsed = Math.max(0, Date.now() - new Date(date).getTime());
-  const hours = Math.floor(elapsed / 3_600_000);
-  if (hours < 1) return "Just now";
-  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? "" : "s"} ago`;
-}
-
-function toNotificationItem(item: ApiNotification): NotificationItem {
-  const type: NotificationItem["type"] =
-    item.type === "SUPPORT_MESSAGE" ? "support"
-      : item.type === "ORDER_UPDATE" ? "order"
-      : item.type === "QUOTE_UPDATE" ? "quote"
-      : item.type === "ACCOUNT" ? "account"
-      : "product-request";
+function toNotificationItem(item: ApiNotification, timeAgo: string): NotificationItem {
+  const type = getNotificationCategory(item.type);
   const tagLabel = type === "product-request" ? "Product Request" : type === "support" ? "Support" : type[0].toUpperCase() + type.slice(1);
   return {
     id: item.id,
     title: item.title,
     message: item.body,
     tagLabel,
-    timeAgo: relativeTime(item.createdAt),
+    timeAgo,
     type,
     isRead: Boolean(item.readAt),
     targetUrl: item.link ?? undefined,
+    tone: getNotificationTone(item),
+    notification: item,
   };
 }
 
@@ -204,47 +192,33 @@ function EmptyState() {
 
 function NotificationCard({ item, onOpen }: { item: NotificationItem; onOpen: () => void }) {
   const { t } = useLanguage();
-  const Icon =
-    item.type === "order"
-      ? Package
-      : item.type === "quote"
-      ? FileText
-      : item.type === "wishlist"
-      ? Heart
-      : item.type === "support"
-      ? LifeBuoy
-      : Bell;
   const cardClassName = cn(
     "block rounded-[24px] border p-[22px] shadow-[0_12px_34px_rgba(5,5,5,0.04)] transition-all",
     item.targetUrl && "cursor-pointer hover:-translate-y-0.5 hover:border-[var(--xd-gold-border-hover)] hover:bg-white",
-    item.isRead
+    item.tone === "destructive" && "border-[#F2C8C8] bg-[#FFF8F7]",
+    item.tone === "success" && "border-[#CFE8D6] bg-[#F8FCF8]",
+    item.tone === "warning" && "border-[#F9DC5C]/60 bg-[#FFFDF5]",
+    item.tone === "neutral" && (item.isRead
       ? "border-[var(--xd-gold-border-soft)] bg-white/80"
-      : "border-[var(--xd-gold-active)]/[0.32] bg-[var(--xd-gold-active)]/[0.04]"
+      : "border-[var(--xd-gold-active)]/[0.32] bg-[var(--xd-gold-active)]/[0.04]")
   );
 
   const content = (
     <div className="flex items-start gap-4">
-      <span
-        className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--xd-gold-text)]",
-          item.isRead ? "bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]" : "bg-[var(--xd-gold)]/16 text-[var(--xd-gold-active)]"
-        )}
-      >
-        <Icon size={17} />
-      </span>
+      <NotificationIconBadge notification={item.notification} />
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           {!item.isRead && (
             <span className="h-2 w-2 rounded-full bg-[var(--xd-gold)]" aria-label={accountT(t, "notifications.unreadNotification", "Unread notification")} />
           )}
-          <h3 className="text-[16px] font-bold text-[#050505]">{accountValue(t, item.title)}</h3>
+          <h3 className={cn("text-[16px] font-bold", item.tone === "destructive" ? "text-[#B42318]" : "text-[#050505]")}>{accountValue(t, item.title)}</h3>
         </div>
         <p className="mt-1.5 text-[14px] leading-6 text-[#8A8D9A]">{accountValue(t, item.message)}</p>
         <div className="mt-2.5 flex items-center gap-3 text-[13px]">
           <span className="inline-flex rounded-full bg-[#050505]/[0.04] px-3 py-1 text-[#717182]">
             {item.tagLabel ? accountValue(t, item.tagLabel) : null}
           </span>
-          <span className="text-[#8A8D9A]">{accountValue(t, item.timeAgo)}</span>
+          <span className="text-[#8A8D9A]">{item.timeAgo}</span>
         </div>
       </div>
     </div>
@@ -267,30 +241,24 @@ function NotificationCard({ item, onOpen }: { item: NotificationItem; onOpen: ()
 
 export default function AccountNotifications() {
   const [, navigate] = useLocation();
-  const { t } = useLanguage();
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { t, language } = useLanguage();
+  const {
+    notifications: apiNotifications,
+    unreadCount,
+    isLoading,
+    hasLoadError,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
   const [activeFilter, setActiveFilter] = useState<NotificationFilter>("all");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const unreadCount = notifications.filter((item) => !item.isRead).length;
+  const notifications = useMemo(
+    () => apiNotifications.map((item) =>
+      toNotificationItem(item, formatNotificationRelativeTime(item.createdAt, language, t))
+    ),
+    [apiNotifications, language, t]
+  );
   const hasUnread = unreadCount > 0;
-
-  useEffect(() => {
-    let active = true;
-    getMyNotifications()
-      .then((items) => {
-        if (active) setNotifications(items.map(toNotificationItem));
-      })
-      .catch(() => {
-        if (active) setStatusMessage(accountT(t, "notifications.loadFailed", "Failed to load notifications."));
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [t]);
   const filteredNotifications = useMemo(() => {
     if (activeFilter === "all") return notifications;
     if (activeFilter === "unread") return notifications.filter((item) => !item.isRead);
@@ -300,8 +268,7 @@ export default function AccountNotifications() {
   const handleMarkAllAsRead = async () => {
     if (!hasUnread) return;
     try {
-      await markAllNotificationsRead();
-      setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+      await markAllAsRead();
       setStatusMessage(accountT(t, "notifications.markedAllRead", "All notifications marked as read."));
     } catch {
       setStatusMessage(accountT(t, "notifications.updateFailed", "Failed to update notifications."));
@@ -310,8 +277,7 @@ export default function AccountNotifications() {
 
   const handleOpenNotification = async (item: NotificationItem) => {
     try {
-      if (!item.isRead) await markNotificationRead(item.id);
-      setNotifications((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, isRead: true } : candidate));
+      if (!item.isRead) await markAsRead(item.id);
       if (item.targetUrl) navigate(item.targetUrl);
     } catch {
       setStatusMessage(accountT(t, "notifications.updateFailed", "Failed to update notification."));
@@ -325,6 +291,7 @@ export default function AccountNotifications() {
           <AccountSidebar />
 
           <main className="min-w-0 space-y-8">
+            <ScheduledPromotionPlacement placement="NOTIFICATION_CENTER" />
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.18em] text-[var(--xd-gold-active)]">{accountT(t, "notifications.eyebrow", "Account Updates")}</p>
@@ -363,7 +330,7 @@ export default function AccountNotifications() {
                     className={cn(
                       "inline-flex h-10 items-center rounded-full border px-4 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]",
                       isActive
-                        ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-active)] text-white shadow-[0_8px_20px_rgba(212,167,44,0.18)]"
+                        ? "xd-account-selected-gold-control xd-gradient-gold border-transparent shadow-[var(--xd-gold-gradient-shadow)]"
                         : "border-[var(--xd-gold-border-soft)] bg-white/70 text-[var(--xd-gold-text)] hover:border-[var(--xd-gold-border)] hover:bg-[var(--xd-gold-active)]/[0.08] hover:text-[#050505]"
                     )}
                   >
@@ -373,12 +340,12 @@ export default function AccountNotifications() {
               })}
             </div>
 
-            {statusMessage && (
+            {(statusMessage || hasLoadError) && (
               <div
                 role="status"
                 className="rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] px-4 py-3 text-[13px] font-semibold text-[#5F5F5F]"
               >
-                {statusMessage}
+                {statusMessage ?? accountT(t, "notifications.loadFailed", "Failed to load notifications.")}
               </div>
             )}
 

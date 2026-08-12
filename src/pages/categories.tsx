@@ -12,6 +12,7 @@ import {
   BadgePercent,
   Building2,
   FileText,
+  Gift,
   PackageCheck,
   Search,
   ShoppingCart,
@@ -23,15 +24,18 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/dental/Container";
 import { SectionReveal } from "@/components/dental/SectionReveal";
+import { PremiumAccentIcon } from "@/components/dental/PremiumAccentIcon";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
-import { getCategoryTranslationKey } from "@/lib/catalogTranslations";
+import { useCatalog } from "@/context/CatalogContext";
+import { getLocalizedCategoryName } from "@/lib/catalogTranslations";
 
-const CATEGORY_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
+const CATEGORY_IMAGE = `${import.meta.env.BASE_URL}toothtools.webp`;
 const CAT_IMG_BASE = `${import.meta.env.BASE_URL}categories page/`;
 
 type CategoryItem = {
   name: string;
+  nameAr: string | null;
   slug: string;
   productCount: number;
   image: string;
@@ -43,27 +47,68 @@ type QuickAction = {
   Icon: LucideIcon;
 };
 
-const categoryCards: CategoryItem[] = [
-  { name: "Endodontics",           slug: "endodontics",               productCount: 120, image: `${CAT_IMG_BASE}Endodontics.svg`           },
-  { name: "Restorative Materials", slug: "composites-bonding",        productCount: 80,  image: `${CAT_IMG_BASE}Restorative Materials.svg` },
-  { name: "Orthodontics",          slug: "orthodontics",              productCount: 70,  image: `${CAT_IMG_BASE}Orthodontics.svg`          },
-  { name: "Dental Instruments",    slug: "hand-instruments",          productCount: 90,  image: `${CAT_IMG_BASE}Dental Instruments.svg`    },
-  { name: "Consumables",           slug: "sterilization-disposables", productCount: 150, image: `${CAT_IMG_BASE}Consumables.svg`           },
-  { name: "Equipment",             slug: "equipment",                 productCount: 45,  image: `${CAT_IMG_BASE}Equipment.svg`             },
-  { name: "Surgery",               slug: "surgery",                   productCount: 65,  image: `${CAT_IMG_BASE}Surgery.svg`               },
-  { name: "Implantology",          slug: "implantology",              productCount: 55,  image: `${CAT_IMG_BASE}Implantology.svg`          },
-  { name: "Infection Control",     slug: "infection-control",         productCount: 60,  image: `${CAT_IMG_BASE}Infection Control.svg`     },
-  { name: "Clinic Essentials",     slug: "clinic-essentials",         productCount: 150, image: `${CAT_IMG_BASE}Clinic Essentials.svg`     },
-  { name: "Whitening",             slug: "whitening",                 productCount: 34,  image: `${CAT_IMG_BASE}Whitening.svg`             },
-  { name: "Periodontics",          slug: "periodontics",              productCount: 78,  image: `${CAT_IMG_BASE}Periodontics.svg`          },
-  { name: "Radiology & Imaging",   slug: "radiology-imaging",         productCount: 42,  image: `${CAT_IMG_BASE}Radiology & Imaging.svg`  },
-  { name: "Burs & Rotary",         slug: "burs-rotary",               productCount: 100, image: `${CAT_IMG_BASE}Burs & Rotary.svg`        },
-  { name: "Impression Materials",  slug: "impression-materials",      productCount: 67,  image: `${CAT_IMG_BASE}Impression Materials.svg` },
-  { name: "Anesthesia",            slug: "anesthesia",                productCount: 45,  image: `${CAT_IMG_BASE}Anesthesia.svg`           },
-  { name: "Prophylaxis",           slug: "prophylaxis",               productCount: 72,  image: `${CAT_IMG_BASE}Prophylaxis.svg`          },
-  { name: "Lab Supplies",          slug: "lab-supplies",              productCount: 58,  image: `${CAT_IMG_BASE}Lab Supplies.svg`         },
-  { name: "Disposables",           slug: "disposables",               productCount: 180, image: `${CAT_IMG_BASE}Disposables.svg`          },
-];
+// Original custom line-art icons mapped by category slug. Keys cover the
+// website-managed taxonomy slugs (seeded from the backend) plus the legacy
+// local slugs so admin-created categories with those names keep their icons.
+const CATEGORY_IMAGES: Record<string, string> = {
+  // Current owner-managed category-tree slugs
+  restorative: `${CAT_IMG_BASE}Restorative Materials.svg`,
+  endodontics: `${CAT_IMG_BASE}Endodontics.svg`,
+  prosthodontics: `${CAT_IMG_BASE}Impression Materials.svg`,
+  "perio-surgery": `${CAT_IMG_BASE}Surgery.svg`,
+  orthodontics: `${CAT_IMG_BASE}Orthodontics.svg`,
+  consumables: `${CAT_IMG_BASE}Consumables.svg`,
+  instruments: `${CAT_IMG_BASE}Dental Instruments.svg`,
+  equipments: `${CAT_IMG_BASE}Equipment.svg`,
+  implant: `${CAT_IMG_BASE}Implantology.svg`,
+  "dental-lab": `${CAT_IMG_BASE}Lab Supplies.svg`,
+  bleaching: `${CAT_IMG_BASE}Whitening.svg`,
+  "burs-stones": `${CAT_IMG_BASE}Burs & Rotary.svg`,
+  "oral-care-system": `${CAT_IMG_BASE}Prophylaxis.svg`,
+  // Website-managed taxonomy (backend slugs)
+  anesthesia: `${CAT_IMG_BASE}Anesthesia.svg`,
+  burs: `${CAT_IMG_BASE}Burs & Rotary.svg`,
+  "disposable-material": `${CAT_IMG_BASE}Disposables.svg`,
+  implantology: `${CAT_IMG_BASE}Implantology.svg`,
+  laboratories: `${CAT_IMG_BASE}Lab Supplies.svg`,
+  "machine-inquiries": `${CAT_IMG_BASE}Equipment.svg`,
+  machines: `${CAT_IMG_BASE}Equipment.svg`,
+  others: `${CAT_IMG_BASE}Clinic Essentials.svg`,
+  periodontics: `${CAT_IMG_BASE}Periodontics.svg`,
+  radiology: `${CAT_IMG_BASE}Radiology & Imaging.svg`,
+  "restorative-materials": `${CAT_IMG_BASE}Restorative Materials.svg`,
+  "sterilization-material": `${CAT_IMG_BASE}Infection Control.svg`,
+  surgery: `${CAT_IMG_BASE}Surgery.svg`,
+  // Legacy local slugs
+  "composites-bonding": `${CAT_IMG_BASE}Restorative Materials.svg`,
+  "hand-instruments": `${CAT_IMG_BASE}Dental Instruments.svg`,
+  "sterilization-disposables": `${CAT_IMG_BASE}Consumables.svg`,
+  equipment: `${CAT_IMG_BASE}Equipment.svg`,
+  "infection-control": `${CAT_IMG_BASE}Infection Control.svg`,
+  "clinic-essentials": `${CAT_IMG_BASE}Clinic Essentials.svg`,
+  whitening: `${CAT_IMG_BASE}Whitening.svg`,
+  "radiology-imaging": `${CAT_IMG_BASE}Radiology & Imaging.svg`,
+  "burs-rotary": `${CAT_IMG_BASE}Burs & Rotary.svg`,
+  "impression-materials": `${CAT_IMG_BASE}Impression Materials.svg`,
+  prophylaxis: `${CAT_IMG_BASE}Prophylaxis.svg`,
+  "lab-supplies": `${CAT_IMG_BASE}Lab Supplies.svg`,
+  disposables: `${CAT_IMG_BASE}Disposables.svg`,
+};
+
+// No Pedodontics-specific asset currently exists. This neutral clinic icon is
+// used only for genuinely unmapped categories, and development builds report
+// the missing slug rather than silently repeating a taxonomy icon.
+const CATEGORY_FALLBACK_ICON = `${CAT_IMG_BASE}Clinic Essentials.svg`;
+
+function getCategoryIcon(slug: string): string {
+  const image = CATEGORY_IMAGES[slug];
+
+  if (!image && import.meta.env.DEV) {
+    console.warn(`[Categories] Missing custom icon mapping for category slug "${slug}".`);
+  }
+
+  return image ?? CATEGORY_FALLBACK_ICON;
+}
 
 const quickActions: QuickAction[] = [
   { label: "Weekly Offers",     href: "/products?collection=weekly-offers",   Icon: ShoppingCart },
@@ -71,24 +116,37 @@ const quickActions: QuickAction[] = [
   { label: "New Arrivals",      href: "/products?collection=new-arrivals",    Icon: Sparkles     },
   { label: "Fast Delivery",     href: "/products?collection=fast-delivery",   Icon: Truck        },
   { label: "Clinic Essentials", href: "/products?collection=clinic-essentials", Icon: Stethoscope },
-  { label: "Equipment & Machines", href: "/products?category=equipment",      Icon: PackageCheck },
+  { label: "Equipment & Machines", href: "/products?category=equipments",     Icon: PackageCheck },
   { label: "Trusted Brands",    href: "/brands",                              Icon: Building2    },
   { label: "Request a Quote",   href: "/account/quotes",                      Icon: FileText     },
 ];
 
 export default function Categories() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const { categoryTree, isLoading, error, refresh } = useCatalog();
   const [searchQuery, setSearchQuery] = useState("");
+  // Tiles show the main categories; each count includes its subcategories.
+  const categoryCards = useMemo<CategoryItem[]>(() => categoryTree.map((category) => ({
+    name: category.name,
+    nameAr: category.nameAr,
+    slug: category.slug,
+    productCount: category.productCount,
+    image: getCategoryIcon(category.slug),
+  })), [categoryTree]);
 
   const filteredCategories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return !query
       ? categoryCards
-      : categoryCards.filter((category) =>
-          category.name.toLowerCase().includes(query)
-        );
-  }, [searchQuery]);
+      : categoryCards.filter((category) => {
+          const localizedName = getLocalizedCategoryName(category, language, t);
+          return (
+            category.name.toLowerCase().includes(query) ||
+            localizedName.toLocaleLowerCase(language).includes(query)
+          );
+        });
+  }, [categoryCards, language, searchQuery, t]);
 
   return (
     <div className="bg-[var(--xd-bg)] pb-20">
@@ -120,11 +178,10 @@ export default function Categories() {
             </div>
           </SectionReveal>
 
-          <SectionReveal delay={0.1} className="mx-auto mt-12 grid max-w-[1120px] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {filteredCategories.map((category) => (
-              <CategoryTile key={category.slug} category={category} />
-            ))}
-          </SectionReveal>
+          {isLoading ? <div className="mx-auto mt-12 grid max-w-[1120px] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="h-[214px] animate-pulse rounded-[22px] bg-white/65" />)}</div> : error ? <div role="alert" className="mx-auto mt-12 max-w-[720px] rounded-[22px] border border-[#F2C8C8] bg-[#FFF3F3] p-6 text-center text-sm text-[#B42318]">{error}<button type="button" onClick={() => void refresh()} className="ms-3 font-bold underline">{t("common.retry", { fallback: "Retry" })}</button></div> : <SectionReveal delay={0.1} className="mx-auto mt-12 grid max-w-[1120px] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredCategories.map((category) => <CategoryTile key={category.slug} category={category} />)}
+            {filteredCategories.length === 0 && <p className="col-span-full py-12 text-center text-sm text-[#717182]">{t("products.noProductsBody")}</p>}
+          </SectionReveal>}
         </Container>
       </section>
 
@@ -135,7 +192,8 @@ export default function Categories() {
 }
 
 function CategoryTile({ category }: { category: CategoryItem }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const translatedName = getLocalizedCategoryName(category, language, t);
 
   return (
     <Link
@@ -144,25 +202,72 @@ function CategoryTile({ category }: { category: CategoryItem }) {
     >
       <article className="flex h-[214px] flex-col items-center justify-center rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white/60 p-6 text-center shadow-[0_10px_26px_rgba(5,5,5,0.045)] backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover:-translate-y-[2px] group-hover:border-[var(--xd-gold-border-hover)] group-hover:shadow-[var(--xd-shadow-hover)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
         <div className="mb-4 transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-          <img
-            src={category.image}
-            alt={category.name}
-            loading="lazy"
-            className="h-16 w-16 object-contain"
-            style={{
-              filter:
-                "brightness(0) saturate(100%) invert(68%) sepia(57%) saturate(450%) hue-rotate(359deg) brightness(95%) contrast(90%)",
-            }}
-          />
+          <CategoryIconArtwork image={category.image} label={translatedName} />
         </div>
         <h2 className="font-display text-[17px] font-semibold leading-snug text-[#050505]">
-          {t(getCategoryTranslationKey(category.name), { fallback: category.name })}
+          {translatedName}
         </h2>
         <p className="mt-2 text-[12px] font-semibold text-[var(--xd-gold-active)]">
           {category.productCount}+ {t("common.products")}
         </p>
       </article>
     </Link>
+  );
+}
+
+const LIGHT_CATEGORY_ICON_FILTER =
+  "drop-shadow(0.35px 0 0 #000) drop-shadow(-0.35px 0 0 #000) drop-shadow(0 0.35px 0 #000) drop-shadow(0 -0.35px 0 #000) brightness(0) saturate(100%) invert(68%) sepia(57%) saturate(450%) hue-rotate(359deg) brightness(95%) contrast(90%)";
+
+// The source SVGs contain filled paths rather than stroke attributes. Layering
+// their masks at sub-pixel offsets thickens the line art crisply in dark mode
+// without blurring it or modifying the original SVG geometry.
+const DARK_CATEGORY_ICON_OFFSETS = [
+  [0, 0],
+  [-0.8, 0],
+  [0.8, 0],
+  [0, -0.8],
+  [0, 0.8],
+  [-0.55, -0.55],
+  [0.55, -0.55],
+  [-0.55, 0.55],
+  [0.55, 0.55],
+] as const;
+
+function CategoryIconArtwork({ image, label }: { image: string; label: string }) {
+  const maskStyle = {
+    WebkitMaskImage: `url("${image}")`,
+    maskImage: `url("${image}")`,
+    WebkitMaskPosition: "center",
+    maskPosition: "center",
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
+    WebkitMaskSize: "contain",
+    maskSize: "contain",
+  } as const;
+
+  return (
+    <span role="img" aria-label={label} className="relative block h-20 w-20">
+      <img
+        src={image}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        className="h-20 w-20 object-contain dark:hidden"
+        style={{ filter: LIGHT_CATEGORY_ICON_FILTER }}
+      />
+      <span aria-hidden="true" className="absolute inset-0 hidden dark:block">
+        {DARK_CATEGORY_ICON_OFFSETS.map(([x, y]) => (
+          <span
+            key={`${x}:${y}`}
+            className="absolute inset-0 bg-[image:var(--xd-gold-gradient)]"
+            style={{
+              ...maskStyle,
+              transform: `translate(${x}px, ${y}px)`,
+            }}
+          />
+        ))}
+      </span>
+    </span>
   );
 }
 
@@ -195,7 +300,7 @@ function PopularShortcuts() {
                 className="group rounded-[18px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
               >
                 <article className="flex h-[110px] flex-col items-center justify-center rounded-[18px] border border-[var(--xd-gold-border-soft)] bg-white/68 px-6 text-center shadow-[0_10px_24px_rgba(5,5,5,0.04)] transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover:-translate-y-[2px] group-hover:border-[var(--xd-gold-border-hover)] group-hover:shadow-[var(--xd-shadow-hover)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-                  <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-[11px] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
+                  <span className="xd-icon-amber xd-icon-card-surface mb-3 flex h-9 w-9 items-center justify-center rounded-[11px] bg-[var(--xd-gold-bg-soft)]">
                     <Icon size={18} />
                   </span>
                   <span className="text-[13px] font-semibold text-[#050505]">
@@ -212,50 +317,43 @@ function PopularShortcuts() {
 }
 
 type CategoryWorkflowStep = {
+  id: "step1" | "step2" | "step3" | "step4";
   Icon: LucideIcon;
-  step: string;
-  title: string;
-  body: string;
   imageSrc: string;
-  imageAlt: string;
   imageClassName: string;
+  featureLinks?: Array<{
+    href: "/account/wallet" | "/checkout";
+    label: "walletLink" | "checkoutLink";
+  }>;
 };
 
 const CATEGORY_WORKFLOW_STEPS: CategoryWorkflowStep[] = [
   {
+    id: "step1",
     Icon: ShoppingCart,
-    step: "Step 1",
-    title: "Browse by Category",
-    body: "Find dental products organized by specialty, treatment type, and daily clinic needs.",
     imageSrc: `${CAT_IMG_BASE}Clinic Essentials.svg`,
-    imageAlt: "Dental clinic essentials category",
     imageClassName: "object-contain p-9",
   },
   {
+    id: "step2",
     Icon: PackageCheck,
-    step: "Step 2",
-    title: "Save to Supply Lists",
-    body: "Keep frequently used products ready for reorder, comparison, or quote requests.",
     imageSrc: `${CAT_IMG_BASE}Dental Instruments.svg`,
-    imageAlt: "Dental instruments for clinic supply lists",
     imageClassName: "object-contain p-9",
   },
   {
-    Icon: FileText,
-    step: "Step 3",
-    title: "Request Bulk Quotes",
-    body: "Send selected products to the sales team and receive pricing for clinic quantities.",
+    id: "step3",
+    Icon: Gift,
     imageSrc: `${CAT_IMG_BASE}Consumables.svg`,
-    imageAlt: "Consumables prepared for quote request",
     imageClassName: "object-contain p-9",
+    featureLinks: [
+      { href: "/account/wallet", label: "walletLink" },
+      { href: "/checkout", label: "checkoutLink" },
+    ],
   },
   {
+    id: "step4",
     Icon: Truck,
-    step: "Step 4",
-    title: "Checkout & Track Orders",
-    body: "Confirm your order, apply points or rewards, and track delivery from your account.",
     imageSrc: CATEGORY_IMAGE,
-    imageAlt: "Dental products ready for checkout and delivery",
     imageClassName: "object-contain p-6 mix-blend-multiply",
   },
 ];
@@ -341,59 +439,65 @@ function ClinicHelp() {
       <div className="px-5 py-14 lg:hidden">
         <div className="mx-auto max-w-[640px]">
           <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#717182]">
-            {t("categoriesPage.helpEyebrow", {
-              fallback: "Clinic Purchasing",
-            })}
+            {t("categoriesPage.helpEyebrow")}
           </p>
 
           <h2 className="font-display text-[34px] font-light leading-[1.12] text-[#050505] sm:text-[44px]">
-            {t("categoriesPage.helpTitle", {
-              fallback: "How X Dental Store",
-            })}
+            {t("categoriesPage.helpTitle")}
             <span className="block text-[#717182]">
-              {t("categoriesPage.helpTitleSecond", {
-                fallback: "helps your clinic.",
-              })}
+              {t("categoriesPage.helpTitleSecond")}
             </span>
           </h2>
 
           <div className="mt-9 flex flex-col gap-5">
             {CATEGORY_WORKFLOW_STEPS.map(
               ({
+                id,
                 Icon,
-                step,
-                title,
-                body,
                 imageSrc,
-                imageAlt,
                 imageClassName,
+                featureLinks,
               }) => (
                 <article
-                  key={step}
+                  key={id}
                   className="overflow-hidden rounded-[20px] border border-[#050505]/[0.06] bg-white/70 p-5 shadow-[0_12px_32px_rgba(5,5,5,0.05)]"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--xd-gold-border-hover)] bg-[var(--xd-bg)] text-[var(--xd-gold-active)]">
-                      <Icon size={16} />
+                    <span className="xd-accent-icon-surface flex h-10 w-10 items-center justify-center rounded-full">
+                      <PremiumAccentIcon icon={Icon} size={16} className="xd-timeline-step-icon" />
                     </span>
 
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0B3D2E]">
-                      {step}
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--xd-gold-text)]">
+                      {t(`categoriesPage.workflow.steps.${id}.label`)}
                     </p>
                   </div>
 
                   <h3 className="mt-4 font-display text-[22px] font-bold leading-[29px] text-[#050505]">
-                    {title}
+                    {t(`categoriesPage.workflow.steps.${id}.title`)}
                   </h3>
 
-                  <p className="mt-3 text-[14px] leading-[24px] text-[#0E0E0E]/75">
-                    {body}
+                  <p className="mt-3 text-[14px] leading-[24px] text-[var(--xd-text-muted)]">
+                    {t(`categoriesPage.workflow.steps.${id}.description`)}
                   </p>
+
+                  {featureLinks && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {featureLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                        >
+                          {t(`categoriesPage.workflow.steps.${id}.${link.label}`)}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="mt-5 aspect-[3/2] overflow-hidden rounded-[16px] bg-white">
                     <img
                       src={imageSrc}
-                      alt={imageAlt}
+                      alt={t(`categoriesPage.workflow.steps.${id}.imageAlt`)}
                       className={`h-full w-full ${imageClassName}`}
                       loading="lazy"
                     />
@@ -413,44 +517,44 @@ function ClinicHelp() {
               <div className="grid grid-cols-[64px_1fr] items-start gap-5">
                 <div
                   className="relative flex flex-col items-center"
-                  aria-label="Clinic purchasing steps"
+                  aria-label={t("categoriesPage.workflow.navigationLabel")}
                 >
-                  <div className="absolute bottom-6 top-6 w-px bg-[var(--xd-gold)]/30" />
+                  <div className="xd-timeline-rail absolute bottom-6 top-6 w-px" />
 
                   <motion.div
-                    className="absolute bottom-6 top-6 w-px origin-top bg-[var(--xd-gold)]"
+                    className="xd-timeline-rail-progress absolute bottom-6 top-6 w-px origin-top"
                     style={{ scaleY: railScaleY }}
                   />
 
                   <div className="relative flex flex-col items-center gap-10">
-                    {CATEGORY_WORKFLOW_STEPS.map(({ Icon, step }, index) => {
+                    {CATEGORY_WORKFLOW_STEPS.map(({ Icon, id }, index) => {
                       const isActive = index === currentStepIndex;
                       const isVisited = index < currentStepIndex;
+                      const stepLabel = t(`categoriesPage.workflow.steps.${id}.label`);
+                      const stepState = isActive
+                        ? "active"
+                        : isVisited
+                          ? "completed"
+                          : "upcoming";
 
                       return (
                         <button
-                          key={step}
+                          key={id}
                           type="button"
                           onClick={() => scrollToStep(index)}
-                          aria-label={`Go to ${step}`}
+                          aria-label={t("categoriesPage.workflow.goToStep", {
+                            values: { step: stepLabel },
+                          })}
                           aria-current={isActive ? "step" : undefined}
-                          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[var(--xd-bg)]"
+                          data-state={stepState}
+                          className={`xd-timeline-step xd-timeline-step--${stepState} relative flex h-12 w-12 items-center justify-center rounded-full`}
                         >
-                          <span
-                            className={`absolute inset-0 rounded-full border transition-colors duration-300 ${
-                              isActive
-                                ? "border-[var(--xd-gold-active)]"
-                                : "border-[var(--xd-gold-border)]"
-                            }`}
-                          />
+                          <span className="xd-timeline-step-ring absolute inset-0 rounded-full" />
 
-                          <Icon
+                          <PremiumAccentIcon
+                            icon={Icon}
                             size={17}
-                            className={`relative z-10 transition-colors duration-300 ${
-                              isActive || isVisited
-                                ? "text-[var(--xd-gold-active)]"
-                                : "text-[var(--xd-gold-active)]/55"
-                            }`}
+                            className="xd-timeline-step-icon relative z-10"
                           />
                         </button>
                       );
@@ -461,23 +565,37 @@ function ClinicHelp() {
                 <div className="flex min-h-[200px] items-start pt-1">
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={activeStep.step}
+                      key={activeStep.id}
                       initial={{ opacity: 0, x: textEnterX }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: textExitX }}
                       transition={{ duration: 0.58, ease: "easeOut" }}
                     >
-                      <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#0B3D2E]">
-                        {activeStep.step}
+                      <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-[var(--xd-gold-text)]">
+                        {t(`categoriesPage.workflow.steps.${activeStep.id}.label`)}
                       </p>
 
-                      <h2 className="mt-3 font-display text-[34px] font-bold leading-[1.08] text-[#1F3D2B] xl:text-[40px]">
-                        {activeStep.title}
+                      <h2 className="mt-3 font-display text-[clamp(2rem,2.8vw,2.375rem)] font-bold leading-[1.12] text-[var(--xd-text)]">
+                        {t(`categoriesPage.workflow.steps.${activeStep.id}.title`)}
                       </h2>
 
-                      <p className="mt-4 max-w-[500px] text-[15px] leading-[26px] text-[#0E0E0E]/75">
-                        {activeStep.body}
+                      <p className="mt-4 max-w-[500px] text-[15px] leading-[26px] text-[var(--xd-text-muted)]">
+                        {t(`categoriesPage.workflow.steps.${activeStep.id}.description`)}
                       </p>
+
+                      {activeStep.featureLinks && (
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          {activeStep.featureLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                            >
+                              {t(`categoriesPage.workflow.steps.${activeStep.id}.${link.label}`)}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </div>
@@ -487,7 +605,7 @@ function ClinicHelp() {
                 <div className="w-full max-w-[360px] xl:max-w-[390px]">
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={activeStep.step}
+                      key={activeStep.id}
                       initial={{ opacity: 0, x: imageEnterX, scale: 0.96 }}
                       animate={{ opacity: 1, x: 0, scale: 1 }}
                       exit={{ opacity: 0, x: imageExitX, scale: 1.02 }}
@@ -496,7 +614,7 @@ function ClinicHelp() {
                     >
                       <img
                         src={activeStep.imageSrc}
-                        alt={activeStep.imageAlt}
+                        alt={t(`categoriesPage.workflow.steps.${activeStep.id}.imageAlt`)}
                         className={`h-full w-full ${activeStep.imageClassName}`}
                         loading={currentStepIndex === 0 ? "eager" : "lazy"}
                       />

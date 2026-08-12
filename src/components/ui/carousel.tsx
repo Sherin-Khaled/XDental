@@ -4,6 +4,11 @@ import useEmblaCarousel, {
 } from "embla-carousel-react"
 
 import { DirectionalIcon } from "@/components/DirectionalIcon"
+import { useLanguage } from "@/context/LanguageContext"
+import {
+  getHorizontalNavigationAction,
+  isEditableNavigationTarget,
+} from "@/hooks/use-directional-navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -56,6 +61,7 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
+    const { isRtl } = useLanguage()
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
@@ -85,15 +91,14 @@ const Carousel = React.forwardRef<
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === "ArrowLeft") {
-          event.preventDefault()
-          scrollPrev()
-        } else if (event.key === "ArrowRight") {
-          event.preventDefault()
-          scrollNext()
-        }
+        if (isEditableNavigationTarget(event.target)) return
+        const action = getHorizontalNavigationAction(event.key, isRtl)
+        if (!action) return
+        event.preventDefault()
+        if (action === "next") scrollNext()
+        else scrollPrev()
       },
-      [scrollPrev, scrollNext]
+      [isRtl, scrollPrev, scrollNext]
     )
 
     React.useEffect(() => {
@@ -197,6 +202,7 @@ const CarouselPrevious = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, variant = "outline", size = "icon", ...props }, ref) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const { isRtl, t } = useLanguage()
 
   return (
     <Button
@@ -206,7 +212,9 @@ const CarouselPrevious = React.forwardRef<
       className={cn(
         "absolute  h-8 w-8 rounded-full",
         orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2"
+          ? isRtl
+            ? "-right-12 top-1/2 -translate-y-1/2"
+            : "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
@@ -214,8 +222,8 @@ const CarouselPrevious = React.forwardRef<
       onClick={scrollPrev}
       {...props}
     >
-      <DirectionalIcon direction="back" className="h-4 w-4" />
-      <span className="sr-only">Previous slide</span>
+      <DirectionalIcon direction="previous" className="h-4 w-4" />
+      <span className="sr-only">{t("common.previousSlide", { fallback: "Previous slide" })}</span>
     </Button>
   )
 })
@@ -226,6 +234,7 @@ const CarouselNext = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, variant = "outline", size = "icon", ...props }, ref) => {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const { isRtl, t } = useLanguage()
 
   return (
     <Button
@@ -235,7 +244,9 @@ const CarouselNext = React.forwardRef<
       className={cn(
         "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
+          ? isRtl
+            ? "-left-12 top-1/2 -translate-y-1/2"
+            : "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
@@ -243,8 +254,8 @@ const CarouselNext = React.forwardRef<
       onClick={scrollNext}
       {...props}
     >
-      <DirectionalIcon direction="forward" className="h-4 w-4" />
-      <span className="sr-only">Next slide</span>
+      <DirectionalIcon direction="next" className="h-4 w-4" />
+      <span className="sr-only">{t("common.nextSlide", { fallback: "Next slide" })}</span>
     </Button>
   )
 })

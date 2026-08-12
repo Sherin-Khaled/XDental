@@ -13,30 +13,36 @@ import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
 import { ProductCard } from "@/components/dental/ProductCard";
+import { LowStockNotice, isLowStockProduct } from "@/components/dental/StockAvailability";
 import { useStore } from "@/context/StoreContext";
-import { mockProducts } from "@/data/products";
+import { fetchPublicProducts } from "@/services/catalog";
+import { createQuote, getMyQuote } from "@/services/quotes";
+import type { SupplyList } from "@/data/supplyLists";
 import {
-  saveCartQuoteRequest,
-  type StoredQuoteDiscount,
-} from "@/data/quotes";
-import {
-  getSupplyLists,
-  saveSupplyLists,
-  summarizeSupplyList,
-  type SupplyList,
-  type SupplyListDetailItem,
-} from "@/data/supplyLists";
-import type { CartItem } from "@/types/product";
+  createSupplyList,
+  fetchSupplyLists,
+  mergeSupplyListItems,
+} from "@/services/supplyLists";
+import type { CartItem, Product } from "@/types/product";
 import { formatCurrency } from "@/utils";
-import {
-  validateCoupon,
-  type CouponValidationResult,
-} from "@/lib/coupons";
 import { cn } from "@/lib/utils";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
+import { getLocalizedProductName } from "@/lib/catalogTranslations";
+import { previewCoupon, type CouponPreview } from "@/services/coupons";
+import { ApiError } from "@/services/http";
+import {
+  canIncreaseCartProduct,
+  cartProductQuantity,
+  getCartStockIssueForProduct,
+  getCartStockIssues,
+  getProductStockLimit,
+  isProductPurchasable,
+  type CartStockIssue,
+} from "@/lib/cartStock";
+import { useImageFallback } from "@/hooks/use-image-fallback";
 
-const CART_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
+const CART_IMAGE = `${import.meta.env.BASE_URL}toothtools.webp`;
 
 function useModalCloseBehavior(onClose: () => void) {
   useEffect(() => {
@@ -66,7 +72,9 @@ function closeOnOverlayPointerDown(event: PointerEvent<HTMLDivElement>, onClose:
   }
 }
 
-function CartImage({ name, className }: { name: string; className?: string }) {
+function CartImage({ image, name, className }: { image?: string; name: string; className?: string }) {
+  const cartImage = useImageFallback(image, CART_IMAGE);
+
   return (
     <div
       className={cn(
@@ -75,7 +83,8 @@ function CartImage({ name, className }: { name: string; className?: string }) {
       )}
     >
       <img
-        src={CART_IMAGE}
+        src={cartImage.src}
+        onError={cartImage.onError}
         alt={name}
         width={2525}
         height={2582}
@@ -90,9 +99,11 @@ function CartImage({ name, className }: { name: string; className?: string }) {
 function QuantityStepper({
   quantity,
   onChange,
+  disableIncrease = false,
 }: {
   quantity: number;
   onChange: (quantity: number) => void;
+  disableIncrease?: boolean;
 }) {
   const { t } = useLanguage();
 
@@ -112,7 +123,8 @@ function QuantityStepper({
       <button
         type="button"
         onClick={() => onChange(quantity + 1)}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-[#8A8D9A] transition-colors hover:text-[#050505] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]"
+        disabled={disableIncrease}
+        className="flex h-7 w-7 items-center justify-center rounded-full text-[#8A8D9A] transition-colors hover:text-[#050505] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:text-[#8A8D9A]"
         aria-label={t("cart.increaseQuantity")}
       >
         <Plus size={14} />
@@ -123,23 +135,31 @@ function QuantityStepper({
 
 function CartItemRow({
   item,
+  stockIssue,
+  disableIncrease,
   onUpdateQuantity,
+  onAdjustToAvailable,
   onRemove,
 }: {
   item: CartItem;
+  stockIssue: CartStockIssue | null;
+  disableIncrease: boolean;
   onUpdateQuantity: (quantity: number) => void;
+  onAdjustToAvailable: () => void;
   onRemove: () => void;
 }) {
-  const { t } = useLanguage();
-  const productName = t(`products.items.${item.product.id}.name`, { fallback: item.product.name });
+  const { t, language } = useLanguage();
+  const productName = getLocalizedProductName(item.product, language, t);
   const optionDetails = item.selectedOptions
     ? item.selectedOptions
     : item.product.options?.slice(0, 3).join(" - ");
   const itemSubtotal = item.product.currentPrice * item.quantity;
+  const isLowStock = isLowStockProduct(item.product);
+  const isOutOfStock = !isProductPurchasable(item.product);
 
   return (
     <article className="grid gap-4 border-b border-[#050505]/[0.07] py-8 first:pt-0 last:border-b-0 sm:grid-cols-[112px_minmax(0,1fr)_120px]">
-      <CartImage name={productName} className="h-[112px] w-[112px]" />
+      <CartImage image={item.product.image} name={productName} className="h-[112px] w-[112px]" />
 
       <div className="min-w-0">
         <h2 className="text-[18px] font-bold leading-6 text-[#050505]">{productName}</h2>
@@ -148,15 +168,57 @@ function CartItemRow({
             {t("common.brand")}: <span className="font-bold text-[#050505]">{item.product.brand}</span>
           </p>
           {optionDetails && <p>{optionDetails}</p>}
-          <p className="inline-flex items-center gap-1.5 text-[var(--xd-gold-active)]">
-            <Check size={13} />
-            {t(`common.${item.product.stockStatus === "Out of Stock" ? "outOfStock" : item.product.stockStatus === "Low Stock" ? "lowStock" : "inStock"}`)}
-          </p>
+          {isLowStock ? (
+            <LowStockNotice product={item.product} />
+          ) : (
+            <p className={cn(
+              "inline-flex items-center gap-1.5 font-semibold",
+              isOutOfStock ? "text-[#C0392B]" : "text-[var(--xd-gold-active)]"
+            )}>
+              <Check size={13} />
+              {t(isOutOfStock ? "common.outOfStock" : "common.inStock")}
+            </p>
+          )}
         </div>
 
         <div className="mt-4">
-          <QuantityStepper quantity={item.quantity} onChange={onUpdateQuantity} />
+          <QuantityStepper
+            quantity={item.quantity}
+            onChange={onUpdateQuantity}
+            disableIncrease={disableIncrease}
+          />
         </div>
+        {stockIssue && (
+          <div
+            role="alert"
+            className="mt-3 max-w-[480px] rounded-[12px] border border-[#D97706]/25 bg-[#D97706]/[0.07] px-3 py-2.5 text-[12px] font-semibold leading-5 text-[#8A4B08] dark:border-[#F9DC5C]/25 dark:bg-[#F9DC5C]/[0.07] dark:text-[#F6D85D]"
+          >
+            <p>
+              {stockIssue.availableQuantity !== null
+                ? t("cart.insufficientStockProduct", {
+                    fallback: "Only {count} unit(s) of {name} are currently available.",
+                    values: {
+                      count: stockIssue.availableQuantity,
+                      name: productName,
+                    },
+                  })
+                : t("cart.availableQuantityChanged", {
+                    fallback: "The available quantity changed. Update this item before checkout.",
+                  })}
+            </p>
+            {stockIssue.availableQuantity !== null && stockIssue.availableQuantity > 0 && (
+              <button
+                type="button"
+                onClick={onAdjustToAvailable}
+                className="mt-1.5 font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-focus-ring)]"
+              >
+                {t("cart.adjustToAvailable", {
+                  fallback: "Adjust to available quantity",
+                })}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex items-start justify-between gap-4 sm:flex-col sm:items-end">
@@ -233,56 +295,6 @@ function EmptyCart({
 }
 
 type SaveCartMode = "existing" | "new";
-
-function cartItemToSupplyListItem(item: CartItem, index: number, createdAt: number): SupplyListDetailItem {
-  const option = item.selectedOptions ?? item.product.options?.[0];
-
-  return {
-    id: `cart-${item.product.id}-${createdAt}-${index}`,
-    productId: item.product.id,
-    name: item.product.name,
-    brand: item.product.brand,
-    sku: item.product.sku ?? `SKU-${item.product.id}`,
-    details: [option ? `Option: ${option}` : item.product.category],
-    unitPrice: item.product.currentPrice,
-    quantity: item.quantity,
-    availability: item.product.stockStatus === "Out of Stock" ? "out-of-stock" : "available",
-    selectedOption: option,
-    category: item.product.category,
-    image: item.product.image,
-  };
-}
-
-function mergeSupplyListItems(
-  existingItems: SupplyListDetailItem[],
-  cartItems: SupplyListDetailItem[]
-) {
-  const mergedItems = [...existingItems];
-
-  cartItems.forEach((cartItem) => {
-    const matchingIndex = mergedItems.findIndex(
-      (item) =>
-        item.productId === cartItem.productId &&
-        (item.selectedOption ?? "") === (cartItem.selectedOption ?? "")
-    );
-
-    if (matchingIndex === -1) {
-      mergedItems.push(cartItem);
-      return;
-    }
-
-    const matchingItem = mergedItems[matchingIndex];
-    mergedItems[matchingIndex] = {
-      ...matchingItem,
-      quantity: matchingItem.quantity + cartItem.quantity,
-      unitPrice: cartItem.unitPrice,
-      availability: cartItem.availability,
-      image: matchingItem.image ?? cartItem.image,
-    };
-  });
-
-  return mergedItems;
-}
 
 function SaveCartSupplyListModal({
   lists,
@@ -460,7 +472,10 @@ function SaveCartSupplyListModal({
   );
 }
 
+const RECOMMENDATION_LIMIT = 4;
+
 export default function Cart() {
+  const [recommendationCandidates, setRecommendationCandidates] = useState<Product[]>([]);
   const {
     cart,
     updateQuantity,
@@ -468,18 +483,20 @@ export default function Cart() {
     cartTotal,
     cartCount,
     isAuthenticated,
-    currentUser,
   } = useStore();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [, navigate] = useLocation();
   const search = useSearch();
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
-  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponNotice, setCouponNotice] = useState<string | null>(null);
+  const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [submittedQuoteId, setSubmittedQuoteId] = useState<string | null>(null);
+  const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
   const [isSaveListModalOpen, setIsSaveListModalOpen] = useState(false);
-  const [supplyLists, setSupplyLists] = useState<SupplyList[]>(() => getSupplyLists());
+  const [supplyLists, setSupplyLists] = useState<SupplyList[]>([]);
+  const [isSavingSupplyList, setIsSavingSupplyList] = useState(false);
   const [saveListMode, setSaveListMode] = useState<SaveCartMode>("existing");
   const [selectedSupplyListId, setSelectedSupplyListId] = useState("");
   const [newSupplyListName, setNewSupplyListName] = useState("");
@@ -492,74 +509,92 @@ export default function Cart() {
       ? t("cart.checkoutEmpty")
       : checkoutState === "unavailable"
         ? t("cart.checkoutUnavailable")
+        : checkoutState === "stock"
+          ? t("cart.availableQuantityChanged", {
+              fallback: "The available quantity changed. Update this item before checkout.",
+            })
         : null;
   const visibleStatusMessage = statusMessage ?? checkoutNotice;
   const shipping = cartTotal > 0 ? 50 : 0;
-  const couponResult = useMemo(
-    () =>
-      appliedCouponCode
-        ? validateCoupon(appliedCouponCode, {
-            subtotal: cartTotal,
-            shipping,
-            items: cart,
-          })
-        : null,
-    [appliedCouponCode, cart, cartTotal, shipping]
-  );
-  const discount = couponResult?.status === "valid" ? couponResult.discount : 0;
-  const total = Math.max(cartTotal + shipping - discount, 0);
+  const monetaryDiscount = couponPreview?.totals.discount ?? 0;
+  const monetaryDiscountLabel = couponPreview?.totals.winningMonetarySource
+    ? language === "ar"
+      ? couponPreview.totals.winningMonetarySource.titleAr
+      : couponPreview.totals.winningMonetarySource.titleEn
+    : t("common.discount", { fallback: "Discount" });
+  const displayedShipping = couponPreview?.totals.shipping ?? shipping;
+  const total = couponPreview?.totals.total ?? cartTotal + shipping;
   const recommendations = useMemo(
-    () => mockProducts.filter((product) => !cart.some((item) => item.product.id === product.id)).slice(0, 4),
-    [cart]
+    () =>
+      recommendationCandidates
+        .filter((product) => !cart.some((item) => item.product.id === product.id))
+        .slice(0, RECOMMENDATION_LIMIT),
+    [cart, recommendationCandidates]
   );
+  const stockIssues = getCartStockIssues(cart);
+  const hasStockIssues = stockIssues.length > 0;
 
-  const getCouponMessage = (result: CouponValidationResult) => {
-    if (result.status === "valid") return null;
+  useEffect(() => {
+    setCouponPreview(null);
+    setCouponNotice(null);
+  }, [cart]);
 
-    if (result.reason === "empty") return t("cart.couponEmpty");
-    if (result.reason === "not_found") return t("cart.couponInvalid");
-    if (result.reason === "unavailable") return t("cart.couponUnavailable");
-    if (result.reason === "category_mismatch") return t("cart.couponClinicOnly");
-    if (result.reason === "minimum") {
-      return t("cart.couponMinimum", {
-        values: { amount: formatCurrency(result.minimumSubtotal ?? 0) },
-      });
-    }
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchPublicProducts({
+      featured: true,
+      limit: RECOMMENDATION_LIMIT + cart.length,
+      signal: controller.signal,
+    })
+      .then(({ products }) => {
+        if (!controller.signal.aborted) setRecommendationCandidates(products);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return t("cart.couponNotEligible");
-  };
-
-  const handleApplyCoupon = (event: FormEvent<HTMLFormElement>) => {
+  const handleApplyCoupon = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmedCode = couponCode.trim();
-    const nextCouponResult = validateCoupon(trimmedCode, {
-      subtotal: cartTotal,
-      shipping,
-      items: cart,
-    });
-
-    setSavedSupplyList(null);
-    setSubmittedQuoteId(null);
-    setStatusMessage(null);
-
-    if (nextCouponResult.status === "valid") {
-      setAppliedCouponCode(nextCouponResult.code);
-      setCouponCode(nextCouponResult.code);
-      setCouponError(null);
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setCouponPreview(null);
+      setCouponNotice(t("cart.couponEmpty"));
       return;
     }
-
-    setAppliedCouponCode(null);
-    setCouponError(getCouponMessage(nextCouponResult));
+    setIsApplyingCoupon(true);
+    setCouponNotice(null);
+    try {
+      const result = await previewCoupon(
+        code,
+        cart.map((item) => ({
+          productId: item.product.id,
+          sku: item.product.sku ?? undefined,
+          slug: item.product.slug ?? undefined,
+          selectedOptions: item.selectedOptions ?? undefined,
+          quantity: item.quantity,
+        }))
+      );
+      setCouponCode(result.coupon.code);
+      setCouponPreview(result);
+      const normalizedCode = result.coupon.code.trim().toUpperCase();
+      const couponIsApplied =
+        result.totals.appliedCoupon?.code.trim().toUpperCase() === normalizedCode
+        || result.totals.appliedBenefits.some((benefit) => benefit.type === "PROMO_CODE");
+      setCouponNotice(
+        t(couponIsApplied ? "cart.couponApplied" : "cart.couponValidStrongerPromotion", {
+          values: { code: result.coupon.code },
+        })
+      );
+    } catch (error) {
+      setCouponPreview(null);
+      setCouponNotice(error instanceof ApiError ? error.message : t("cart.couponInvalid"));
+    } finally {
+      setIsApplyingCoupon(false);
+    }
   };
 
-  const removeAppliedCoupon = () => {
-    setAppliedCouponCode(null);
-    setCouponCode("");
-    setCouponError(null);
-  };
-
-  const handleRequestQuote = () => {
+  const handleRequestQuote = async () => {
     setSavedSupplyList(null);
     setSubmittedQuoteId(null);
 
@@ -573,102 +608,127 @@ export default function Cart() {
       return;
     }
 
-    const quoteDiscount: StoredQuoteDiscount | undefined =
-      couponResult?.status === "valid" && discount > 0
-        ? {
-            code: couponResult.code,
-            label: couponResult.coupon.label,
-            type: couponResult.coupon.type,
-            value: couponResult.coupon.value,
-            amount: discount,
-          }
-        : undefined;
-
-    // Frontend preview only. In production, quote requests should be sent to backend, stored in database, shown in admin dashboard, and emailed to the company.
-    const quote = saveCartQuoteRequest({
-      userId: currentUser?.id,
-      items: cart,
-      subtotal: cartTotal,
-      shipping,
-      discount: quoteDiscount,
-      estimatedTotal: total,
-    });
-
-    setSubmittedQuoteId(quote.id);
-    setStatusMessage(t("cart.quoteSubmitted"));
-  };
-
-  const openSaveListModal = () => {
-    const currentLists = getSupplyLists();
-    const availableLists = currentLists.filter((list) => list.status !== "Archived");
-
-    setSupplyLists(currentLists);
-    setSelectedSupplyListId(availableLists[0]?.id ?? "");
-    setSaveListMode(availableLists.length > 0 ? "existing" : "new");
-    setNewSupplyListName(t("cart.saveListNamePlaceholder", { fallback: "Cart Supply List" }));
-    setNewSupplyListDescription("");
-    setNewSupplyListBranch("Main Clinic");
-    setSavedSupplyList(null);
-    setSubmittedQuoteId(null);
+    setIsQuoteSubmitting(true);
     setStatusMessage(null);
-    setIsSaveListModalOpen(true);
-  };
-
-  const handleSaveCartToList = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const currentLists = getSupplyLists();
-    const cartDetailItems = cart.map((item, index) => cartItemToSupplyListItem(item, index, Date.now()));
-    let savedList: SupplyList | null = null;
-    let nextLists: SupplyList[];
-
-    if (saveListMode === "existing") {
-      const targetList = currentLists.find((list) => list.id === selectedSupplyListId);
-      if (!targetList) return;
-
-      savedList = summarizeSupplyList({
-        ...targetList,
-        detailItems: mergeSupplyListItems(targetList.detailItems, cartDetailItems),
+    try {
+      const quote = await createQuote({
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          brand: item.product.brand,
+          sku: item.product.sku ?? undefined,
+          quantity: item.quantity,
+          selectedOptions: item.selectedOptions ?? undefined,
+          requestedPrice: item.product.currentPrice,
+        })),
       });
-      nextLists = currentLists.map((list) => (list.id === savedList?.id ? savedList : list));
-    } else {
-      const trimmedName = newSupplyListName.trim();
-      if (!trimmedName) return;
-
-      savedList = summarizeSupplyList({
-        id: `cart-list-${Date.now()}`,
-        name: trimmedName,
-        branch: newSupplyListBranch,
-        description: newSupplyListDescription.trim() || t("cart.saveListDescriptionDefault", { fallback: "Saved from cart." }),
-        status: "Active",
-        items: [],
-        productCount: 0,
-        estimatedTotal: 0,
-        updatedDaysAgo: 0,
-        availableCount: 0,
-        outOfStockCount: 0,
-        needsOptionsCount: 0,
-        detailItems: cartDetailItems,
-      });
-      nextLists = [savedList, ...currentLists];
+      await getMyQuote(quote.id);
+      setSubmittedQuoteId(quote.id);
+      setStatusMessage(t("quoteWorkflow.requestSubmitted", { values: { quoteNumber: quote.quoteNumber } }));
+    } catch (requestError) {
+      setStatusMessage(requestError instanceof Error ? requestError.message : t("quoteWorkflow.requestError"));
+    } finally {
+      setIsQuoteSubmitting(false);
     }
-
-    const persistedLists = saveSupplyLists(nextLists);
-    setSupplyLists(persistedLists);
-    setSavedSupplyList(savedList);
-    setSubmittedQuoteId(null);
-    setStatusMessage(
-      t("cart.savedToSupplyList", {
-        fallback: "Cart saved to {name}.",
-        values: { name: savedList.name },
-      })
-    );
-    setIsSaveListModalOpen(false);
   };
 
-  const activeCouponError =
-    couponResult?.status === "invalid" ? getCouponMessage(couponResult) : null;
-  const couponStatusMessage = couponError ?? activeCouponError;
+  const openSaveListModal = async () => {
+    if (!isAuthenticated) {
+      navigate("/signin?redirect=/cart");
+      return;
+    }
+    if (isSavingSupplyList) return;
+    setIsSavingSupplyList(true);
+    setStatusMessage(null);
+    try {
+      const currentLists = await fetchSupplyLists();
+      const availableLists = currentLists.filter(
+        (list) => list.status !== "Archived"
+      );
+      setSupplyLists(currentLists);
+      setSelectedSupplyListId(availableLists[0]?.id ?? "");
+      setSaveListMode(availableLists.length > 0 ? "existing" : "new");
+      setNewSupplyListName(
+        t("cart.saveListNamePlaceholder", {
+          fallback: "Cart Supply List",
+        })
+      );
+      setNewSupplyListDescription("");
+      setNewSupplyListBranch("Main Clinic");
+      setSavedSupplyList(null);
+      setSubmittedQuoteId(null);
+      setIsSaveListModalOpen(true);
+    } catch {
+      setStatusMessage(
+        t("cart.saveListError", {
+          fallback: "Unable to load your supply lists. Please try again.",
+        })
+      );
+    } finally {
+      setIsSavingSupplyList(false);
+    }
+  };
+
+  const handleSaveCartToList = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSavingSupplyList) return;
+    const itemInputs = cart.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      selectedOptions:
+        item.selectedOptions ?? item.product.options?.[0] ?? null,
+    }));
+    setIsSavingSupplyList(true);
+    try {
+      let savedList: SupplyList;
+      if (saveListMode === "existing") {
+        if (!selectedSupplyListId) return;
+        savedList = await mergeSupplyListItems(
+          selectedSupplyListId,
+          itemInputs
+        );
+        setSupplyLists((current) =>
+          current.map((list) =>
+            list.id === savedList.id ? savedList : list
+          )
+        );
+      } else {
+        const trimmedName = newSupplyListName.trim();
+        if (!trimmedName) return;
+        savedList = await createSupplyList({
+          name: trimmedName,
+          branch: newSupplyListBranch,
+          description:
+            newSupplyListDescription.trim() ||
+            t("cart.saveListDescriptionDefault", {
+              fallback: "Saved from cart.",
+            }),
+          items: itemInputs,
+        });
+        setSupplyLists((current) => [savedList, ...current]);
+      }
+
+      setSavedSupplyList(savedList);
+      setSubmittedQuoteId(null);
+      setStatusMessage(
+        t("cart.savedToSupplyList", {
+          fallback: "Cart saved to {name}.",
+          values: { name: savedList.name },
+        })
+      );
+      setIsSaveListModalOpen(false);
+    } catch (error) {
+      setStatusMessage(
+        error instanceof ApiError
+          ? error.message
+          : t("cart.saveListError", {
+              fallback: "Unable to save this supply list. Please try again.",
+            })
+      );
+    } finally {
+      setIsSavingSupplyList(false);
+    }
+  };
 
   if (cart.length === 0) {
     return <EmptyCart statusMessage={visibleStatusMessage} onRequestQuote={handleRequestQuote} />;
@@ -718,12 +778,61 @@ export default function Cart() {
           <div className="min-w-0">
             <div className="rounded-[24px] bg-transparent">
               {cart.map((item, index) => (
-                <CartItemRow
-                  key={`${item.product.id}-${item.selectedOptions ?? index}`}
-                  item={item}
-                  onUpdateQuantity={(quantity) => updateQuantity(item.product.id, quantity)}
-                  onRemove={() => removeFromCart(item.product.id)}
-                />
+                (() => {
+                  const stockIssue =
+                    getCartStockIssueForProduct(cart, item.product.id) ??
+                    item.stockIssue ??
+                    null;
+                  const stockLimit = getProductStockLimit(item.product);
+                  const productTotal = cartProductQuantity(cart, item.product.id);
+                  const otherLineQuantity = productTotal - item.quantity;
+                  const adjustToAvailable = () => {
+                    const safeLineQuantity = Math.max(
+                      0,
+                      (stockLimit ?? 0) - otherLineQuantity
+                    );
+                    updateQuantity(
+                      item.product.id,
+                      safeLineQuantity,
+                      item.selectedOptions
+                    );
+                  };
+                  return (
+                    <CartItemRow
+                      key={`${item.product.id}-${item.selectedOptions ?? index}`}
+                      item={item}
+                      stockIssue={stockIssue}
+                      disableIncrease={!canIncreaseCartProduct(cart, item.product)}
+                      onUpdateQuantity={(quantity) => {
+                        if (
+                          stockIssue &&
+                          quantity < item.quantity &&
+                          stockLimit !== null
+                        ) {
+                          const safeLineQuantity = Math.max(
+                            0,
+                            Math.min(quantity, stockLimit - otherLineQuantity)
+                          );
+                          updateQuantity(
+                            item.product.id,
+                            safeLineQuantity,
+                            item.selectedOptions
+                          );
+                          return;
+                        }
+                        updateQuantity(
+                          item.product.id,
+                          quantity,
+                          item.selectedOptions
+                        );
+                      }}
+                      onAdjustToAvailable={adjustToAvailable}
+                      onRemove={() =>
+                        removeFromCart(item.product.id, item.selectedOptions)
+                      }
+                    />
+                  );
+                })()
               ))}
             </div>
 
@@ -740,45 +849,21 @@ export default function Cart() {
                   value={couponCode}
                   onChange={(event) => {
                     setCouponCode(event.target.value);
-                    setCouponError(null);
+                    setCouponPreview(null);
+                    setCouponNotice(null);
                   }}
                   placeholder={t("cart.couponPlaceholder")}
                   className="h-12 rounded-[12px] border border-[#050505]/10 bg-white px-4 text-[14px] text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
                 />
-                <Button type="submit" className="h-12 px-6 text-[14px]">
-                  {t("common.apply")}
+                <Button type="submit" disabled={isApplyingCoupon} className="h-12 px-6 text-[14px]">
+                  {isApplyingCoupon ? t("common.loading", { fallback: "Checking..." }) : t("common.apply")}
                 </Button>
               </div>
-              <p className="mt-3 text-[12px] font-medium leading-5 text-[#8A8D9A]">
-                {t("cart.couponDemoHint")}
-              </p>
-              {appliedCouponCode && couponResult?.status === "valid" ? (
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-[13px] font-semibold text-[#16803C]">
-                  <span>{t("cart.couponApplied", { values: { code: couponResult.code } })}</span>
-                  <button
-                    type="button"
-                    onClick={removeAppliedCoupon}
-                    className="font-bold text-[var(--xd-gold-text)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
-                  >
-                    {t("cart.removeCoupon")}
-                  </button>
-                </div>
-              ) : couponStatusMessage ? (
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-[13px] font-semibold">
-                  <p className="text-[#B42318]" role="alert">
-                    {couponStatusMessage}
-                  </p>
-                  {appliedCouponCode && (
-                    <button
-                      type="button"
-                      onClick={removeAppliedCoupon}
-                      className="font-bold text-[var(--xd-gold-text)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
-                    >
-                      {t("cart.removeCoupon")}
-                    </button>
-                  )}
-                </div>
-              ) : null}
+              {couponNotice && (
+                <p role="status" className="mt-3 text-[13px] font-semibold text-[#8A6A1F]">
+                  {couponNotice}
+                </p>
+              )}
             </form>
 
             <div className="mt-5 flex flex-col gap-4 rounded-[20px] border border-[var(--xd-gold-border-soft)] bg-white/80 p-5 shadow-[0_12px_32px_rgba(5,5,5,0.035)] sm:flex-row sm:items-center sm:justify-between">
@@ -790,7 +875,8 @@ export default function Cart() {
               </div>
               <Button
                 type="button"
-                onClick={openSaveListModal}
+                onClick={() => void openSaveListModal()}
+                disabled={isSavingSupplyList}
                 variant="secondary"
                 size="sm"
                 className="h-11 shrink-0 px-5 text-[13px] text-[#050505]"
@@ -810,20 +896,18 @@ export default function Cart() {
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-[#8A8D9A]">{t("common.shipping")}</dt>
-                  <dd className="font-bold text-[#050505]">{formatCurrency(shipping)}</dd>
+                  <dd className="font-bold text-[#050505]">{formatCurrency(displayedShipping)}</dd>
                 </div>
+                {monetaryDiscount > 0 && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-[var(--xd-gold-text)]">{monetaryDiscountLabel}</dt>
+                    <dd className="font-bold text-[var(--xd-gold-text)]">-{formatCurrency(monetaryDiscount)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between gap-4">
                   <dt className="text-[#8A8D9A]">{t("common.subtotal")}</dt>
                   <dd className="font-bold text-[#050505]">{formatCurrency(cartTotal)}</dd>
                 </div>
-                {couponResult?.status === "valid" && discount > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-[#8A8D9A]">
-                      {t("cart.discount")} ({couponResult.code})
-                    </dt>
-                    <dd className="font-bold text-[#16803C]">-{formatCurrency(discount)}</dd>
-                  </div>
-                )}
               </dl>
 
               <div className="mt-6 border-t border-[#050505]/[0.07] pt-5">
@@ -836,16 +920,32 @@ export default function Cart() {
               </div>
 
               <div className="mt-7 space-y-3">
-                <Button asChild size="lg" className="h-12 w-full text-[14px]">
-                  <Link href="/checkout">{t("cart.proceedCheckout")}</Link>
-                </Button>
+                {hasStockIssues ? (
+                  <Button disabled size="lg" className="h-12 w-full text-[14px]">
+                    {t("cart.proceedCheckout")}
+                  </Button>
+                ) : (
+                  <Button asChild size="lg" className="h-12 w-full text-[14px]">
+                    <Link href={couponPreview ? `/checkout?coupon=${encodeURIComponent(couponPreview.coupon.code)}` : "/checkout"}>
+                      {t("cart.proceedCheckout")}
+                    </Link>
+                  </Button>
+                )}
+                {hasStockIssues && (
+                  <p className="text-center text-[12px] font-semibold leading-5 text-[#B45309] dark:text-[#F6D85D]">
+                    {t("cart.availableQuantityChanged", {
+                      fallback: "The available quantity changed. Update this item before checkout.",
+                    })}
+                  </p>
+                )}
                 <Button
                   type="button"
                   variant="secondary"
                   className="h-12 w-full text-[14px] text-[#050505]"
-                  onClick={handleRequestQuote}
+                  onClick={() => void handleRequestQuote()}
+                  disabled={isQuoteSubmitting}
                 >
-                  {t("common.requestQuote")}
+                  {isQuoteSubmitting ? t("quoteWorkflow.submitting") : t("common.requestQuote")}
                 </Button>
               </div>
 

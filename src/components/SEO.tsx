@@ -7,6 +7,7 @@ type SEOProps = {
   page: SeoPageKey;
   path?: string;
   title?: string;
+  titleFormat?: "brandFirst" | "exact";
   description?: string;
   image?: string;
   robots?: RobotsDirective;
@@ -58,6 +59,7 @@ export function SEO({
   page,
   path,
   title,
+  titleFormat = "brandFirst",
   description,
   image = `${SITE_URL}/opengraph.jpg`,
   robots,
@@ -69,7 +71,11 @@ export function SEO({
     const pageConfig = seoPages[page];
     const pagePath = path ?? pageConfig.path;
     const canonicalUrl = `${SITE_URL}${pagePath}`;
-    const resolvedTitle = getBrandFirstTitle(title ?? t(`seo.pages.${page}.title`, { values }));
+    const rawTitle = title ?? t(`seo.pages.${page}.title`, { values });
+    const resolvedTitle =
+      titleFormat === "exact"
+        ? rawTitle.trim() || ISOLATED_BRAND_NAME
+        : getBrandFirstTitle(rawTitle);
     const resolvedDescription = description ?? t(`seo.pages.${page}.description`, { values });
     const resolvedRobots = robots ?? pageConfig.robots;
     const locale = language === "ar" ? "ar_EG" : "en_US";
@@ -152,7 +158,7 @@ export function SEO({
     upsertLink("alternate", "link[rel='alternate'][hreflang='en']", `${SITE_URL}${pagePath}`, "en");
     upsertLink("alternate", "link[rel='alternate'][hreflang='ar']", `${SITE_URL}${pagePath}`, "ar");
     upsertLink("alternate", "link[rel='alternate'][hreflang='x-default']", `${SITE_URL}${pagePath}`, "x-default");
-  }, [description, image, language, page, path, robots, t, title, values]);
+  }, [description, image, language, page, path, robots, t, title, titleFormat, values]);
 
   return null;
 }

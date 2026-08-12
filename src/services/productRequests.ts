@@ -1,4 +1,5 @@
 import { apiRequest } from "./http";
+import type { EmailDelivery } from "./emailDeliveries";
 
 export type ProductRequestStatus = "Under Review" | "Available" | "Searching Supplier" | "Not Available" | "Canceled";
 
@@ -33,6 +34,7 @@ export type ApiProductRequest = {
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;
+  emailDelivery?: EmailDelivery | null;
 };
 
 export type CreateProductRequestInput = {

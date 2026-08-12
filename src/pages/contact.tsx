@@ -6,13 +6,17 @@ import {
   Phone,
   type LucideIcon,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
 import { SectionReveal } from "@/components/dental/SectionReveal";
+import { PremiumAccentIcon } from "@/components/dental/PremiumAccentIcon";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
+import { submitContactMessage } from "@/services/contact";
+import { ApiError } from "@/services/http";
+import { FAQS, HOME_FAQS } from "@/data/faqs";
 
 const CONTACT_ACTIONS: {
   Icon: LucideIcon;
@@ -64,26 +68,87 @@ const CONTACT_ACTIONS: {
   },
 ];
 
-const FAQS = [
-  "quoteBeforeOrdering",
-  "saveRepeatedLists",
-  "sourceUnlistedProduct",
-];
+function ContactActionIcon({ Icon }: { Icon: LucideIcon }) {
+  return <PremiumAccentIcon icon={Icon} size={18} strokeWidth={2.2} />;
+}
 
 const FIELD_CLASS =
   "h-10 w-full rounded-[10px] border border-[#3D2518]/10 bg-white px-3 text-[13px] text-[#050505] outline-none transition focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10";
 
+function hasAccountAccessTopic(location: string) {
+  const query = location.split("?")[1]?.split("#")[0] ?? "";
+  return new URLSearchParams(query).get("topic") === "account-access";
+}
+
 export default function Contact() {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const [location] = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isAccountAccess = hasAccountAccessTopic(location);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    toast({
-      title: t("contactPage.toastTitle"),
-      description: t("contactPage.toastBody"),
+  useEffect(() => {
+    if (!isAccountAccess) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("message")?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
     });
-    event.currentTarget.reset();
+    return () => window.cancelAnimationFrame(frame);
+  }, [isAccountAccess]);
+
+  // Persists the message via POST /api/contact; success feedback is only
+  // shown after the backend confirms the save.
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const name = String(data.get("name") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const phone = String(data.get("phone") ?? "").trim();
+    const interest = String(data.get("interest") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
+    const website = String(data.get("website") ?? "").trim();
+
+    setIsSubmitting(true);
+    try {
+      await submitContactMessage({
+        name,
+        email: email || undefined,
+        phone: phone || undefined,
+        subject: isAccountAccess
+          ? t("contactPage.accountAccess.subjectValue")
+          : interest || undefined,
+        message,
+        source: "contact_page",
+        website,
+      });
+      toast({
+        title: isAccountAccess
+          ? t("contactPage.accountAccess.successTitle")
+          : t("contactPage.toastTitle"),
+        description: isAccountAccess
+          ? t("contactPage.accountAccess.successBody")
+          : t("contactPage.toastBody"),
+      });
+      form.reset();
+    } catch (error) {
+      toast({
+        title: t("contactPage.toastErrorTitle", { fallback: "Message not sent" }),
+        description:
+          error instanceof ApiError && error.status !== 0
+            ? error.message
+            : t("contactPage.toastErrorBody", {
+                fallback: "Your message could not be sent. Please try again or call us directly.",
+              }),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -91,7 +156,11 @@ export default function Contact() {
       <SEO page="contact" />
       <HeroSection />
       <QuickActionsSection />
-      <MessageSection onSubmit={handleSubmit} />
+      <MessageSection
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        isAccountAccess={isAccountAccess}
+      />
       <LocationSection />
       <FaqSection />
     </div>
@@ -105,7 +174,7 @@ function HeroSection() {
   return (
     <section className="pt-8 lg:pt-12">
       <ContactContainer>
-        <SectionReveal className="relative mb-[58px] min-h-[640px] overflow-hidden rounded-[32px] border border-[var(--xd-gold-border-soft)] bg-white shadow-[0_24px_64px_rgba(5,5,5,0.08)] lg:min-h-[580px]">
+        <SectionReveal className="relative mb-[58px] min-h-[640px] overflow-hidden rounded-[20px] lg:min-h-[580px]">
           <img
             src={heroImage}
             alt="Dental clinic equipment and supply environment"
@@ -117,25 +186,25 @@ function HeroSection() {
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.94),rgba(255,255,255,0.78),rgba(255,255,255,0.35))]" />
+          <div className="contact-hero-scrim absolute inset-0" />
 
           {/* Top-right badge */}
-          <div className="absolute right-5 top-5 z-20 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/25 px-4 py-2 text-[13px] font-semibold text-[var(--xd-text)] shadow-[0_8px_24px_rgba(5,5,5,0.08)] backdrop-blur-md sm:right-8 sm:top-8 lg:right-12 lg:top-12">
+          <div className="absolute right-5 top-5 z-20 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/85 px-4 py-2 text-[13px] font-semibold text-[var(--xd-text)] shadow-[0_8px_24px_rgba(5,5,5,0.08)] backdrop-blur-md sm:right-8 sm:top-8 lg:right-12 lg:top-12">
             <span className="h-2 w-2 rounded-full bg-[var(--xd-gold)]" />
             {t("contactPage.supplySupport")}
           </div>
 
           <div className="relative z-10 flex min-h-[560px] items-center px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[580px] lg:px-14 lg:py-20 xl:px-16">
             <div className="max-w-[640px] min-w-0">
-              <Eyebrow className="text-[var(--xd-gold-text)]">
+              <Eyebrow className="contact-hero-eyebrow">
                 {t("nav.contact")}
               </Eyebrow>
 
-              <h1 className="mt-3 max-w-[640px] font-display text-[42px] font-semibold leading-[1.06] tracking-[-0.035em] text-[var(--xd-text)] sm:text-[54px] lg:text-[62px]">
+              <h1 className="contact-hero-title xd-gradient-gold-text mt-3 max-w-[640px] overflow-visible font-display text-[42px] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[54px] lg:text-[62px]">
                 {t("contactPage.heroTitle")}
               </h1>
 
-              <p className="mt-5 max-w-[580px] text-[16px] leading-[27px] text-[var(--xd-muted-2)]">
+              <p className="contact-hero-body mt-5 max-w-[580px] text-[16px] leading-[27px]">
                 {t("contactPage.heroBody")}
               </p>
 
@@ -247,8 +316,8 @@ function QuickActionsSection() {
                     }`}
                   >
                     <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-white/75 px-4 py-5 text-center shadow-[0_8px_22px_rgba(5,5,5,0.03)] [backface-visibility:hidden] transition-[border-color,box-shadow] duration-300 group-hover:border-[var(--xd-gold-border)] group-focus-within:border-[var(--xd-gold-border)]">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
-                        <Icon size={18} strokeWidth={1.9} />
+                      <span className="xd-icon-amber xd-icon-card-surface flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--xd-gold-bg-soft)]">
+                        <ContactActionIcon Icon={Icon} />
                       </span>
                       <span className="mt-3 text-[13px] font-semibold text-[#050505]">
                         {title}
@@ -291,7 +360,15 @@ function QuickActionsSection() {
   );
 }
 
-function MessageSection({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+function MessageSection({
+  onSubmit,
+  isSubmitting,
+  isAccountAccess,
+}: {
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSubmitting: boolean;
+  isAccountAccess: boolean;
+}) {
   const { t } = useLanguage();
 
   return (
@@ -314,6 +391,27 @@ function MessageSection({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElem
             onSubmit={onSubmit}
             className="w-full  p-4 sm:p-5 lg:max-w-[760px]"
           >
+            {isAccountAccess && (
+              <div
+                role="note"
+                className="mb-5 rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] px-4 py-3"
+              >
+                <p className="text-[14px] font-black text-[var(--xd-text)]">
+                  {t("contactPage.accountAccess.title")}
+                </p>
+                <p className="mt-1 text-[13px] leading-5 text-[var(--xd-muted-2)]">
+                  {t("contactPage.accountAccess.description")}
+                </p>
+              </div>
+            )}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute left-[-10000px] h-px w-px overflow-hidden"
+            />
             <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
               <Field label={t("auth.signup.fullName")} name="name" required />
               <Field label={t("contactPage.phoneNo")} name="phone" type="tel" />
@@ -324,7 +422,20 @@ function MessageSection({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElem
                 required
                 icon={<Mail size={14} />}
               />
-              <Field label={t("contactPage.productInterest")} name="interest" />
+              <Field
+                label={
+                  isAccountAccess
+                    ? t("contactPage.accountAccess.subjectLabel")
+                    : t("contactPage.productInterest")
+                }
+                name="interest"
+                defaultValue={
+                  isAccountAccess
+                    ? t("contactPage.accountAccess.subjectValue")
+                    : undefined
+                }
+                readOnly={isAccountAccess}
+              />
             </div>
 
             <div className="mt-4">
@@ -344,9 +455,10 @@ function MessageSection({ onSubmit }: { onSubmit: (event: FormEvent<HTMLFormElem
                 type="submit"
                 variant="primary"
                 size="sm"
+                disabled={isSubmitting}
                 className="h-11 w-full px-7 text-[13px] sm:ms-auto sm:w-auto sm:min-w-[118px]"
               >
-                {t("contactPage.send")}
+                {isSubmitting ? t("contactPage.sending", { fallback: "Sending..." }) : t("contactPage.send")}
               </Button>
             </div>
           </form>
@@ -420,29 +532,31 @@ function FaqSection() {
         </SectionReveal>
 
         <SectionReveal delay={0.08} className="mx-auto mt-10 flex max-w-[1080px] flex-col gap-4">
-          {FAQS.map((faqKey) => (
+          {HOME_FAQS.map((item) => (
             <article
-              key={faqKey}
+              key={item.id}
               className="rounded-[12px] border border-[var(--xd-gold-border-soft)] bg-white/80 px-6 py-6 shadow-[0_10px_24px_rgba(5,5,5,0.035)] sm:px-8"
             >
               <h3 className="text-[15px] font-bold leading-[22px] text-[#050505]">
-                {t(`contactPage.faqs.${faqKey}.question`)}
+                {t(item.questionKey)}
               </h3>
               <p className="mt-2 max-w-[700px] text-[13px] leading-[22px] text-[#717182]">
-                {t(`contactPage.faqs.${faqKey}.answer`)}
+                {t(item.answerKey)}
               </p>
             </article>
           ))}
         </SectionReveal>
 
-        <SectionReveal delay={0.08} className="mt-8 flex justify-center">
-          <Button asChild variant="primary" className="gap-2 px-6 text-[14px]">
-            <Link href="/faqs">
-              {t("contactPage.viewMoreFaqs")}
-              <DirectionalIcon size={16} aria-hidden="true" />
-            </Link>
-          </Button>
-        </SectionReveal>
+        {FAQS.length > HOME_FAQS.length && (
+          <SectionReveal delay={0.08} className="mt-8 flex justify-center">
+            <Button asChild variant="primary" className="gap-2 px-6 text-[14px]">
+              <Link href="/faqs">
+                {t("contactPage.viewMoreFaqs")}
+                <DirectionalIcon size={16} aria-hidden="true" />
+              </Link>
+            </Button>
+          </SectionReveal>
+        )}
       </ContactContainer>
     </section>
   );
@@ -462,12 +576,16 @@ function Field({
   type = "text",
   required = false,
   icon,
+  defaultValue,
+  readOnly = false,
 }: {
   label: string;
   name: string;
   type?: string;
   required?: boolean;
   icon?: ReactNode;
+  defaultValue?: string;
+  readOnly?: boolean;
 }) {
   return (
     <label className="block">
@@ -484,7 +602,9 @@ function Field({
           name={name}
           type={type}
           required={required}
-          className={`${FIELD_CLASS} ${icon ? "pl-9" : ""}`}
+          defaultValue={defaultValue}
+          readOnly={readOnly}
+          className={`${FIELD_CLASS} ${icon ? "pl-9" : ""} ${readOnly ? "cursor-default bg-[var(--xd-gold-bg-soft)] font-semibold" : ""}`}
         />
       </span>
     </label>

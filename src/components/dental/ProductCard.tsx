@@ -1,11 +1,14 @@
 import React from "react";
-import { Link } from "wouter";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Heart, MessageSquareText, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/dental/Button";
+import { LowStockNotice, isLowStockProduct } from "@/components/dental/StockAvailability";
 import { formatCurrency, calculateDiscount } from "@/utils";
 import { useStore } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { getCategoryTranslationKey } from "@/lib/catalogTranslations";
+import { getCategoryTranslationKey, getLocalizedProductName } from "@/lib/catalogTranslations";
+import { isProductPurchasable } from "@/lib/cartStock";
+import { useImageFallback } from "@/hooks/use-image-fallback";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -14,7 +17,7 @@ interface ProductCardProps {
   imageFetchPriority?: React.ImgHTMLAttributes<HTMLImageElement>["fetchPriority"];
 }
 
-const PRODUCT_CARD_IMAGE = `${import.meta.env.BASE_URL}toothtools.png`;
+const PRODUCT_CARD_IMAGE = `${import.meta.env.BASE_URL}toothtools.webp`;
 
 export function ProductCard({
   product,
@@ -22,17 +25,28 @@ export function ProductCard({
   imageFetchPriority = "auto",
 }: ProductCardProps) {
   const { addToCart, toggleWishlist, isInWishlist } = useStore();
-  const { t } = useLanguage();
+  const [, navigate] = useLocation();
+  const { t, language } = useLanguage();
   const isWishlisted = isInWishlist(product.id);
+  const isOutOfStock = !isProductPurchasable(product);
+  const isLowStock = isLowStockProduct(product);
+  const productHref = `/products/${encodeURIComponent(product.slug || product.id)}`;
   const discount = calculateDiscount(product.oldPrice ?? undefined, product.currentPrice);
-  const productName = t(`products.items.${product.id}.name`, { fallback: product.name });
+  const productName = getLocalizedProductName(product, language, t);
   const productCategory = t(`products.items.${product.id}.category`, {
     fallback: t(getCategoryTranslationKey(product.category), { fallback: product.category }),
   });
+  const cardImage = useImageFallback(product.image, PRODUCT_CARD_IMAGE);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isOutOfStock) {
+      navigate(productHref);
+      return;
+    }
+
     addToCart(product, 1, product.options?.[0]);
   };
 
@@ -44,12 +58,12 @@ export function ProductCard({
 
   return (
     <Link
-      href={`/products/${product.id}`}
-      className="product-card group block overflow-visible rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
+      href={productHref}
+      className="product-card group block h-full min-w-0 overflow-visible rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]"
       data-testid={`link-product-${product.id}`}
     >
       <div
-        className="product-card-shell flex flex-col rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white/70 shadow-[0_12px_32px_rgba(5,5,5,0.05)] transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover:-translate-y-[2px] group-hover:border-[var(--xd-gold-border-hover)] group-hover:shadow-[0_18px_44px_var(--xd-gold-bg-medium)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 sm:rounded-[24px]"
+        className="product-card-shell flex h-full min-w-0 flex-col rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-card-glass)] shadow-[var(--xd-shadow-card)] transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover:-translate-y-[2px] group-hover:border-[var(--xd-gold-border-hover)] group-hover:shadow-[var(--xd-shadow-hover)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 sm:rounded-[24px]"
       >
         {/* Image area */}
         <div className="product-card-image relative h-[180px] overflow-hidden rounded-t-[22px] bg-white sm:h-[200px] sm:rounded-t-[24px]">
@@ -86,7 +100,8 @@ export function ProductCard({
 
           {/* Product image */}
           <img
-            src={PRODUCT_CARD_IMAGE}
+            src={cardImage.src}
+            onError={cardImage.onError}
             alt={productName}
             width={2525}
             height={2582}
@@ -98,14 +113,15 @@ export function ProductCard({
         </div>
 
         {/* Content */}
-        <div className="product-card-content flex flex-col gap-1 px-4 py-4 sm:p-4 sm:pt-3">
+        <div className="product-card-content flex min-w-0 flex-1 flex-col gap-1 px-4 py-4 sm:p-4 sm:pt-3">
           {/* Category */}
-          <div className="text-[12px] text-[#9A9A9A] font-medium">{productCategory}</div>
+          <div className="truncate text-[12px] font-medium text-[#9A9A9A]">{productCategory}</div>
 
           {/* Product name */}
           <h3
-            className="product-card-title font-display font-semibold text-[#050505] leading-snug line-clamp-2"
+            className="product-card-title block w-full min-w-0 truncate whitespace-nowrap font-display font-semibold leading-snug text-[#050505]"
             style={{ fontSize: 15 }}
+            title={productName}
           >
             {productName}
           </h3>
@@ -122,19 +138,30 @@ export function ProductCard({
             )}
           </div>
 
-          {/* Add to Cart button */}
-          <Button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={product.stockStatus === "Out of Stock"}
-            variant="primary"
-            size="sm"
-            className="product-card-action mt-3 h-10 w-full gap-1 text-[13px] font-semibold sm:h-[42px]"
-            data-testid={`button-add-cart-${product.id}`}
-          >
-            <ShoppingCart size={15} strokeWidth={2} />
-            {t("common.addToCart")}
-          </Button>
+          <div className="mt-1 flex min-h-7 items-center">
+            {isLowStock ? (
+              <LowStockNotice product={product} />
+            ) : isOutOfStock ? (
+              <p className="text-[12px] font-bold text-[#C0392B]">
+                {t("productDetail.outOfStock")}
+              </p>
+            ) : null}
+          </div>
+
+          {/* Stock-aware primary action */}
+          <div className="mt-auto pt-3">
+            <Button
+              type="button"
+              onClick={handleAddToCart}
+              variant="primary"
+              size="sm"
+              className="product-card-action h-10 w-full gap-1 text-[13px] font-semibold sm:h-[42px]"
+              data-testid={`${isOutOfStock ? "button-request-product" : "button-add-cart"}-${product.id}`}
+            >
+              {isOutOfStock ? <MessageSquareText size={15} strokeWidth={2} /> : <ShoppingCart size={15} strokeWidth={2} />}
+              {isOutOfStock ? t("productDetail.requestProduct") : t("common.addToCart")}
+            </Button>
+          </div>
         </div>
       </div>
     </Link>

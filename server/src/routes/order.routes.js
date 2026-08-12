@@ -1,9 +1,18 @@
 import { Router } from "express";
-import { createOrder, getMyOrder, getMyOrders } from "../controllers/order.controller.js";
-import { requireAuth } from "../middleware/auth.middleware.js";
+import { createOrder, getMyOrder, getMyOrders, previewOrderTotals, previewPublicCoupon, trackPublicOrder } from "../controllers/order.controller.js";
+import { attachUserIfAuthenticated, requireAuth } from "../middleware/auth.middleware.js";
+import { couponValidationRateLimit, orderCreationRateLimit, publicOrderTrackingRateLimit } from "../middleware/rateLimit.middleware.js";
 import { requireAuthServiceReady } from "../middleware/serviceReady.middleware.js";
 
 const router = Router();
+
+router.post("/track", publicOrderTrackingRateLimit, trackPublicOrder);
+router.post(
+  "/coupon-preview",
+  couponValidationRateLimit,
+  attachUserIfAuthenticated,
+  previewPublicCoupon
+);
 
 router.use(requireAuthServiceReady, requireAuth);
 router.use((request, response, next) => {
@@ -12,7 +21,8 @@ router.use((request, response, next) => {
   }
   return next();
 });
-router.post("/", createOrder);
+router.post("/", orderCreationRateLimit, createOrder);
+router.post("/preview", previewOrderTotals);
 router.get("/my", getMyOrders);
 router.get("/my/:id", getMyOrder);
 

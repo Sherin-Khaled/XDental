@@ -1,17 +1,24 @@
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+import { Check, Minus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+type CheckboxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
+  variant?: "default" | "filter"
+}
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
+  CheckboxProps
+>(({ className, variant = "default", ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "grid place-content-center peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      "group/checkbox peer grid h-4 w-4 shrink-0 place-content-center rounded-sm border shadow transition-[background,border-color,box-shadow] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+      variant === "filter"
+        ? "border-[var(--xd-gold-border-hover)] bg-[var(--xd-surface)] text-[#050505] shadow-none hover:border-[var(--xd-gold-active)] focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--xd-bg)] data-[state=checked]:border-transparent data-[state=checked]:[background:var(--xd-gold-gradient)] data-[state=checked]:text-[#050505] data-[state=indeterminate]:border-transparent data-[state=indeterminate]:[background:var(--xd-gold-gradient)] data-[state=indeterminate]:text-[#050505]"
+        : "border-primary shadow focus-visible:ring-1 focus-visible:ring-ring data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground",
       className
     )}
     {...props}
@@ -19,7 +26,8 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn("grid place-content-center text-current")}
     >
-      <Check className="h-4 w-4" />
+      <Check className="h-4 w-4 group-data-[state=indeterminate]/checkbox:hidden" />
+      <Minus className="hidden h-3.5 w-3.5 group-data-[state=indeterminate]/checkbox:block" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

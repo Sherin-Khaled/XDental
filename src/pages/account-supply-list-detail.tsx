@@ -17,18 +17,22 @@ import { Container } from "@/components/dental/Container";
 import { DentalSelect, type DentalSelectOption } from "@/components/dental/Select";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStore } from "@/context/StoreContext";
-import { mockProducts } from "@/data/products";
+import { fetchPublicProducts } from "@/services/catalog";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import {
-  getSupplyListById,
-  updateSupplyListItems,
   type SupplyList,
   type SupplyListDetailAvailability,
   type SupplyListDetailItem,
 } from "@/data/supplyLists";
+import {
+  fetchSupplyList,
+  replaceSupplyListItems,
+} from "@/services/supplyLists";
+import { createQuote, getMyQuote } from "@/services/quotes";
 import { accountT, accountValue } from "@/lib/accountI18n";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
+import { getProductStockLimit } from "@/lib/cartStock";
 
 type AvailabilityFilter = "all" | SupplyListDetailAvailability;
 
@@ -132,10 +136,12 @@ function QuantityStepper({
   value,
   onChange,
   disabled = false,
+  max = 99,
 }: {
   value: number;
   onChange: (quantity: number) => void;
   disabled?: boolean;
+  max?: number;
 }) {
   const { t } = useLanguage();
 
@@ -158,8 +164,8 @@ function QuantityStepper({
       <span className="text-center text-[13px] font-bold text-[#050505]">{value}</span>
       <button
         type="button"
-        onClick={() => onChange(Math.min(99, value + 1))}
-        disabled={disabled}
+        onClick={() => onChange(Math.min(max, value + 1))}
+        disabled={disabled || value >= max}
         aria-label={accountT(t, "common.increaseQuantity", "Increase quantity")}
         className="flex h-full items-center justify-center rounded-r-full text-[var(--xd-gold-active)] transition hover:text-[#050505] disabled:text-[var(--xd-gold-active)]/40"
       >
@@ -171,7 +177,7 @@ function QuantityStepper({
 
 function DetailProductImage({ item }: { item: SupplyListDetailItem }) {
   const [hasImageError, setHasImageError] = useState(false);
-  const productImage = item.image ?? mockProducts.find((product) => product.id === item.productId)?.image;
+  const productImage = item.image;
 
   return (
     <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-white sm:h-[80px] sm:w-[80px]">
@@ -194,15 +200,26 @@ function DetailProductImage({ item }: { item: SupplyListDetailItem }) {
 }
 
 function toCartProduct(item: SupplyListDetailItem): Product {
+  const available =
+    item.isAvailable !== false &&
+    item.status !== "OUT_OF_STOCK" &&
+    item.availability !== "out-of-stock";
   return {
     id: item.productId,
     name: item.name,
     brand: item.brand,
     category: item.category,
     currentPrice: item.unitPrice,
-    stockStatus: item.availability === "out-of-stock" ? "Out of Stock" : "In Stock",
+    stockStatus: !available
+      ? "Out of Stock"
+      : item.status === "LOW_STOCK"
+        ? "Low Stock"
+        : "In Stock",
     sku: item.sku,
     image: item.image,
+    stockQuantity: item.stockQuantity,
+    status: item.status,
+    available,
   };
 }
 
@@ -222,6 +239,7 @@ function ProductRow({
   const { t } = useLanguage();
   const isOutOfStock = item.availability === "out-of-stock";
   const needsOptions = item.availability === "needs-options";
+  const maximumQuantity = getProductStockLimit(toCartProduct(item)) ?? 99;
 
   return (
     <article className="grid gap-4 border-b border-[#050505]/[0.06] py-6 last:border-b-0 md:grid-cols-[80px_minmax(0,1fr)_190px] md:items-center">
@@ -261,7 +279,11 @@ function ProductRow({
             {accountT(t, "supplyLists.detail.selectOptions", "Select Options")}
           </Button>
         ) : (
-          <QuantityStepper value={quantity} onChange={onQuantityChange} />
+          <QuantityStepper
+            value={quantity}
+            max={maximumQuantity}
+            onChange={onQuantityChange}
+          />
         )}
         <p className="text-[17px] font-bold text-[#050505]">{formatCurrency(item.unitPrice * quantity)}</p>
 
@@ -338,9 +360,33 @@ function AddProductModal({
   onAddProduct: (product: Product) => void;
 }) {
   const { t } = useLanguage();
+  const [query, setQuery] = useState("");
+  const [candidates, setCandidates] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(true);
   const existingProductIds = new Set(items.map((item) => item.productId));
-  const availableProducts = mockProducts.filter((product) => !existingProductIds.has(product.id));
+  const availableProducts = candidates.filter((product) => !existingProductIds.has(product.id));
   useModalCloseBehavior(onClose);
+
+  // Small, bounded server search — this modal no longer holds the full
+  // catalogue, so results are limited to what the user is actively typing.
+  useEffect(() => {
+    const controller = new AbortController();
+    setIsSearching(true);
+    const debounce = window.setTimeout(() => {
+      fetchPublicProducts({ search: query.trim() || undefined, limit: 20, signal: controller.signal })
+        .then(({ products }) => {
+          if (!controller.signal.aborted) setCandidates(products);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!controller.signal.aborted) setIsSearching(false);
+        });
+    }, 250);
+    return () => {
+      window.clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [query]);
 
   return (
     <div
@@ -374,8 +420,29 @@ function AddProductModal({
         </div>
 
         <div className="min-h-0 overflow-y-auto p-6 pt-5 sm:p-8 sm:pt-6">
+          <label className="relative mb-4 block">
+            <span className="sr-only">
+              {accountT(t, "supplyLists.detail.addProductsSearchLabel", "Search products to add")}
+            </span>
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8A8D9A]"
+            />
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={accountT(t, "supplyLists.detail.addProductsSearchPlaceholder", "Search products to add")}
+              className="h-12 w-full rounded-full border border-[#050505]/10 bg-white px-4 pl-11 text-[14px] text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
+            />
+          </label>
+
           <div className="divide-y divide-[#050505]/[0.06] rounded-[18px] border border-[#050505]/[0.08]">
-            {availableProducts.length > 0 ? (
+            {isSearching ? (
+              <div className="p-8 text-center">
+                <p className="text-[14px] font-bold text-[#050505]">{accountT(t, "common.loading", "Loading...")}</p>
+              </div>
+            ) : availableProducts.length > 0 ? (
               availableProducts.map((product) => (
                 <div
                   key={product.id}
@@ -401,7 +468,11 @@ function AddProductModal({
               ))
             ) : (
               <div className="p-8 text-center">
-                <p className="text-[14px] font-bold text-[#050505]">{accountT(t, "supplyLists.detail.allProductsAlreadyInList", "All catalog products are already in this list.")}</p>
+                <p className="text-[14px] font-bold text-[#050505]">
+                  {query.trim()
+                    ? accountT(t, "supplyLists.detail.noSearchResults", "No products match your search.")
+                    : accountT(t, "supplyLists.detail.allProductsAlreadyInList", "All matching products are already in this list.")}
+                </p>
               </div>
             )}
           </div>
@@ -450,7 +521,7 @@ function OptionModal({
               className={cn(
                 "h-11 rounded-full border px-4 text-[13px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]",
                 selectedOption === option
-                  ? "border-[var(--xd-gold-active)] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]"
+                  ? "xd-gradient-gold-border bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-text)]"
                   : "border-[#050505]/10 text-[#717182] hover:border-[var(--xd-gold-border)] hover:text-[#050505]"
               )}
             >
@@ -480,12 +551,16 @@ function QuoteModal({
   listName,
   productCount,
   subtotal,
+  error,
+  isSubmitting,
   onClose,
   onSubmit,
 }: {
   listName: string;
   productCount: number;
   subtotal: number;
+  error: string | null;
+  isSubmitting: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }) {
@@ -514,17 +589,35 @@ function QuoteModal({
         <p className="mt-4 text-[13px] leading-6 text-[#8A8D9A]">
           {accountT(t, "supplyLists.detail.quoteRequestDescription", "Submitting this request sends the current list quantities and selected options to the quotes workflow.")}
         </p>
+        {error && (
+          <p
+            role="alert"
+            className="mt-4 rounded-[12px] border border-[#B42318]/20 bg-[#B42318]/[0.06] px-4 py-3 text-[13px] font-semibold text-[#B42318]"
+          >
+            {error}
+          </p>
+        )}
 
         <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={onClose}
-            className="inline-flex h-11 items-center justify-center rounded-full px-5 text-[14px] font-bold text-[#717182] transition hover:text-[#050505] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]"
+            className="inline-flex h-11 items-center justify-center rounded-full px-5 text-[14px] font-bold text-[#717182] transition hover:text-[#050505] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {accountT(t, "common.cancel", "Cancel")}
           </button>
-          <Button type="button" onClick={onSubmit} variant="primary" size="sm" className="h-11 px-6 text-[14px]">
-            {accountT(t, "quotes.submitQuoteRequest", "Submit Quote Request")}
+          <Button
+            type="button"
+            disabled={isSubmitting}
+            onClick={onSubmit}
+            variant="primary"
+            size="sm"
+            className="h-11 px-6 text-[14px]"
+          >
+            {isSubmitting
+              ? t("quoteWorkflow.submitting")
+              : accountT(t, "quotes.submitQuoteRequest", "Submit Quote Request")}
           </Button>
         </div>
       </div>
@@ -532,7 +625,7 @@ function QuoteModal({
   );
 }
 
-function EmptyOrMissingList() {
+function EmptyOrMissingList({ loading = false }: { loading?: boolean }) {
   const { t } = useLanguage();
 
   return (
@@ -541,13 +634,33 @@ function EmptyOrMissingList() {
         <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:gap-7">
           <AccountSidebar />
           <Card className="p-8 text-center">
-            <h1 className="font-display text-[28px] font-bold text-[#050505]">{accountT(t, "supplyLists.detail.notFoundTitle", "Supply list not found")}</h1>
+            <h1 className="font-display text-[28px] font-bold text-[#050505]">
+              {loading
+                ? accountT(t, "common.loading", "Loading...")
+                : accountT(
+                    t,
+                    "supplyLists.detail.notFoundTitle",
+                    "Supply list not found"
+                  )}
+            </h1>
             <p className="mx-auto mt-2 max-w-[440px] text-[14px] leading-6 text-[#8A8D9A]">
-              {accountT(t, "supplyLists.detail.notFoundDescription", "The requested supply list may have been removed or renamed.")}
+              {loading
+                ? accountT(
+                    t,
+                    "supplyLists.detail.loadingDescription",
+                    "Loading your saved products and current availability."
+                  )
+                : accountT(
+                    t,
+                    "supplyLists.detail.notFoundDescription",
+                    "The requested supply list may have been removed or renamed."
+                  )}
             </p>
-            <Button asChild variant="primary" size="sm" className="mt-6 h-11 px-6 text-[14px]">
-              <Link href="/account/supply-lists">{accountT(t, "supplyLists.detail.backToSupplyLists", "Back to My Supply Lists")}</Link>
-            </Button>
+            {!loading && (
+              <Button asChild variant="primary" size="sm" className="mt-6 h-11 px-6 text-[14px]">
+                <Link href="/account/supply-lists">{accountT(t, "supplyLists.detail.backToSupplyLists", "Back to My Supply Lists")}</Link>
+              </Button>
+            )}
           </Card>
         </div>
       </Container>
@@ -559,33 +672,72 @@ export default function AccountSupplyListDetail() {
   const { id } = useParams();
   const { addToCart } = useStore();
   const { t } = useLanguage();
-  const [list, setList] = useState<SupplyList | null>(() => getSupplyListById(id));
+  const [list, setList] = useState<SupplyList | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>("all");
-  const [items, setItems] = useState<SupplyListDetailItem[]>(() => list?.detailItems ?? []);
-  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries((list?.detailItems ?? []).map((item) => [item.id, item.quantity]))
-  );
+  const [items, setItems] = useState<SupplyListDetailItem[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
+  const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [submittedQuoteId, setSubmittedQuoteId] = useState<string | null>(null);
   const [optionItemId, setOptionItemId] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState(optionChoices[0]);
   const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+  const showStatusMessage = (
+    message: string | null,
+    quoteId: string | null = null
+  ) => {
+    setStatusMessage(message);
+    setSubmittedQuoteId(quoteId);
+  };
 
   useClickOutside(actionsMenuRef, () => setIsActionsOpen(false), {
     enabled: isActionsOpen,
   });
 
   useEffect(() => {
-    const savedList = getSupplyListById(id);
-    setList(savedList);
-    setItems(savedList?.detailItems ?? []);
-    setQuantities(Object.fromEntries((savedList?.detailItems ?? []).map((item) => [item.id, item.quantity])));
+    const controller = new AbortController();
+    setIsLoading(true);
+    setList(null);
+    setItems([]);
+    setQuantities({});
     setSearch("");
     setAvailabilityFilter("all");
     setStatusMessage(null);
+    setSubmittedQuoteId(null);
+    if (!id) {
+      setIsLoading(false);
+      return () => controller.abort();
+    }
+
+    void fetchSupplyList(id, controller.signal)
+      .then((savedList) => {
+        if (controller.signal.aborted) return;
+        setList(savedList);
+        setItems(savedList?.detailItems ?? []);
+        setQuantities(
+          Object.fromEntries(
+            (savedList?.detailItems ?? []).map((item) => [
+              item.id,
+              item.quantity,
+            ])
+          )
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setList(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
   }, [id]);
 
   const filteredItems = useMemo(() => {
@@ -604,6 +756,10 @@ export default function AccountSupplyListDetail() {
       return matchesAvailability && matchesSearch;
     });
   }, [availabilityFilter, items, search]);
+
+  if (isLoading) {
+    return <EmptyOrMissingList loading />;
+  }
 
   if (!list) {
     return <EmptyOrMissingList />;
@@ -635,7 +791,7 @@ export default function AccountSupplyListDetail() {
 
   const updateQuantity = (itemId: string, quantity: number) => {
     setQuantities((current) => ({ ...current, [itemId]: quantity }));
-    setStatusMessage(null);
+    showStatusMessage(null);
   };
 
   const removeItem = (itemId: string) => {
@@ -645,48 +801,138 @@ export default function AccountSupplyListDetail() {
       delete next[itemId];
       return next;
     });
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.productRemoved", "Product removed from this list."));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.productRemoved", "Product removed from this list."));
   };
 
   const addAvailableToCart = () => {
     if (availableItems.length === 0) {
-      setStatusMessage(accountT(t, "supplyLists.detail.messages.noAvailableProducts", "No available products can be added to cart."));
+      showStatusMessage(accountT(t, "supplyLists.detail.messages.noAvailableProducts", "No available products can be added to cart."));
       return;
     }
 
-    availableItems.forEach((item) => {
-      addToCart(toCartProduct(item), quantities[item.id] ?? item.quantity, item.selectedOption);
-    });
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.availableAddedToCart", "{count} available products added to cart.", { count: availableCount }));
+    const addedCount = availableItems.reduce((count, item) => {
+      const result = addToCart(
+        toCartProduct(item),
+        quantities[item.id] ?? item.quantity,
+        item.selectedOption
+      );
+      return count + (result.ok ? 1 : 0);
+    }, 0);
+    showStatusMessage(
+      addedCount > 0
+        ? accountT(
+            t,
+            "supplyLists.detail.messages.availableAddedToCart",
+            "{count} available products added to cart.",
+            { count: addedCount }
+          )
+        : accountT(
+            t,
+            "cart.maximumAlreadyInCart",
+            "You already have the maximum available quantity in your cart."
+          )
+    );
   };
 
   const requestQuote = () => {
+    showStatusMessage(null);
+    setQuoteError(null);
+    if (items.length === 0) {
+      showStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.quoteNeedsProducts",
+          "Add at least one product before requesting a quote."
+        )
+      );
+      return;
+    }
+    if (items.length > 50) {
+      showStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.quoteItemLimit",
+          "A quote request can include up to 50 different products."
+        )
+      );
+      return;
+    }
     setIsQuoteOpen(true);
   };
 
-  const submitQuoteRequest = () => {
-    setIsQuoteOpen(false);
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.quoteSubmitted", "Quote request submitted for {name}.", { name: list.name }));
+  const submitQuoteRequest = async () => {
+    if (isQuoteSubmitting || items.length === 0 || items.length > 50) return;
+    setIsQuoteSubmitting(true);
+    setQuoteError(null);
+    showStatusMessage(null);
+    try {
+      const quote = await createQuote({
+        notes: [
+          `Supply list: ${list.name}`,
+          `Clinic branch: ${list.branch}`,
+          list.description ? `List notes: ${list.description}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        items: items.map((item) => ({
+          productId: item.productId,
+          productName: item.name,
+          brand: item.brand,
+          sku: item.sku,
+          quantity: quantities[item.id] ?? item.quantity,
+          selectedOptions: item.selectedOption,
+        })),
+      });
+      const persistedQuote = await getMyQuote(quote.id);
+      setIsQuoteOpen(false);
+      showStatusMessage(
+        t("quoteWorkflow.requestSubmitted", {
+          values: { quoteNumber: persistedQuote.quoteNumber },
+        }),
+        persistedQuote.id
+      );
+    } catch (requestError) {
+      setQuoteError(
+        requestError instanceof Error
+          ? requestError.message
+          : t("quoteWorkflow.requestError")
+      );
+    } finally {
+      setIsQuoteSubmitting(false);
+    }
   };
 
-  const saveChanges = () => {
-    if (!list) return;
-
-    const detailItems = items.map((item) => ({
-      ...item,
-      quantity: quantities[item.id] ?? item.quantity,
-    }));
-    const savedList = updateSupplyListItems(list.id, detailItems);
-
-    if (!savedList) {
-      setStatusMessage(accountT(t, "supplyLists.detail.messages.unableToSave", "Unable to save this list."));
-      return;
+  const saveChanges = async () => {
+    if (!list || isSaving) return;
+    setIsSaving(true);
+    try {
+      const savedList = await replaceSupplyListItems(
+        list.id,
+        items.map((item) => ({
+          productId: item.productId,
+          quantity: quantities[item.id] ?? item.quantity,
+          selectedOptions: item.selectedOption,
+        }))
+      );
+      setList(savedList);
+      setItems(savedList.detailItems);
+      setQuantities(
+        Object.fromEntries(
+          savedList.detailItems.map((item) => [item.id, item.quantity])
+        )
+      );
+      showStatusMessage(
+        accountT(
+          t,
+          "supplyLists.detail.messages.saved",
+          "List changes saved."
+        )
+      );
+    } catch {
+      showStatusMessage(accountT(t, "supplyLists.detail.messages.unableToSave", "Unable to save this list."));
+    } finally {
+      setIsSaving(false);
     }
-
-    setList(savedList);
-    setItems(savedList.detailItems);
-    setQuantities(Object.fromEntries(savedList.detailItems.map((item) => [item.id, item.quantity])));
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.saved", "List changes saved."));
   };
 
   const resetList = () => {
@@ -694,7 +940,7 @@ export default function AccountSupplyListDetail() {
     setQuantities(Object.fromEntries(list.detailItems.map((item) => [item.id, item.quantity])));
     setSearch("");
     setAvailabilityFilter("all");
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.reset", "List reset to its saved version."));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.reset", "List reset to its saved version."));
   };
 
   const removeUnavailable = () => {
@@ -705,7 +951,7 @@ export default function AccountSupplyListDetail() {
     );
 
     if (unavailableIds.size === 0) {
-      setStatusMessage(accountT(t, "supplyLists.detail.messages.noUnavailableProducts", "There are no unavailable products to remove."));
+      showStatusMessage(accountT(t, "supplyLists.detail.messages.noUnavailableProducts", "There are no unavailable products to remove."));
       return;
     }
 
@@ -717,7 +963,7 @@ export default function AccountSupplyListDetail() {
       });
       return next;
     });
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.unavailableRemoved", "{count} unavailable products removed.", { count: unavailableIds.size }));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.unavailableRemoved", "{count} unavailable products removed.", { count: unavailableIds.size }));
   };
 
   const clearList = () => {
@@ -725,7 +971,7 @@ export default function AccountSupplyListDetail() {
     setQuantities({});
     setSearch("");
     setAvailabilityFilter("all");
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.cleared", "All products removed from this list."));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.cleared", "All products removed from this list."));
   };
 
   const addProductFromCatalog = (product: Product) => {
@@ -747,7 +993,7 @@ export default function AccountSupplyListDetail() {
 
     setItems((current) => [...current, item]);
     setQuantities((current) => ({ ...current, [itemId]: 1 }));
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.productAdded", "{name} added to this list.", { name: product.name }));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.productAdded", "{name} added to this list.", { name: product.name }));
   };
 
   const openOptions = (itemId: string) => {
@@ -779,7 +1025,7 @@ export default function AccountSupplyListDetail() {
       ...current,
       [optionItemId]: current[optionItemId] ?? 1,
     }));
-    setStatusMessage(accountT(t, "supplyLists.detail.messages.optionsSelected", "Product options selected."));
+    showStatusMessage(accountT(t, "supplyLists.detail.messages.optionsSelected", "Product options selected."));
     setOptionItemId(null);
   };
 
@@ -872,9 +1118,21 @@ export default function AccountSupplyListDetail() {
             {statusMessage && (
               <div
                 role="status"
-                className="rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-active)]/[0.08] px-4 py-3 text-[13px] font-semibold text-[#5F5F5F]"
+                className="flex flex-col gap-3 rounded-[14px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-active)]/[0.08] px-4 py-3 text-[13px] font-semibold text-[#5F5F5F] sm:flex-row sm:items-center sm:justify-between"
               >
-                {statusMessage}
+                <span>{statusMessage}</span>
+                {submittedQuoteId && (
+                  <Button
+                    asChild
+                    variant="secondary"
+                    size="sm"
+                    className="h-9 shrink-0 px-4 text-[12px] text-[#050505]"
+                  >
+                    <Link href={`/account/quotes/${submittedQuoteId}`}>
+                      {t("quoteWorkflow.quoteDetails")}
+                    </Link>
+                  </Button>
+                )}
               </div>
             )}
 
@@ -980,11 +1238,14 @@ export default function AccountSupplyListDetail() {
                   </Button>
                   <Button
                     type="button"
-                    onClick={saveChanges}
+                    onClick={() => void saveChanges()}
+                    disabled={isSaving}
                     variant="secondary"
                     className="h-12 w-full px-5 text-[14px] text-[var(--xd-gold-active)]"
                   >
-                    {accountT(t, "common.saveChanges", "Save Changes")}
+                    {isSaving
+                      ? accountT(t, "common.saving", "Saving...")
+                      : accountT(t, "common.saveChanges", "Save Changes")}
                   </Button>
                 </div>
 
@@ -1024,8 +1285,15 @@ export default function AccountSupplyListDetail() {
           listName={list.name}
           productCount={productCount}
           subtotal={estimatedTotal}
-          onClose={() => setIsQuoteOpen(false)}
-          onSubmit={submitQuoteRequest}
+          error={quoteError}
+          isSubmitting={isQuoteSubmitting}
+          onClose={() => {
+            if (!isQuoteSubmitting) {
+              setIsQuoteOpen(false);
+              setQuoteError(null);
+            }
+          }}
+          onSubmit={() => void submitQuoteRequest()}
         />
       )}
     </div>

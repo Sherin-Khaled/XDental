@@ -1,0 +1,17 @@
+# X Dental Store is a single-page app (client-side routing via wouter).
+# Without this rewrite, a hard refresh or direct link to any non-root path
+# (e.g. /products/some-slug, /account/orders) 404s on Apache/LiteSpeed
+# static hosting, because no such file exists on disk — only index.html
+# does, and the router only takes over once index.html's JS has loaded.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Real files and directories (assets, images, etc.) are served as-is.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else falls back to index.html so the client router can render it.
+  RewriteRule ^ index.html [L]
+</IfModule>

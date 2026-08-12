@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Eye,
   EyeOff,
+  LifeBuoy,
   LockKeyhole,
   Mail,
   ShieldCheck,
@@ -78,6 +79,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotHelp, setShowForgotHelp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { signIn } = useStore();
@@ -94,7 +96,10 @@ export default function Login() {
     if (!result.success) {
       toast({
         title: t("auth.login.invalidTitle"),
-        description: result.message,
+        description:
+          result.message === t("auth.serviceUnavailable")
+            ? result.message
+            : t("auth.login.invalidDescription"),
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -136,7 +141,7 @@ export default function Login() {
             <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.16),transparent_45%,rgba(5,5,5,0.24))]" />
 
             <Link href="/" className="relative z-10 flex w-fit items-center gap-2.5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-[var(--xd-gold-active)] font-display text-[18px] font-bold text-white shadow-[0_8px_20px_rgba(212,167,44,0.32)]">
+              <span className="xd-gradient-gold flex h-10 w-10 items-center justify-center rounded-[11px] font-display text-[18px] font-bold text-[#050505] shadow-[var(--xd-gold-gradient-shadow)]">
                 X
               </span>
               <span className="font-display text-[15px] font-semibold tracking-tight">
@@ -226,11 +231,38 @@ export default function Login() {
                 </span>
               </label>
 
+              {/* No self-serve reset flow exists yet (no SMTP); the link
+                  honestly points users to real support channels instead. */}
               <div className="flex justify-end">
-                <a href="#" className="text-[13px] font-semibold text-[var(--xd-gold-text)] transition hover:text-[#050505] hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotHelp((isVisible) => !isVisible)}
+                  className="text-[13px] font-semibold text-[var(--xd-gold-text)] transition hover:text-[#050505] hover:underline"
+                >
                   {t("auth.login.forgot")}
-                </a>
+                </button>
               </div>
+
+              {showForgotHelp && (
+                <div
+                  role="note"
+                  className="rounded-[12px] border border-[var(--xd-gold-border-soft)] bg-[var(--xd-gold-bg-soft)] px-4 py-3 text-[13px] leading-5 text-[#3A3A3A]"
+                >
+                  <p className="font-semibold">
+                    {t("auth.login.forgotHelpTitle", {
+                      fallback: "For password reset, please contact X Dental support.",
+                    })}
+                  </p>
+                  <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    <a href="https://wa.me/201035777335" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
+                      {t("auth.login.forgotWhatsApp", { fallback: "WhatsApp" })}: <span dir="ltr">01035777335</span>
+                    </a>
+                    <a href="tel:+201552229405" className="font-bold hover:underline">
+                      {t("auth.login.forgotPhone", { fallback: "Phone" })}: <span dir="ltr">01552229405</span>
+                    </a>
+                  </p>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -241,6 +273,21 @@ export default function Login() {
               >
                 {isSubmitting ? t("auth.login.signingIn") : t("auth.login.signIn")}
                 {!isSubmitting && <DirectionalIcon direction="forward" size={17} />}
+              </Button>
+
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="h-[48px] w-full gap-2 border-[var(--xd-gold-border-soft)] text-[14px]"
+              >
+                <Link
+                  href="/contact?topic=account-access"
+                  data-testid="link-account-access-help"
+                >
+                  <LifeBuoy size={17} />
+                  {t("auth.login.accountAccessHelp")}
+                </Link>
               </Button>
             </form>
 

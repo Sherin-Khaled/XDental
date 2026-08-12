@@ -20,9 +20,11 @@ import {
 } from "@/components/dental/AccountFilterToolbar";
 import { Button } from "@/components/dental/Button";
 import { Container } from "@/components/dental/Container";
+import { ProductAutocomplete } from "@/components/dental/ProductAutocomplete";
 import { DentalSelect, type DentalSelectOption } from "@/components/dental/Select";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStore } from "@/context/StoreContext";
+import { useCatalog } from "@/context/CatalogContext";
 import {
   type ProductRequest,
   type ProductRequestStatus,
@@ -38,6 +40,8 @@ type DateFilter = "30d" | "6m" | "all";
 type SortOrder = "newest" | "oldest";
 
 type NewProductRequestForm = {
+  productId: string;
+  sku: string;
   productName: string;
   brand: string;
   category: string;
@@ -47,6 +51,8 @@ type NewProductRequestForm = {
 };
 
 const emptyProductRequest: NewProductRequestForm = {
+  productId: "",
+  sku: "",
   productName: "",
   brand: "",
   category: "Endodontics",
@@ -54,6 +60,14 @@ const emptyProductRequest: NewProductRequestForm = {
   branch: "Main Clinic",
   notes: "",
 };
+const PRODUCT_REQUEST_CATEGORY_FALLBACKS = [
+  "Endodontics",
+  "Restorative",
+  "Infection Control",
+  "Orthodontics",
+  "Implantology",
+  "Dental Instruments",
+];
 
 const inputClassName =
   "h-12 w-full rounded-[12px] border border-[#050505]/10 bg-white px-4 text-[14px] text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10";
@@ -306,16 +320,32 @@ function RequestCard({
 
 function RequestProductModal({
   form,
+  errors,
+  submissionError,
+  isSubmitting,
+  categoryOptions,
   onChange,
   onClose,
   onSubmit,
 }: {
   form: NewProductRequestForm;
+  errors: Partial<Record<"productName" | "quantity", string>>;
+  submissionError: string | null;
+  isSubmitting: boolean;
+  categoryOptions: string[];
   onChange: (form: NewProductRequestForm) => void;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   return (
     <div
@@ -323,6 +353,9 @@ function RequestProductModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="request-product-title"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <form
         onSubmit={onSubmit}
@@ -353,16 +386,22 @@ function RequestProductModal({
         </div>
 
         <div className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-6 sm:px-8">
-          <label className="block">
-            <span className="mb-2 block text-[13px] font-bold text-[#050505]">{accountT(t, "productRequests.productName", "Product Name")}</span>
-            <input
-              required
-              value={form.productName}
-              onChange={(event) => onChange({ ...form, productName: event.target.value })}
-              placeholder={accountT(t, "productRequests.productNamePlaceholder", "Example: M3-Pro Gold Rotary Files Double")}
-              className={inputClassName}
-            />
-          </label>
+          <ProductAutocomplete
+            id="product-request-name"
+            label={accountT(t, "productRequests.productName", "Product Name")}
+            value={form.productName}
+            selectedProductId={form.productId || undefined}
+            error={errors.productName}
+            onValueChange={(value) => onChange({ ...form, productId: "", sku: "", productName: value })}
+            onSelect={(product, displayName) => onChange({
+              ...form,
+              productId: product.id,
+              sku: product.sku ?? "",
+              productName: displayName,
+              brand: product.brand,
+              category: product.category,
+            })}
+          />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
@@ -379,14 +418,7 @@ function RequestProductModal({
               label={accountT(t, "common.category", "Category")}
               value={form.category}
               onChange={(value) => onChange({ ...form, category: value })}
-              options={[
-                { value: "Endodontics", label: accountValue(t, "Endodontics") },
-                { value: "Restorative", label: accountValue(t, "Restorative") },
-                { value: "Infection Control", label: accountValue(t, "Infection Control") },
-                { value: "Orthodontics", label: accountValue(t, "Orthodontics") },
-                { value: "Implantology", label: accountValue(t, "Implantology") },
-                { value: "Dental Instruments", label: accountValue(t, "Dental Instruments") },
-              ]}
+              options={categoryOptions.map((value) => ({ value, label: accountValue(t, value) }))}
             />
           </div>
 
@@ -394,12 +426,17 @@ function RequestProductModal({
             <label className="block">
               <span className="mb-2 block text-[13px] font-bold text-[#050505]">{accountT(t, "productRequests.quantityNeeded", "Quantity Needed")}</span>
               <input
-                required
+                type="number"
+                min={1}
+                step={1}
                 value={form.quantity}
                 onChange={(event) => onChange({ ...form, quantity: event.target.value })}
-                placeholder={accountT(t, "productRequests.quantityPlaceholder", "2 packs")}
-                className={inputClassName}
+                placeholder="1"
+                aria-invalid={Boolean(errors.quantity)}
+                aria-describedby={errors.quantity ? "product-request-quantity-error" : undefined}
+                className={cn(inputClassName, errors.quantity && "border-[#B42318]/50 focus:border-[#B42318] focus:ring-[#B42318]/10")}
               />
+              {errors.quantity && <p id="product-request-quantity-error" role="alert" className="mt-2 text-[12px] font-semibold text-[#B42318]">{errors.quantity}</p>}
             </label>
 
             <FieldSelect
@@ -423,21 +460,27 @@ function RequestProductModal({
               className="min-h-[112px] w-full resize-none rounded-[14px] border border-[#050505]/10 bg-white px-4 py-3 text-[14px] text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-border-hover)] focus:ring-4 focus:ring-[var(--xd-gold-active)]/10"
             />
           </label>
+          {submissionError && (
+            <p role="alert" className="rounded-[12px] border border-[#B42318]/20 bg-[#B42318]/[0.06] px-4 py-3 text-[13px] font-semibold text-[#B42318]">
+              {submissionError}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-[#050505]/[0.07] bg-white px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
           <Button
             type="button"
             onClick={onClose}
+            disabled={isSubmitting}
             variant="tertiary"
             size="sm"
             className="h-11 px-5 text-[14px]"
           >
             {accountT(t, "common.cancel", "Cancel")}
           </Button>
-          <Button type="submit" variant="primary" size="sm" className="h-11 gap-2 px-6 text-[14px]">
+          <Button type="submit" disabled={isSubmitting} variant="primary" size="sm" className="h-11 gap-2 px-6 text-[14px]">
             <Plus size={16} />
-            {accountT(t, "productRequests.submitRequest", "Submit Request")}
+            {isSubmitting ? accountT(t, "common.loading", "Loading...") : accountT(t, "productRequests.submitRequest", "Submit Request")}
           </Button>
         </div>
       </form>
@@ -447,6 +490,7 @@ function RequestProductModal({
 
 export default function AccountProductRequests() {
   const { addToCart, currentUser } = useStore();
+  const { categories } = useCatalog();
   const { t } = useLanguage();
   const [requests, setRequests] = useState<ProductRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -458,6 +502,13 @@ export default function AccountProductRequests() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [newRequestForm, setNewRequestForm] = useState<NewProductRequestForm>(emptyProductRequest);
+  const [requestFormErrors, setRequestFormErrors] = useState<Partial<Record<"productName" | "quantity", string>>>({});
+  const [requestSubmissionError, setRequestSubmissionError] = useState<string | null>(null);
+  const [isRequestSubmitting, setIsRequestSubmitting] = useState(false);
+  const productRequestCategories = useMemo(
+    () => Array.from(new Set([...PRODUCT_REQUEST_CATEGORY_FALLBACKS, ...categories.map((category) => category.name)])),
+    [categories]
+  );
 
   useEffect(() => {
     let active = true;
@@ -522,14 +573,31 @@ export default function AccountProductRequests() {
 
   const handleSubmitRequest = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const productName = newRequestForm.productName.trim();
+    const quantity = Number(newRequestForm.quantity);
+    const nextErrors: Partial<Record<"productName" | "quantity", string>> = {};
+    if (!productName) {
+      nextErrors.productName = accountT(t, "productRequests.productRequired", "Enter a product name.");
+    }
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      nextErrors.quantity = accountT(t, "productRequests.quantityRequired", "Enter a quantity of at least 1.");
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setRequestFormErrors(nextErrors);
+      return;
+    }
+
     setStatusMessage(null);
+    setRequestSubmissionError(null);
+    setIsRequestSubmitting(true);
     try {
-      const quantity = Number.parseInt(newRequestForm.quantity, 10);
       const result = await createProductRequest({
-        productName: newRequestForm.productName,
+        productId: newRequestForm.productId || undefined,
+        productName,
         brand: newRequestForm.brand,
+        sku: newRequestForm.sku || undefined,
         category: newRequestForm.category,
-        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        quantity,
         branch: newRequestForm.branch,
         notes: newRequestForm.notes,
         message: newRequestForm.notes,
@@ -542,10 +610,13 @@ export default function AccountProductRequests() {
       setDateFilter("all");
       setSearch("");
       setNewRequestForm(emptyProductRequest);
+      setRequestFormErrors({});
       setIsRequestModalOpen(false);
       setStatusMessage(accountT(t, "productRequests.messages.submitted", "Request {requestNumber} submitted.", { requestNumber: createdRequest.requestNumber }));
     } catch {
-      setStatusMessage(accountT(t, "productRequests.messages.submitFailed", "Failed to send request. Please try again."));
+      setRequestSubmissionError(accountT(t, "productRequests.messages.submitFailed", "Failed to send request. Please try again."));
+    } finally {
+      setIsRequestSubmitting(false);
     }
   };
 
@@ -576,6 +647,8 @@ export default function AccountProductRequests() {
                 type="button"
                 onClick={() => {
                   setStatusMessage(null);
+                  setRequestFormErrors({});
+                  setRequestSubmissionError(null);
                   setIsRequestModalOpen(true);
                 }}
                 variant="primary"
@@ -671,7 +744,7 @@ export default function AccountProductRequests() {
                     className={cn(
                       "rounded-full px-5 py-2 text-[13px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]",
                       activeTab === value
-                        ? "bg-[var(--xd-gold-active)] text-white shadow-[0_8px_20px_rgba(212,167,44,0.18)]"
+                        ? "xd-account-selected-gold-control xd-gradient-gold shadow-[var(--xd-gold-gradient-shadow)]"
                         : "text-[var(--xd-gold-text)] hover:bg-[var(--xd-gold-active)]/[0.08] hover:text-[#050505]"
                     )}
                   >
@@ -757,10 +830,20 @@ export default function AccountProductRequests() {
       {isRequestModalOpen && (
         <RequestProductModal
           form={newRequestForm}
-          onChange={setNewRequestForm}
+          errors={requestFormErrors}
+          submissionError={requestSubmissionError}
+          isSubmitting={isRequestSubmitting}
+          categoryOptions={productRequestCategories}
+          onChange={(form) => {
+            setNewRequestForm(form);
+            setRequestFormErrors({});
+            setRequestSubmissionError(null);
+          }}
           onClose={() => {
             setIsRequestModalOpen(false);
             setNewRequestForm(emptyProductRequest);
+            setRequestFormErrors({});
+            setRequestSubmissionError(null);
           }}
           onSubmit={handleSubmitRequest}
         />

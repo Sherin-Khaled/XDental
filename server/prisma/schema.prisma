@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma-client-runtime"
 }
 
 datasource db {
@@ -11,6 +12,87 @@ enum UserRole {
   CUSTOMER
   ADMIN
   SUPPORT
+}
+
+enum CustomerTier {
+  STANDARD
+  VIP
+}
+
+enum AccountLanguage {
+  EN
+  AR
+}
+
+enum AccountCountry {
+  EGYPT
+}
+
+enum AccountCurrency {
+  EGP
+}
+
+enum UserLifecycleState {
+  ACTIVE
+  DELETION_REQUESTED
+  DEACTIVATED
+  DELETED
+}
+
+enum AccountActionRequestType {
+  DEACTIVATION
+  DELETION
+}
+
+enum AccountActionRequestStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CANCELED
+  COMPLETED
+}
+
+enum AccountActionEventType {
+  STATUS_CHANGE
+  REACTIVATED
+}
+
+enum CustomerBenefitType {
+  FREE_SHIPPING
+  PERCENTAGE_DISCOUNT
+  FIXED_DISCOUNT
+  PROMO_CODE
+  CUSTOM
+}
+
+enum LoyaltyPointTransactionType {
+  WELCOME_PENDING
+  WELCOME_ACTIVATED
+  WELCOME_GRANTED
+  WELCOME_RESTORE
+  ORDER_EARN
+  REDEMPTION
+  RESTORE
+  REVERSAL
+  EXPIRATION
+  ADMIN_ADJUSTMENT
+}
+
+enum LoyaltyPointTransactionStatus {
+  PENDING
+  ACTIVE
+  REVERSED
+  EXPIRED
+}
+
+enum WalletTransactionType {
+  REFUND_CREDIT
+  PROMOTIONAL_CREDIT
+  ADMIN_CREDIT
+  ADMIN_DEBIT
+  ORDER_PAYMENT
+  RESTORE
 }
 
 enum ProductRequestStatus {
@@ -62,12 +144,110 @@ enum NotificationType {
   ACCOUNT
 }
 
+enum DeliveryOfferType {
+  SAME_DAY_DELIVERY
+  FREE_DELIVERY
+  DISCOUNTED_DELIVERY
+  CUSTOM
+}
+
+enum DeliveryRecurrenceType {
+  WEEKLY
+  SPECIFIC_DATE
+  DATE_RANGE
+}
+
+enum DeliveryDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum PromotionType {
+  INFORMATIONAL
+  PERCENTAGE_DISCOUNT
+  FIXED_DISCOUNT
+  COUPON
+  FREE_DELIVERY
+  CUSTOM
+}
+
+enum PromotionScheduleType {
+  ONE_TIME_DATE
+  DATE_RANGE
+  WEEKLY_RECURRING
+  ALWAYS_ACTIVE
+}
+
+enum PromotionDisplayPlacement {
+  ANNOUNCEMENT_BANNER
+  NOTIFICATION_CENTER
+  HOMEPAGE_PROMOTION_CARD
+  ACCOUNT_DASHBOARD
+  POPUP
+}
+
+enum PromotionStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  EXPIRED
+  ARCHIVED
+}
+
+enum HeroSlideStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum OrderStatus {
-  PENDING
-  SENT_TO_OWNER_SYSTEM
+  PENDING_REVIEW
   CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
   REJECTED
   CANCELED
+}
+
+enum PaymentStatus {
+  PENDING_COLLECTION
+  PAID
+}
+
+enum QuoteStatus {
+  PENDING
+  SUPPLIER_REVIEW
+  DRAFT_RESPONSE
+  SENT
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+enum BrandStatus {
+  ACTIVE
+  INACTIVE
+  NEEDS_LOGO
+}
+
+enum CategoryStatus {
+  ACTIVE
+  DRAFT
+  INACTIVE
+}
+
+enum ProductStatus {
+  ACTIVE
+  LOW_STOCK
+  OUT_OF_STOCK
+  DRAFT
+  INACTIVE
+}
+
+enum SupplyListStatus {
+  ACTIVE
+  ARCHIVED
 }
 
 enum SyncDirection {
@@ -81,6 +261,50 @@ enum SyncStatus {
   FAILED
 }
 
+// Catalog imports are intentionally preview-first. They record validation
+// results before any product, price, stock, or taxonomy record is changed.
+enum CatalogImportBatchStatus {
+  PREVIEW
+  APPLIED
+  FAILED
+}
+
+enum CatalogImportRowAction {
+  CREATE
+  UPDATE
+  SKIP
+  CONFLICT
+  ERROR
+}
+
+enum CatalogImportEntityType {
+  PRODUCTS
+  VARIANTS
+  PRODUCT_OPTIONS
+  OPTION_VALUES
+  VARIANT_OPTION_VALUES
+  BRANDS
+  CATEGORIES
+  IMAGES
+  INVENTORY
+}
+
+enum EmailDeliveryStatus {
+  DISABLED
+  PENDING
+  SENT
+  FAILED
+}
+
+enum EmailNotificationCategory {
+  CONTACT
+  NEWSLETTER
+  QUOTE
+  PRODUCT_REQUEST
+  MACHINE_INQUIRY
+  SUPPORT
+}
+
 model User {
   id                 String           @id @default(cuid())
   name               String
@@ -88,41 +312,695 @@ model User {
   passwordHash       String
   phone              String?
   professionalRole   String?
+  clinicSpecialty    String?
+  clinicName         String?
+  profileImageUrl    String?
   role               UserRole         @default(CUSTOMER)
+  customerTier       CustomerTier     @default(STANDARD)
+  isActive           Boolean          @default(true)
+  lifecycleState     UserLifecycleState @default(ACTIVE)
+  lifecycleUpdatedAt DateTime         @default(now())
+  anonymizedIdentityHash String?      @unique
+  customerBenefits   CustomerBenefit[] @relation("BenefitCustomer")
+  benefitsCreated    CustomerBenefit[] @relation("BenefitCreator")
+  benefitsRevoked    CustomerBenefit[] @relation("BenefitRevoker")
+  loyaltyAccount     LoyaltyAccount?
+  loyaltyPointTransactions LoyaltyPointTransaction[] @relation("LoyaltyPointCustomer")
+  loyaltyPointAdjustments LoyaltyPointTransaction[] @relation("LoyaltyPointActor")
+  walletTransactions WalletTransaction[] @relation("WalletCustomer")
+  walletAdjustments  WalletTransaction[] @relation("WalletActor")
+  permissions        UserPermission[] @relation("PermissionSubject")
+  permissionsGranted UserPermission[] @relation("PermissionGranter")
+  permissionsUpdatedAt DateTime?
+  permissionsUpdatedById String?
+  permissionsUpdatedBy User?          @relation("PermissionUpdates", fields: [permissionsUpdatedById], references: [id], onDelete: SetNull)
+  permissionUpdates  User[]           @relation("PermissionUpdates")
   productRequests    ProductRequest[]
   supportThreads     SupportThread[]   @relation("SupportCustomer")
   assignedThreads    SupportThread[]   @relation("AssignedSupport")
   supportMessages    SupportMessage[]
   notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
+  accountPreference  AccountPreference?
+  authSessions       AuthSession[]
+  accountActionRequests AccountActionRequest[] @relation("AccountActionCustomer")
+  reviewedAccountActionRequests AccountActionRequest[] @relation("AccountActionReviewer")
+  accountActionHistory AccountActionRequestHistory[] @relation("AccountActionActor")
+  cartItems          CartItem[]
+  supplyLists        SupplyList[]
   orders             Order[]
+  quotes             Quote[]
+  catalogImportBatches CatalogImportBatch[] @relation("CatalogImportCreator")
+  heroSlidesUpdated  HeroSlide[]       @relation("HeroSlideUpdatedBy")
+  contactMessages    ContactMessage[]
+  clinicLocations    UserClinicLocation[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
   @@index([role])
+  @@index([role, customerTier])
+  @@index([role, isActive])
+  @@index([role, lifecycleState])
+  @@index([permissionsUpdatedById])
+}
+
+model AccountPreference {
+  id                              String          @id @default(cuid())
+  userId                          String          @unique
+  user                            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderUpdates                    Boolean         @default(true)
+  quoteUpdates                    Boolean         @default(true)
+  productRequestUpdates           Boolean         @default(true)
+  backInStockUpdates              Boolean         @default(true)
+  supportReplyUpdates             Boolean         @default(true)
+  personalizedRecommendations     Boolean         @default(false)
+  saveBrowsingActivity            Boolean         @default(false)
+  useOrderHistoryForSuggestions   Boolean         @default(false)
+  weeklyOffers                    Boolean         @default(false)
+  newArrivals                     Boolean         @default(false)
+  clinicSupplyOffers              Boolean         @default(false)
+  marketingBackInStock            Boolean         @default(false)
+  language                        AccountLanguage @default(EN)
+  country                         AccountCountry  @default(EGYPT)
+  currency                        AccountCurrency @default(EGP)
+  createdAt                       DateTime        @default(now())
+  updatedAt                       DateTime        @updatedAt
+
+  @@map("account_preferences")
+}
+
+model AuthSession {
+  id               String    @id
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceSummary    String
+  ipAddressHash    String?
+  createdAt        DateTime  @default(now())
+  lastSeenAt       DateTime  @default(now())
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revocationReason String?
+
+  @@index([userId])
+  @@index([userId, revokedAt, expiresAt])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AccountActionRequest {
+  id                    String                     @id @default(cuid())
+  publicRequestNumber   String                     @unique
+  userId                String
+  user                  User                       @relation("AccountActionCustomer", fields: [userId], references: [id], onDelete: Restrict)
+  type                  AccountActionRequestType
+  status                AccountActionRequestStatus @default(PENDING)
+  customerReason        String?
+  customerDetails       String?
+  submittedAt           DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  reviewedBy            User?                      @relation("AccountActionReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  customerResponse      String?
+  reviewerNote          String?
+  completedAt           DateTime?
+  canceledAt            DateTime?
+  cancellationReason    String?
+  completionReference   String?                    @unique
+  history               AccountActionRequestHistory[]
+
+  @@index([userId])
+  @@index([userId, type, status])
+  @@index([type])
+  @@index([status])
+  @@index([submittedAt(sort: Desc)])
+  @@index([reviewedByUserId])
+  @@map("account_action_requests")
+}
+
+model AccountActionRequestHistory {
+  id                String                      @id @default(cuid())
+  requestId         String
+  request           AccountActionRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  eventType         AccountActionEventType      @default(STATUS_CHANGE)
+  previousStatus    AccountActionRequestStatus?
+  newStatus         AccountActionRequestStatus?
+  previousLifecycle UserLifecycleState?
+  newLifecycle      UserLifecycleState?
+  actorUserId       String?
+  actor             User?                       @relation("AccountActionActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorRole         String
+  customerNote      String?
+  adminNote         String?
+  createdAt         DateTime                    @default(now())
+
+  @@index([requestId, createdAt])
+  @@index([actorUserId])
+  @@map("account_action_request_history")
+}
+
+model CustomerBenefit {
+  id                 String              @id @default(cuid())
+  userId             String
+  user               User                @relation("BenefitCustomer", fields: [userId], references: [id], onDelete: Cascade)
+  type               CustomerBenefitType
+  titleEn            String
+  titleAr            String
+  descriptionEn      String?
+  descriptionAr      String?
+  discountPercent    Decimal?            @db.Decimal(5, 2)
+  discountAmount     Decimal?            @db.Decimal(12, 2)
+  promoCode          String?
+  minimumOrderAmount Decimal?            @db.Decimal(12, 2)
+  startsAt           DateTime?
+  endsAt             DateTime?
+  isActive           Boolean             @default(true)
+  pausedAt           DateTime?
+  revokedAt          DateTime?
+  revokedById        String?
+  revokedBy          User?               @relation("BenefitRevoker", fields: [revokedById], references: [id], onDelete: SetNull)
+  createdById        String
+  createdBy          User                @relation("BenefitCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([userId, isActive, revokedAt])
+  @@index([promoCode])
+  @@index([startsAt, endsAt])
+  @@map("customer_benefits")
+}
+
+model LoyaltyAccount {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  availablePoints        Int      @default(0)
+  pendingPoints          Int      @default(0)
+  lifetimeEarnedPoints   Int      @default(0)
+  lifetimeRedeemedPoints Int      @default(0)
+  walletBalance          Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("loyalty_accounts")
+}
+
+model LoyaltyPointTransaction {
+  id             String                        @id @default(cuid())
+  userId         String
+  user           User                          @relation("LoyaltyPointCustomer", fields: [userId], references: [id], onDelete: Restrict)
+  orderId        String?
+  order          Order?                        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actorUserId    String?
+  actor          User?                         @relation("LoyaltyPointActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  type           LoyaltyPointTransactionType
+  points         Int
+  balanceAfter   Int
+  status         LoyaltyPointTransactionStatus
+  expiresAt      DateTime?
+  description    String
+  idempotencyKey String                        @unique
+  createdAt      DateTime                      @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, expiresAt])
+  @@index([orderId])
+  @@index([actorUserId])
+  @@map("loyalty_point_transactions")
+}
+
+model WalletTransaction {
+  id             String                @id @default(cuid())
+  userId         String
+  user           User                  @relation("WalletCustomer", fields: [userId], references: [id], onDelete: Restrict)
+  orderId        String?
+  order          Order?                @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actorUserId    String?
+  actor          User?                 @relation("WalletActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  type           WalletTransactionType
+  amount         Decimal               @db.Decimal(12, 2)
+  balanceAfter   Decimal               @db.Decimal(12, 2)
+  description    String
+  idempotencyKey String                @unique
+  createdAt      DateTime              @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([orderId])
+  @@index([actorUserId])
+  @@map("wallet_transactions")
+}
+
+model LoyaltyProgramSettings {
+  id                         String   @id @default("default")
+  enabled                    Boolean  @default(true)
+  standardPointsPerEgp10     Int      @default(1)
+  vipPointsPerEgp10          Int      @default(2)
+  pointsPerRedemptionUnit    Int      @default(100)
+  redemptionValueEgp         Decimal  @default(10) @db.Decimal(12, 2)
+  welcomePoints              Int      @default(200)
+  welcomeMinimumSubtotalEgp  Decimal  @default(500) @db.Decimal(12, 2)
+  welcomeExpiryDays          Int      @default(30)
+  minimumRedemptionPoints    Int      @default(100)
+  maximumRedemptionPercent   Decimal  @default(20) @db.Decimal(5, 2)
+  expiryMonths               Int      @default(12)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@map("loyalty_program_settings")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  group       String
+  description String?
+  users       UserPermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([group])
+  @@map("permissions")
+}
+
+model UserPermission {
+  userId       String
+  user         User       @relation("PermissionSubject", fields: [userId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  grantedById  String?
+  grantedBy    User?      @relation("PermissionGranter", fields: [grantedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@id([userId, permissionId])
+  @@index([permissionId])
+  @@index([grantedById])
+  @@map("user_permissions")
+}
+
+model DeliveryZone {
+  id              String               @id @default(cuid())
+  slug            String               @unique
+  nameEn          String
+  nameAr          String
+  isActive        Boolean              @default(true)
+  displayOrder    Int                  @default(0)
+  userLocations   UserClinicLocation[]
+  offerZones      DeliveryOfferZone[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("delivery_zones")
+}
+
+model UserClinicLocation {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveryZoneId String
+  deliveryZone   DeliveryZone @relation(fields: [deliveryZoneId], references: [id], onDelete: Restrict)
+  customArea     String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, deliveryZoneId])
+  @@index([deliveryZoneId])
+  @@map("user_clinic_locations")
+}
+
+model DeliveryOffer {
+  id                 String                  @id @default(cuid())
+  titleEn            String
+  titleAr            String
+  descriptionEn      String
+  descriptionAr      String
+  offerType          DeliveryOfferType
+  recurrenceType     DeliveryRecurrenceType
+  weekdays           Int[]                   @default([])
+  specificDate       DateTime?               @db.Date
+  startDate          DateTime?               @db.Date
+  endDate            DateTime?               @db.Date
+  cutoffTime         String?
+  timezone           String                  @default("Africa/Cairo")
+  discountType       DeliveryDiscountType?
+  discountValue      Decimal?                @db.Decimal(12, 2)
+  minimumOrderAmount Decimal?                @db.Decimal(12, 2)
+  appliesToStandard  Boolean                 @default(true)
+  appliesToFast      Boolean                 @default(true)
+  isActive           Boolean                 @default(true)
+  zones              DeliveryOfferZone[]
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@index([isActive, recurrenceType])
+  @@map("delivery_offers")
+}
+
+model DeliveryOfferZone {
+  offerId       String        @map("deliveryOfferId")
+  offer         DeliveryOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  deliveryZoneId String
+  deliveryZone  DeliveryZone  @relation(fields: [deliveryZoneId], references: [id], onDelete: Restrict)
+  createdAt     DateTime      @default(now())
+
+  @@id([offerId, deliveryZoneId])
+  @@index([deliveryZoneId])
+  @@map("delivery_offer_zones")
+}
+
+model ScheduledPromotion {
+  id                 String                    @id @default(cuid())
+  titleEn            String
+  titleAr            String
+  descriptionEn      String
+  descriptionAr      String
+  badgeEn            String?
+  badgeAr            String?
+  imageUrl           String?
+  promotionType      PromotionType
+  discountPercent    Decimal?                  @db.Decimal(5, 2)
+  discountAmount     Decimal?                  @db.Decimal(12, 2)
+  couponCode         String?
+  minimumOrderAmount Decimal?                  @db.Decimal(12, 2)
+  targetUrl          String?
+  buttonTextEn       String?
+  buttonTextAr       String?
+  scheduleType       PromotionScheduleType
+  weekdays           Int[]                     @default([])
+  startAt            DateTime?
+  endAt              DateTime?
+  startTime          String?
+  endTime            String?
+  timezone           String                    @default("Africa/Cairo")
+  displayPlacement   PromotionDisplayPlacement
+  priority           Int                       @default(0)
+  isDismissible      Boolean                   @default(true)
+  status             PromotionStatus           @default(DRAFT)
+  isActive           Boolean                   @default(true)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@index([isActive, status, displayPlacement, priority])
+  @@index([scheduleType, startAt, endAt])
+  @@map("scheduled_promotions")
 }
 
 model Product {
   id                String      @id @default(cuid())
   externalProductId String?     @unique
   name              String
+  nameAr            String?
+  slug              String      @unique
   brand             String?
+  brandId           String?
+  brandRecord       Brand?      @relation("ProductBrand", fields: [brandId], references: [id], onDelete: SetNull)
   sku               String?     @unique
   category          String?
+  categoryId        String?
+  categoryRecord    Category?   @relation("ProductCategory", fields: [categoryId], references: [id], onDelete: SetNull)
   description       String?
+  descriptionAr     String?
+  shortDescription  String?
+  shortDescriptionAr String?
   price             Decimal?    @db.Decimal(12, 2)
+  salePrice         Decimal?    @db.Decimal(12, 2)
   stockQuantity     Int?
+  status            ProductStatus @default(ACTIVE)
+  featured          Boolean     @default(false)
   isAvailable       Boolean     @default(true)
   imageUrl          String?
   sourceSystem      String?
   externalStatus    String?
   syncStatus        String?
   lastSyncedAt      DateTime?
+  flashSales        FlashSale[]
+  options           ProductOption[]
+  variants          ProductVariant[]
+  images            ProductImage[]
+  cartItems          CartItem[]
+  supplyListItems    SupplyListItem[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
   @@index([externalProductId])
+  @@index([brandId])
+  @@index([categoryId])
   @@index([brand])
   @@index([category])
+  @@index([status])
+  @@index([featured])
+}
+
+model CartItem {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId       String?
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  selectedOptions String   @default("")
+  quantity        Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, productId, selectedOptions])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([productId])
+  @@index([variantId])
+  @@map("cart_items")
+}
+
+model SupplyList {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  branch      String
+  description String?
+  status      SupplyListStatus @default(ACTIVE)
+  items       SupplyListItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, status])
+  @@map("supply_lists")
+}
+
+model SupplyListItem {
+  id              String     @id @default(cuid())
+  supplyListId    String
+  supplyList      SupplyList @relation(fields: [supplyListId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  selectedOptions String     @default("")
+  quantity        Int
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@unique([supplyListId, productId, selectedOptions])
+  @@index([supplyListId, updatedAt(sort: Desc)])
+  @@index([productId])
+  @@map("supply_list_items")
+}
+
+// Admin-configured Flash Sale campaigns. A currently valid sale price becomes
+// the server-authoritative catalog and checkout price; Product.price remains
+// the original price. VIP benefits are evaluated after the sale subtotal.
+model FlashSale {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  salePrice    Decimal  @db.Decimal(12, 2)
+  startsAt     DateTime
+  endsAt       DateTime
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, startsAt, endsAt])
+  @@index([productId])
+  @@map("flash_sales")
+}
+
+// Home hero slider slides, managed by the admin dashboard (CRUD to be added).
+// Localized copy (badge, headline, CTAs, stats, image, ...) lives in `content`
+// as JSON with { en, ar } text fields — see src/types/heroSlide.ts on the web
+// side for the exact shape.
+model HeroSlide {
+  id          String          @id @default(cuid())
+  slotNumber  Int             @unique
+  order       Int             @unique
+  isActive    Boolean         @default(true)
+  status      HeroSlideStatus @default(PUBLISHED)
+  countdownTo DateTime?
+  content     Json
+  draftData   Json?
+  publishedAt DateTime?
+  updatedById String?
+  updatedBy   User?           @relation("HeroSlideUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([isActive, order])
+  @@index([publishedAt, isActive, order])
+  @@index([updatedById])
+  @@map("hero_slides")
+}
+
+model Brand {
+  id          String      @id @default(cuid())
+  externalBrandId String?
+  sourceSystem String?
+  name        String      @unique
+  slug        String      @unique
+  country     String?
+  logoUrl     String?
+  description String?
+  featured    Boolean     @default(false)
+  status      BrandStatus @default(ACTIVE)
+  products    Product[]   @relation("ProductBrand")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([status])
+  @@index([featured])
+  @@index([country])
+  @@unique([sourceSystem, externalBrandId])
+}
+
+model Category {
+  id           String         @id @default(cuid())
+  externalCategoryId String?
+  sourceSystem String?
+  name         String         @unique
+  nameAr       String?
+  slug         String         @unique
+  description  String?
+  icon         String?
+  imageUrl     String?
+  parentId     String?
+  parent       Category?      @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Category[]     @relation("CategoryTree")
+  displayOrder Int            @default(0)
+  status       CategoryStatus @default(ACTIVE)
+  products     Product[]      @relation("ProductCategory")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([status])
+  @@index([parentId])
+  @@index([displayOrder])
+  @@unique([sourceSystem, externalCategoryId])
+}
+
+// A product can remain simple (with no options or variants) indefinitely.
+// Options define the valid dimensions; free-text cart options are retained only
+// to read legacy rows and are never authoritative for variant selection.
+model ProductOption {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  code      String
+  nameEn    String
+  nameAr    String?
+  sortOrder Int      @default(0)
+  values    ProductOptionValue[]
+  variantSelections ProductVariantOptionValue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, code])
+  @@index([productId, sortOrder])
+  @@map("product_options")
+}
+
+model ProductOptionValue {
+  id          String   @id @default(cuid())
+  optionId    String
+  option      ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  code        String
+  valueEn     String
+  valueAr     String?
+  displayHex  String?
+  sortOrder   Int      @default(0)
+  variantSelections ProductVariantOptionValue[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([optionId, code])
+  @@index([optionId, sortOrder])
+  @@map("product_option_values")
+}
+
+model ProductVariant {
+  id                String   @id @default(cuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  externalVariantId String?
+  sourceSystem      String?
+  sku               String?  @unique
+  barcode           String?  @unique
+  nameEn            String?
+  nameAr            String?
+  priceOverride     Decimal? @db.Decimal(12, 2)
+  stockQuantity     Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  status            ProductStatus @default(ACTIVE)
+  isAvailable       Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  lastSyncedAt      DateTime?
+  selections        ProductVariantOptionValue[]
+  images            ProductImage[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([sourceSystem, externalVariantId])
+  @@index([productId, sortOrder])
+  @@index([productId, status, isAvailable])
+  @@map("product_variants")
+}
+
+model ProductVariantOptionValue {
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  optionId      String
+  option        ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionValueId String
+  optionValue   ProductOptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@id([variantId, optionValueId])
+  @@unique([variantId, optionId])
+  @@index([optionValueId])
+  @@map("product_variant_option_values")
+}
+
+model ProductImage {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId       String?
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  url             String
+  altEn           String?
+  altAr           String?
+  sortOrder       Int      @default(0)
+  isPrimary       Boolean  @default(false)
+  sourceSystem    String?
+  sourceUrl       String?
+  rightsConfirmed Boolean  @default(false)
+  rightsNote      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([productId, variantId, sortOrder])
+  @@map("product_images")
 }
 
 model ProductRequest {
@@ -168,6 +1046,7 @@ model SupportThread {
   productRequestId     String?               @unique
   productRequest       ProductRequest?       @relation("SupportThreadProductRequest", fields: [productRequestId], references: [id], onDelete: SetNull)
   linkedProductRequest ProductRequest?       @relation("ProductRequestSupportThread")
+  linkedQuote          Quote?                @relation("QuoteSupportThread")
   subject              String
   type                 SupportThreadType     @default(GENERAL_SUPPORT)
   related              String?
@@ -217,16 +1096,44 @@ model Notification {
   @@index([userId, readAt])
 }
 
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint     String
+  endpointHash String   @unique
+  p256dh       String
+  auth         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
 model Order {
   id                String      @id @default(cuid())
   userId            String
   user              User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   orderNumber       String      @unique
-  status            OrderStatus @default(PENDING)
+  idempotencyKey    String?
+  requestFingerprint String?
+  status            OrderStatus   @default(PENDING_REVIEW)
+  paymentStatus     PaymentStatus @default(PENDING_COLLECTION)
   subtotal          Decimal?    @db.Decimal(12, 2)
   shipping          Decimal?    @db.Decimal(12, 2)
   discount          Decimal?    @db.Decimal(12, 2)
   total             Decimal?    @db.Decimal(12, 2)
+  shippingBeforeDiscount     Decimal? @db.Decimal(12, 2)
+  shippingDiscount           Decimal? @db.Decimal(12, 2)
+  productPromotionSavings    Decimal? @db.Decimal(12, 2)
+  scheduledPromotionDiscount Decimal? @db.Decimal(12, 2)
+  couponDiscount             Decimal? @db.Decimal(12, 2)
+  vipDiscount                Decimal? @db.Decimal(12, 2)
+  pointsRedeemed             Int      @default(0)
+  pointsRedemptionValue      Decimal  @default(0) @db.Decimal(12, 2)
+  walletCreditUsed           Decimal  @default(0) @db.Decimal(12, 2)
+  remainingCodAmount         Decimal? @db.Decimal(12, 2)
+  pricingBreakdown           Json?
   customerName      String?
   customerEmail     String?
   customerPhone     String?
@@ -238,11 +1145,15 @@ model Order {
   syncStatus        String?
   lastSyncedAt      DateTime?
   items             OrderItem[]
+  loyaltyPointTransactions LoyaltyPointTransaction[]
+  walletTransactions WalletTransaction[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
   @@index([userId, createdAt(sort: Desc)])
+  @@unique([userId, idempotencyKey])
   @@index([status])
+  @@index([paymentStatus])
 }
 
 model OrderItem {
@@ -251,15 +1162,110 @@ model OrderItem {
   order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId         String?
   externalProductId String?
+  variantId         String?
+  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  externalVariantId String?
   productName       String
   sku               String?
+  variantSku        String?
+  variantBarcode    String?
+  selectedOptions   String?
   quantity          Int
   unitPrice         Decimal? @db.Decimal(12, 2)
+  variantUnitPrice  Decimal? @db.Decimal(12, 2)
   total             Decimal? @db.Decimal(12, 2)
+  originalUnitPrice   Decimal? @db.Decimal(12, 2)
+  promotionDiscount  Decimal? @db.Decimal(12, 2)
+  promotionSourceType String?
+  promotionSourceId   String?
+  promotionTitleEn    String?
+  promotionTitleAr    String?
   createdAt         DateTime @default(now())
 
   @@index([orderId])
   @@index([externalProductId])
+  @@index([variantId])
+  @@index([externalVariantId])
+}
+
+model CatalogImportBatch {
+  id          String                   @id @default(cuid())
+  sourceSystem String
+  filename    String?
+  status      CatalogImportBatchStatus @default(PREVIEW)
+  dryRun      Boolean                  @default(true)
+  totalRows   Int                      @default(0)
+  validRows   Int                      @default(0)
+  warningRows Int                      @default(0)
+  errorRows   Int                      @default(0)
+  createdById String?
+  createdBy   User?                    @relation("CatalogImportCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  rows        CatalogImportRow[]
+  createdAt   DateTime                 @default(now())
+  appliedAt   DateTime?
+
+  @@index([sourceSystem, createdAt])
+  @@index([status, createdAt])
+  @@map("catalog_import_batches")
+}
+
+model CatalogImportRow {
+  id                String                 @id @default(cuid())
+  batchId           String
+  batch             CatalogImportBatch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  entityType        CatalogImportEntityType
+  rowNumber         Int
+  externalId        String?
+  sku               String?
+  action            CatalogImportRowAction
+  validationMessages Json                  @default("[]")
+  normalizedPayload Json                   @default("{}")
+  createdAt         DateTime               @default(now())
+
+  @@index([batchId, entityType, rowNumber])
+  @@index([batchId, action])
+  @@map("catalog_import_rows")
+}
+
+model Quote {
+  id              String         @id @default(cuid())
+  quoteNumber     String         @unique
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          QuoteStatus    @default(PENDING)
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  notes           String?
+  adminResponse   String?
+  quotedPrice     Decimal?       @db.Decimal(12, 2)
+  supportThreadId String?        @unique
+  supportThread   SupportThread? @relation("QuoteSupportThread", fields: [supportThreadId], references: [id], onDelete: SetNull)
+  items           QuoteItem[]
+  respondedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+model QuoteItem {
+  id              String   @id @default(cuid())
+  quoteId         String
+  quote           Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId       String?
+  productName     String
+  brand           String?
+  sku             String?
+  quantity        Int
+  selectedOptions String?
+  requestedPrice  Decimal? @db.Decimal(12, 2)
+  quotedPrice     Decimal? @db.Decimal(12, 2)
+  createdAt       DateTime @default(now())
+
+  @@index([quoteId])
+  @@index([productId])
 }
 
 model SyncLog {
@@ -274,4 +1280,70 @@ model SyncLog {
 
   @@index([entityType, entityId])
   @@index([status, createdAt])
+}
+
+enum ContactMessageStatus {
+  NEW
+  REVIEWED
+  RESOLVED
+}
+
+model ContactMessage {
+  id        String               @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  subject   String?
+  message   String
+  source    String               @default("contact_page")
+  userId    String?
+  user      User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status    ContactMessageStatus @default(NEW)
+  internalNotes String?
+  archivedAt DateTime?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([status])
+  @@index([archivedAt])
+  @@index([createdAt])
+}
+
+enum NewsletterStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+model NewsletterSubscriber {
+  id        String           @id @default(cuid())
+  email     String           @unique
+  source    String?
+  locale    String?
+  status    NewsletterStatus @default(SUBSCRIBED)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([status])
+}
+
+model EmailDelivery {
+  id              String                    @id @default(cuid())
+  category        EmailNotificationCategory
+  entityId        String
+  status          EmailDeliveryStatus       @default(DISABLED)
+  recipient       String?
+  replyTo         String?
+  subject         String?
+  payload         Json                      @default("{}")
+  retryCount      Int                       @default(0)
+  lastAttemptAt   DateTime?
+  lastRetryAt     DateTime?
+  sentAt          DateTime?
+  errorMessage    String?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@unique([category, entityId])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([category, createdAt(sort: Desc)])
 }

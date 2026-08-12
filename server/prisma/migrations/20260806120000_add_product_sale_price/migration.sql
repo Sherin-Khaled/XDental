@@ -1,0 +1,1 @@
+ALTER TABLE "Product" ADD COLUMN "salePrice" DECIMAL(12,2);

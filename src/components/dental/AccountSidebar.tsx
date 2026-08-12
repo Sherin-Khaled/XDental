@@ -16,6 +16,7 @@ import {
   Settings,
   ShieldCheck,
   User,
+  Users,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -31,6 +32,7 @@ type AccountLink = {
   labelKey: string;
   icon: LucideIcon;
   isActive: (location: string) => boolean;
+  permission?: string;
 };
 
 const accountLinks: AccountLink[] = [
@@ -114,12 +116,61 @@ const accountLinks: AccountLink[] = [
   },
 ];
 
-const staffAccountLink: AccountLink = {
-  href: "/admin",
-  labelKey: "account.adminDashboard",
-  icon: ShieldCheck,
-  isActive: (location) => location === "/admin" || location.startsWith("/admin/"),
-};
+const staffToolLinks: Array<AccountLink & { adminOnly?: boolean }> = [
+  {
+    href: "/admin",
+    labelKey: "staffAccount.adminDashboard",
+    icon: ShieldCheck,
+    adminOnly: true,
+    isActive: (location) => location === "/admin",
+  },
+  {
+    href: "/admin/orders",
+    labelKey: "staffAccount.ordersManagement",
+    icon: Package,
+    isActive: (location) => location.startsWith("/admin/orders"),
+    permission: "ORDERS_VIEW",
+  },
+  {
+    href: "/admin/quotes",
+    labelKey: "staffAccount.quotesManagement",
+    icon: FileText,
+    isActive: (location) => location.startsWith("/admin/quotes"),
+    permission: "QUOTES_VIEW",
+  },
+  {
+    href: "/admin/product-requests",
+    labelKey: "staffAccount.productRequestsManagement",
+    icon: MessageSquareText,
+    isActive: (location) => location.startsWith("/admin/product-requests"),
+    permission: "PRODUCT_REQUESTS_VIEW",
+  },
+  {
+    href: "/admin/support",
+    labelKey: "staffAccount.supportInbox",
+    icon: LifeBuoy,
+    isActive: (location) => location.startsWith("/admin/support"),
+    permission: "SUPPORT_INBOX_VIEW",
+  },
+  {
+    href: "/admin/users",
+    labelKey: "staffAccount.users",
+    icon: Users,
+    permission: "USERS_VIEW",
+    isActive: (location) => location.startsWith("/admin/users"),
+  },
+  {
+    href: "/admin/settings",
+    labelKey: "staffAccount.settings",
+    icon: Settings,
+    adminOnly: true,
+    isActive: (location) => location.startsWith("/admin/settings"),
+  },
+];
+
+const staffPersonalLinks = accountLinks.filter((link) =>
+  ["/account/dashboard", "/account", "/account/notifications", "/account/settings"].includes(link.href)
+);
 
 export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
   const [location, navigate] = useLocation();
@@ -129,10 +180,17 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const role = currentUser?.role?.trim().toLowerCase();
   const hasStaffAccess = role === "admin" || role === "support";
-  const visibleAccountLinks = hasStaffAccess ? [...accountLinks, staffAccountLink] : accountLinks;
+  const visibleStaffToolLinks = staffToolLinks.filter(
+    (link) =>
+      (!link.adminOnly || role === "admin") &&
+      (role === "admin" || !link.permission || currentUser?.permissions?.includes(link.permission))
+  );
+  const visibleAccountLinks = hasStaffAccess ? [...visibleStaffToolLinks, ...staffPersonalLinks] : accountLinks;
   const activeLink = visibleAccountLinks.find((link) => link.isActive(location)) ?? accountLinks[0];
   const ActiveIcon = activeLink.icon;
   const userDisplayName = formatUserDisplayName(currentUser, language);
+  const staffRoleLabel = role === "admin" ? t("staffAccount.roles.admin") : t("staffAccount.roles.support");
+  const staffUserLabel = role === "admin" ? t("staffAccount.adminUser") : t("staffAccount.supportUser");
 
   useClickOutside(mobileMenuRef, () => setIsMobileOpen(false), {
     enabled: isMobileOpen,
@@ -150,6 +208,51 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
     navigate("/signin");
   };
 
+  const renderMobileLink = (link: AccountLink) => {
+    const Icon = link.icon;
+    const isActive = link.isActive(location);
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        onClick={() => setIsMobileOpen(false)}
+        className={cn(
+          "flex items-center gap-3 rounded-[12px] px-3.5 py-3 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]",
+          isActive
+            ? "xd-gradient-gold-border bg-[var(--xd-gold)]/[0.14] text-[var(--xd-gold-active)]"
+            : "text-[#8A8D9A] hover:text-[#050505]"
+        )}
+      >
+        <Icon size={16} strokeWidth={1.8} className="xd-premium-icon" />
+        <span className={cn(isActive && "account-sidebar-active-label")}>
+          {t(link.labelKey)}
+        </span>
+      </Link>
+    );
+  };
+
+  const renderDesktopLink = (link: AccountLink) => {
+    const Icon = link.icon;
+    const isActive = link.isActive(location);
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={cn(
+          "flex items-center gap-3 rounded-[12px] px-3.5 py-3 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]",
+          isActive
+            ? "xd-gradient-gold-border bg-[var(--xd-gold)]/[0.14] text-[var(--xd-gold-active)]"
+            : "text-[#8A8D9A] hover:bg-[var(--xd-gold-bg-soft)] hover:text-[#050505]"
+        )}
+      >
+        <Icon size={16} strokeWidth={1.8} className="xd-premium-icon" />
+        <span className={cn(isActive && "account-sidebar-active-label")}>
+          {t(link.labelKey)}
+        </span>
+      </Link>
+    );
+  };
+
   return (
     <aside className="w-full shrink-0 lg:w-[260px]">
       <div className="relative lg:hidden" ref={mobileMenuRef}>
@@ -161,12 +264,12 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
           aria-controls="account-mobile-menu"
         >
           <span className="flex min-w-0 items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[var(--xd-gold-bg-soft)] text-[var(--xd-gold-active)]">
+            <span className="xd-gold-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[var(--xd-gold-bg-soft)]">
               <ActiveIcon size={16} strokeWidth={1.8} />
             </span>
             <span className="min-w-0">
               <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--xd-gold-text)]">
-                {userDisplayName || t("common.myAccount")}
+                {hasStaffAccess ? staffUserLabel : userDisplayName || t("common.myAccount")}
               </span>
               <span className="block truncate text-[14px] font-bold text-[#050505]">
                 {t(activeLink.labelKey)}
@@ -188,27 +291,19 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
             className="absolute left-0 top-[calc(100%+8px)] z-40 w-full overflow-hidden rounded-[18px] border border-[var(--xd-gold-border-soft)] bg-white shadow-[0_18px_44px_rgba(5,5,5,0.12)] sm:w-[320px]"
           >
             <nav className="max-h-[min(70vh,520px)] overflow-y-auto p-2">
-              {visibleAccountLinks.map((link, index) => {
-                const Icon = link.icon;
-                const isActive = link.isActive(location);
-
-                return (
-                  <Link
-                    key={`${link.labelKey}-${index}`}
-                    href={link.href}
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-[12px] px-3.5 py-3 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]",
-                      isActive
-                        ? "bg-[var(--xd-gold)]/[0.14] text-[var(--xd-gold-active)]"
-                        : "text-[#8A8D9A] hover:text-[#050505]"
-                    )}
-                  >
-                    <Icon size={16} strokeWidth={1.8} />
-                    {t(link.labelKey)}
-                  </Link>
-                );
-              })}
+              {hasStaffAccess ? (
+                <>
+                  <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--xd-gold-text)]">
+                    {t("staffAccount.staffTools")}
+                  </p>
+                  {visibleStaffToolLinks.map(renderMobileLink)}
+                  <div className="mx-3 my-2 h-px bg-[#050505]/[0.07]" />
+                  <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[#717182]">
+                    {t("staffAccount.personalAccount")}
+                  </p>
+                  {staffPersonalLinks.map(renderMobileLink)}
+                </>
+              ) : accountLinks.map(renderMobileLink)}
 
               <div className="mx-3 my-2 h-px bg-[#050505]/[0.07]" />
 
@@ -230,35 +325,33 @@ export function AccountSidebar({ onLogout }: { onLogout?: () => void }) {
 
       <div className="hidden rounded-[24px] border border-[var(--xd-gold-active)]/15 bg-white/70 p-4 shadow-[0_12px_34px_rgba(5,5,5,0.04)] backdrop-blur lg:sticky lg:top-28 lg:block">
         <h2 className="px-3 text-[17px] font-bold text-[#050505]">
-          {t("common.myAccount")}
+          {hasStaffAccess ? t("staffAccount.staffAccount") : t("common.myAccount")}
         </h2>
         {userDisplayName && (
-          <p className="truncate px-3 pb-4 pt-1 text-[12px] font-semibold text-[#717182]">
-            {userDisplayName}
-          </p>
+          <div className="px-3 pb-4 pt-1">
+            <p className="truncate text-[12px] font-semibold text-[#717182]">{userDisplayName}</p>
+            {hasStaffAccess && (
+              <span className="mt-2 inline-flex rounded-full border border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--xd-gold-text)]">
+                {staffRoleLabel}
+              </span>
+            )}
+          </div>
         )}
 
         <nav className="flex flex-col gap-1">
-          {visibleAccountLinks.map((link, index) => {
-            const Icon = link.icon;
-            const isActive = link.isActive(location);
-
-            return (
-              <Link
-                key={`${link.labelKey}-${index}`}
-                href={link.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-[12px] px-3.5 py-3 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-active)]",
-                  isActive
-                    ? "bg-[var(--xd-gold)]/[0.14] text-[var(--xd-gold-active)]"
-                    : "text-[#8A8D9A] hover:bg-[var(--xd-gold-bg-soft)] hover:text-[#050505]"
-                )}
-              >
-                <Icon size={16} strokeWidth={1.8} />
-                {t(link.labelKey)}
-              </Link>
-            );
-          })}
+          {hasStaffAccess ? (
+            <>
+              <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--xd-gold-text)]">
+                {t("staffAccount.staffTools")}
+              </p>
+              {visibleStaffToolLinks.map(renderDesktopLink)}
+              <div className="mx-3 my-3 h-px bg-[#050505]/[0.07]" />
+              <p className="px-3 pb-1 pt-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#717182]">
+                {t("staffAccount.personalAccount")}
+              </p>
+              {staffPersonalLinks.map(renderDesktopLink)}
+            </>
+          ) : accountLinks.map(renderDesktopLink)}
 
           <div className="mx-3 my-4 h-px bg-[#050505]/[0.07]" />
 

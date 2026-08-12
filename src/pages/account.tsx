@@ -1,12 +1,36 @@
 import { useLocation } from "wouter";
-import { Camera, CheckCircle2 } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { Camera, CheckCircle2, ChevronDown } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Container } from "@/components/dental/Container";
 import { AccountSidebar } from "@/components/dental/AccountSidebar";
 import { Button } from "@/components/dental/Button";
+import { DeliveryZoneMultiSelect } from "@/components/dental/DeliveryZoneMultiSelect";
 import { useStore, type AuthUser } from "@/context/StoreContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { accountT } from "@/lib/accountI18n";
+import {
+  AuthApiError,
+  resolveAuthAssetUrl,
+  updateProfile,
+  uploadProfileImage,
+} from "@/services/auth";
+import {
+  getActiveDeliveryZones,
+  type ClinicLocationInput,
+  type DeliveryZone,
+} from "@/services/delivery";
+import {
+  CLINIC_SPECIALTIES,
+  DEFAULT_CLINIC_SPECIALTY,
+  normalizeClinicSpecialty,
+} from "@/lib/clinicSpecialties";
 import { cn } from "@/lib/utils";
 import { formatUserDisplayName } from "@/lib/userDisplayName";
 
@@ -14,14 +38,18 @@ type ProfileForm = {
   firstName: string;
   lastName: string;
   professionalRole: string;
+  clinicSpecialty: string;
   clinicName: string;
   email: string;
   phone: string;
   whatsapp: string;
+  clinicLocations: ClinicLocationInput[];
 };
 
 const fieldClassName =
   "h-14 w-full rounded-[14px] border border-[#050505]/10 bg-white/[0.55] px-4 text-[14px] font-medium text-[#050505] outline-none transition placeholder:text-[#B3B4BD] focus:border-[var(--xd-gold-active)] focus:ring-4 focus:ring-[var(--xd-gold-bg-soft)]";
+const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const PROFILE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function splitDisplayName(name?: string) {
   const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
@@ -39,10 +67,16 @@ function buildProfileFromUser(user: AuthUser | null): ProfileForm {
     firstName,
     lastName,
     professionalRole: user?.professionalRole ?? "Dental Professional",
+    clinicSpecialty: normalizeClinicSpecialty(user?.clinicSpecialty ?? DEFAULT_CLINIC_SPECIALTY),
     clinicName: user?.clinicName ?? "",
     email: user?.email ?? "",
     phone: user?.phone ?? "",
     whatsapp: user?.phone ?? "",
+    clinicLocations:
+      user?.clinicLocations?.map((location) => ({
+        deliveryZoneId: location.deliveryZoneId,
+        customArea: location.customArea,
+      })) ?? [],
   };
 }
 
@@ -72,15 +106,21 @@ function TextField({
   label,
   value,
   helper,
+  placeholder,
+  maxLength,
   type = "text",
   autoComplete,
+  disabled = false,
   onChange,
 }: {
   label: string;
   value: string;
   helper?: string;
+  placeholder?: string;
+  maxLength?: number;
   type?: "email" | "tel" | "text";
   autoComplete?: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
@@ -90,10 +130,45 @@ function TextField({
         type={type}
         value={value}
         autoComplete={autoComplete}
+        disabled={disabled}
+        placeholder={placeholder}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
-        className={fieldClassName}
+        className={cn(fieldClassName, disabled && "cursor-not-allowed bg-[#F5F4EF] text-[#9A9A9A]")}
       />
       {helper && <span className="mt-2 block text-[13px] leading-5 text-[#717182]">{helper}</span>}
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: readonly string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-[14px] font-semibold text-[#050505]">{label}</span>
+      <span className="relative block">
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={`${fieldClassName} appearance-none pr-10`}
+        >
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#9A9A9A]" size={16} />
+      </span>
     </label>
   );
 }
@@ -102,11 +177,20 @@ export default function AccountDashboard() {
   const [, navigate] = useLocation();
   const { signOut, currentUser, updateCurrentUser } = useStore();
   const { t, language } = useLanguage();
-  const photoInputRef = useRef<HTMLInputElement | null>(null);
   const [profile, setProfile] = useState<ProfileForm>(() => buildProfileFromUser(currentUser));
   const [draftProfile, setDraftProfile] = useState<ProfileForm>(() => buildProfileFromUser(currentUser));
-  const [profilePhotoName, setProfilePhotoName] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [photoMessage, setPhotoMessage] = useState<{
+    text: string;
+    error: boolean;
+  } | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const clinicLocationsRef = useRef<HTMLDivElement | null>(null);
 
   const fullName = `${draftProfile.firstName} ${draftProfile.lastName}`.trim();
   const profileDisplayName = formatUserDisplayName(
@@ -120,6 +204,10 @@ export default function AccountDashboard() {
       .join("")
       .slice(0, 2)
       .toUpperCase() || "XD";
+  const displayedProfileImage =
+    photoPreviewUrl ??
+    resolveAuthAssetUrl(currentUser?.profileImageUrl) ??
+    null;
 
   useEffect(() => {
     const nextProfile = buildProfileFromUser(currentUser);
@@ -127,13 +215,78 @@ export default function AccountDashboard() {
     setDraftProfile(nextProfile);
   }, [currentUser?.id]);
 
+  useEffect(() => {
+    const scrollToClinicLocations = () => {
+      if (window.location.hash !== "#clinic-locations") return;
+      window.requestAnimationFrame(() => {
+        clinicLocationsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        clinicLocationsRef.current
+          ?.querySelector<HTMLElement>("button, input")
+          ?.focus({ preventScroll: true });
+      });
+    };
+
+    scrollToClinicLocations();
+    window.addEventListener("hashchange", scrollToClinicLocations);
+    return () =>
+      window.removeEventListener("hashchange", scrollToClinicLocations);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+    },
+    [photoPreviewUrl]
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    getActiveDeliveryZones(controller.signal)
+      .then((activeZones) => {
+        const currentZones =
+          currentUser?.clinicLocations
+            ?.map((location) => location.deliveryZone)
+            .filter(Boolean) ?? [];
+        const mergedZones = new Map(
+          [...activeZones, ...currentZones].map((zone) => [zone.id, zone])
+        );
+        setDeliveryZones(
+          Array.from(mergedZones.values()).sort(
+            (left, right) =>
+              left.displayOrder - right.displayOrder ||
+              left.nameEn.localeCompare(right.nameEn)
+          )
+        );
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          setLocationError(
+            accountT(
+              t,
+              "profile.clinicLocationsLoadError",
+              "Delivery areas could not be loaded. Please try again."
+            )
+          );
+        }
+      });
+
+    return () => controller.abort();
+  }, [currentUser?.id, t]);
+
   const handleSignOut = async () => {
     setStatusMessage(null);
     await signOut();
     navigate("/signin");
   };
 
-  const updateDraftProfile = (key: keyof ProfileForm, value: string) => {
+  const updateDraftProfile = (
+    key: Exclude<keyof ProfileForm, "clinicLocations">,
+    value: string
+  ) => {
     setDraftProfile((current) => ({
       ...current,
       [key]: value,
@@ -143,41 +296,218 @@ export default function AccountDashboard() {
 
   const cancelChanges = () => {
     setDraftProfile(profile);
+    setLocationError(null);
     setStatusMessage(accountT(t, "profile.messages.changesDiscarded", "Changes discarded."));
   };
 
-  const saveChanges = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handlePhotoSelection = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || isUploadingPhoto) return;
 
-    const savedProfile: ProfileForm = {
-      firstName: draftProfile.firstName.trim(),
-      lastName: draftProfile.lastName.trim(),
-      professionalRole: draftProfile.professionalRole.trim(),
-      clinicName: draftProfile.clinicName.trim(),
-      email: draftProfile.email.trim(),
-      phone: draftProfile.phone.trim(),
-      whatsapp: draftProfile.whatsapp.trim(),
-    };
-    const savedName = `${savedProfile.firstName} ${savedProfile.lastName}`.trim();
+    if (!PROFILE_IMAGE_TYPES.has(file.type)) {
+      setPhotoMessage({
+        text: accountT(
+          t,
+          "profile.photoInvalidType",
+          "Choose a JPEG, PNG, or WebP image."
+        ),
+        error: true,
+      });
+      return;
+    }
 
-    setProfile(savedProfile);
-    setDraftProfile(savedProfile);
-    updateCurrentUser({
-      name: savedName || "Dental Professional",
-      professionalRole: savedProfile.professionalRole || "Dental Professional",
-      clinicName: savedProfile.clinicName,
-      email: savedProfile.email,
-      phone: savedProfile.phone,
-    });
-    setStatusMessage(accountT(t, "profile.messages.profileSaved", "Profile changes saved."));
+    if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+      setPhotoMessage({
+        text: accountT(
+          t,
+          "profile.photoTooLarge",
+          "Profile images must be 5 MB or smaller."
+        ),
+        error: true,
+      });
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreviewUrl(previewUrl);
+    setPhotoMessage(null);
+    setIsUploadingPhoto(true);
+
+    try {
+      const savedUser = await uploadProfileImage(file);
+      updateCurrentUser({
+        profileImageUrl: savedUser.profileImageUrl ?? undefined,
+      });
+      setPhotoPreviewUrl(null);
+      setPhotoMessage({
+        text: accountT(
+          t,
+          "profile.photoUploadSuccess",
+          "Profile photo updated successfully."
+        ),
+        error: false,
+      });
+    } catch (uploadError) {
+      setPhotoPreviewUrl(null);
+      const fallbackMessage = accountT(
+        t,
+        "profile.photoUploadFailed",
+        "Profile photo could not be uploaded. Please try again."
+      );
+      let uploadMessage = fallbackMessage;
+      if (uploadError instanceof AuthApiError) {
+        if (uploadError.status === 413) {
+          uploadMessage = accountT(
+            t,
+            "profile.photoTooLarge",
+            "Profile images must be 5 MB or smaller."
+          );
+        } else if (uploadError.status === 415) {
+          uploadMessage = accountT(
+            t,
+            "profile.photoInvalidType",
+            "Choose a JPEG, PNG, or WebP image."
+          );
+        } else if (uploadError.status === 400) {
+          uploadMessage = accountT(
+            t,
+            "profile.photoInvalidFile",
+            "The selected file does not contain a valid image."
+          );
+        }
+      }
+      setPhotoMessage({
+        text: uploadMessage,
+        error: true,
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
-  const handlePhotoSelected = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // Persists the profile via PATCH /api/auth/me; the local user state is only
+  // updated after the backend confirms the save. Email changes are not
+  // supported from this page (the field is read-only for the first launch).
+  const saveChanges = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSaving) return;
 
-    setProfilePhotoName(file.name);
-    setStatusMessage(accountT(t, "profile.messages.photoSelected", "Profile photo \"{fileName}\" selected.", { fileName: file.name }));
+    const savedName = `${draftProfile.firstName.trim()} ${draftProfile.lastName.trim()}`.trim();
+    if (savedName.length < 2) {
+      setStatusMessage(accountT(t, "profile.messages.nameRequired", "Please enter your name."));
+      return;
+    }
+
+    const clinicName = draftProfile.clinicName.trim();
+    if (draftProfile.clinicName.length > 0 && clinicName.length === 0) {
+      setStatusMessage(
+        accountT(
+          t,
+          "profile.messages.clinicNameWhitespace",
+          "Clinic name cannot contain only spaces."
+        )
+      );
+      return;
+    }
+    if (clinicName.length > 120) {
+      setStatusMessage(
+        accountT(
+          t,
+          "profile.messages.clinicNameTooLong",
+          "Clinic name must be 120 characters or fewer."
+        )
+      );
+      return;
+    }
+
+    const otherZone = deliveryZones.find((zone) => zone.slug === "other");
+    const otherLocation = otherZone
+      ? draftProfile.clinicLocations.find(
+          (location) => location.deliveryZoneId === otherZone.id
+        )
+      : undefined;
+    if (
+      otherLocation &&
+      (otherLocation.customArea?.trim().length ?? 0) < 2
+    ) {
+      setLocationError(
+        accountT(
+          t,
+          "profile.clinicLocationsOtherRequired",
+          "Enter the clinic area for Other."
+        )
+      );
+      return;
+    }
+    if (
+      profile.clinicLocations.length > 0 &&
+      draftProfile.clinicLocations.length === 0
+    ) {
+      setLocationError(
+        accountT(
+          t,
+          "profile.clinicLocationsRequired",
+          "Select at least one clinic location."
+        )
+      );
+      return;
+    }
+
+    setIsSaving(true);
+    setStatusMessage(null);
+    setLocationError(null);
+    try {
+      const savedUser = await updateProfile({
+        name: savedName,
+        phone: draftProfile.phone.trim(),
+        professionalRole: draftProfile.professionalRole.trim(),
+        clinicSpecialty: normalizeClinicSpecialty(draftProfile.clinicSpecialty),
+        clinicName,
+        ...(draftProfile.clinicLocations.length > 0
+          ? {
+              clinicLocations: draftProfile.clinicLocations.map((location) => ({
+                deliveryZoneId: location.deliveryZoneId,
+                customArea: location.customArea?.trim() || undefined,
+              })),
+            }
+          : {}),
+      });
+
+      updateCurrentUser({
+        name: savedUser.name,
+        professionalRole: savedUser.professionalRole ?? undefined,
+        clinicSpecialty: savedUser.clinicSpecialty,
+        clinicName: savedUser.clinicName ?? undefined,
+        phone: savedUser.phone ?? undefined,
+        clinicLocations: savedUser.clinicLocations,
+      });
+      const savedProfile: ProfileForm = {
+        ...draftProfile,
+        ...splitDisplayName(savedUser.name),
+        professionalRole: savedUser.professionalRole ?? "",
+        clinicSpecialty: normalizeClinicSpecialty(savedUser.clinicSpecialty),
+        clinicName: savedUser.clinicName ?? "",
+        phone: savedUser.phone ?? "",
+        clinicLocations: savedUser.clinicLocations.map((location) => ({
+          deliveryZoneId: location.deliveryZoneId,
+          customArea: location.customArea,
+        })),
+      };
+      setProfile(savedProfile);
+      setDraftProfile(savedProfile);
+      setStatusMessage(accountT(t, "profile.messages.profileSaved", "Profile changes saved."));
+    } catch (saveError) {
+      setStatusMessage(
+        saveError instanceof AuthApiError && saveError.status !== 0
+          ? saveError.message
+          : accountT(t, "profile.messages.profileSaveFailed", "Profile changes could not be saved. Please try again.")
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -211,8 +541,20 @@ export default function AccountDashboard() {
             <section className="rounded-[26px] border border-[var(--xd-gold-border-soft)] bg-white/70 p-7 shadow-[0_12px_34px_rgba(5,5,5,0.04)] backdrop-blur sm:p-8">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] text-[22px] font-bold text-[var(--xd-gold-active)]">
-                    {initials || "XD"}
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] text-[22px] font-bold text-[var(--xd-gold-active)]">
+                    {displayedProfileImage ? (
+                      <img
+                        src={displayedProfileImage}
+                        alt={accountT(
+                          t,
+                          "profile.photoAlt",
+                          "Profile photo"
+                        )}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      initials || "XD"
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -226,32 +568,50 @@ export default function AccountDashboard() {
                       {draftProfile.professionalRole}
                     </p>
                     <p className="mt-1 break-words text-[13px] text-[#717182]">{draftProfile.email}</p>
-                    {profilePhotoName && (
-                      <p className="mt-1 text-[12px] font-semibold text-[var(--xd-gold-text)]">
-                        {accountT(t, "profile.selectedPhoto", "Selected photo: {fileName}", { fileName: profilePhotoName })}
-                      </p>
-                    )}
                   </div>
                 </div>
 
-                <input
-                  ref={photoInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={handlePhotoSelected}
-                  className="sr-only"
-                  aria-label={accountT(t, "profile.chooseProfilePhoto", "Choose profile photo")}
-                />
-                <Button
-                  type="button"
-                  onClick={() => photoInputRef.current?.click()}
-                  variant="secondary"
-                  size="sm"
-                  className="h-12 gap-2 rounded-full px-5 text-[13px] text-[var(--xd-gold-text)]"
-                >
-                  <Camera size={15} />
-                  {accountT(t, "profile.changePhoto", "Change Photo")}
-                </Button>
+                <div className="shrink-0">
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    onChange={handlePhotoSelection}
+                    data-testid="profile-photo-input"
+                  />
+                  <Button
+                    type="button"
+                    disabled={isUploadingPhoto}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="h-12 gap-2 rounded-full px-5 text-[13px] text-[var(--xd-gold-text)]"
+                    data-testid="profile-photo-button"
+                  >
+                    <Camera size={15} />
+                    {isUploadingPhoto
+                      ? accountT(
+                          t,
+                          "profile.uploadingPhoto",
+                          "Uploading..."
+                        )
+                      : accountT(t, "profile.changePhoto", "Change Photo")}
+                  </Button>
+                  {photoMessage && (
+                    <p
+                      role={photoMessage.error ? "alert" : "status"}
+                      className={cn(
+                        "mt-2 max-w-[240px] text-[12px] font-medium",
+                        photoMessage.error
+                          ? "text-[#9B6B18]"
+                          : "text-[#16803C]"
+                      )}
+                    >
+                      {photoMessage.text}
+                    </p>
+                  )}
+                </div>
               </div>
             </section>
 
@@ -278,12 +638,88 @@ export default function AccountDashboard() {
                     value={draftProfile.professionalRole}
                     onChange={(value) => updateDraftProfile("professionalRole", value)}
                   />
+                  <SelectField
+                    label={accountT(t, "profile.clinicSpecialty", "Clinic Specialty")}
+                    value={draftProfile.clinicSpecialty}
+                    options={CLINIC_SPECIALTIES}
+                    onChange={(value) => updateDraftProfile("clinicSpecialty", value)}
+                  />
                   <TextField
                     label={accountT(t, "profile.clinicName", "Clinic Name")}
                     value={draftProfile.clinicName}
                     autoComplete="organization"
+                    placeholder={accountT(
+                      t,
+                      "profile.clinicNamePlaceholder",
+                      "Enter your clinic name"
+                    )}
+                    maxLength={120}
                     onChange={(value) => updateDraftProfile("clinicName", value)}
                   />
+                  <div
+                    id="clinic-locations"
+                    ref={clinicLocationsRef}
+                    className="scroll-mt-28 space-y-2 md:col-span-2"
+                  >
+                    <DeliveryZoneMultiSelect
+                      zones={deliveryZones}
+                      value={draftProfile.clinicLocations}
+                      onChange={(clinicLocations) => {
+                        setDraftProfile((current) => ({
+                          ...current,
+                          clinicLocations,
+                        }));
+                        setLocationError(null);
+                        setStatusMessage(null);
+                      }}
+                      label={accountT(
+                        t,
+                        "profile.clinicLocations",
+                        "Clinic locations"
+                      )}
+                      placeholder={accountT(
+                        t,
+                        "profile.clinicLocationsPlaceholder",
+                        "Select your clinic locations"
+                      )}
+                      addAnotherPlaceholder={accountT(
+                        t,
+                        "profile.clinicLocationsAddAnother",
+                        "Add another location"
+                      )}
+                      searchPlaceholder={accountT(
+                        t,
+                        "profile.clinicLocationsSearch",
+                        "Search delivery areas"
+                      )}
+                      emptyText={accountT(
+                        t,
+                        "profile.clinicLocationsEmpty",
+                        "No delivery areas found."
+                      )}
+                      otherPlaceholder={accountT(
+                        t,
+                        "profile.clinicLocationsOtherPlaceholder",
+                        "Enter your clinic area"
+                      )}
+                      otherLabel={accountT(
+                        t,
+                        "profile.clinicLocationsOtherLabel",
+                        "Other location name"
+                      )}
+                      error={locationError ?? undefined}
+                      disabled={isSaving}
+                      inputClassName="min-h-14 rounded-[14px] bg-white/[0.55] px-3"
+                      testId="profile-clinic-locations"
+                    />
+                    <p className="text-[13px] leading-5 text-[#717182]">
+                      {accountT(
+                        t,
+                        "profile.clinicLocationsDescription",
+                        "We use these locations only to show delivery offers that apply to your clinic."
+                      )}
+                    </p>
+                  </div>
                 </div>
               </SectionCard>
 
@@ -297,7 +733,8 @@ export default function AccountDashboard() {
                     type="email"
                     value={draftProfile.email}
                     autoComplete="email"
-                    helper={accountT(t, "profile.verifiedEmail", "Verified account email.")}
+                    disabled
+                    helper={accountT(t, "profile.emailReadOnly", "To change your account email, please contact support.")}
                     onChange={(value) => updateDraftProfile("email", value)}
                   />
                   <TextField
@@ -312,7 +749,8 @@ export default function AccountDashboard() {
                     type="tel"
                     value={draftProfile.whatsapp}
                     autoComplete="tel"
-                    helper={accountT(t, "profile.whatsappHelper", "Used only for order and delivery support when needed.")}
+                    disabled
+                    helper={accountT(t, "profile.fieldComingSoon", "Saving this field will be available soon.")}
                     onChange={(value) => updateDraftProfile("whatsapp", value)}
                   />
                 </div>
@@ -335,9 +773,12 @@ export default function AccountDashboard() {
                   type="submit"
                   variant="primary"
                   size="sm"
-                  className="h-12 rounded-full bg-[var(--xd-gold)] px-6 text-[14px] font-semibold text-[#050505]"
+                  disabled={isSaving}
+                  className="h-12 rounded-full px-6 text-[14px] font-semibold"
                 >
-                  {accountT(t, "common.saveChanges", "Save Changes")}
+                  {isSaving
+                    ? accountT(t, "common.saving", "Saving...")
+                    : accountT(t, "common.saveChanges", "Save Changes")}
                 </Button>
               </div>
             </form>

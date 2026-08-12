@@ -5,6 +5,10 @@ import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
 import { ProductCard } from "./ProductCard";
 import { useLanguage } from "@/context/LanguageContext";
+import {
+  useDirectionalNavigation,
+  type HorizontalNavigationAction,
+} from "@/hooks/use-directional-navigation";
 import type { Product } from "@/types/product";
 
 type RtlScrollModel = "negative" | "reverse" | "default";
@@ -101,6 +105,7 @@ export function ProductCarouselRow({
 }: ProductCarouselRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { isRtl, t } = useLanguage();
+  const { controlOrder } = useDirectionalNavigation();
   const prefersReducedMotion = useReducedMotion();
 
   const getScrollAmount = () => {
@@ -115,14 +120,12 @@ export function ProductCarouselRow({
     return firstCard.getBoundingClientRect().width + gap;
   };
 
-  const scroll = (direction: "left" | "right") => {
+  const scroll = (action: HorizontalNavigationAction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-      const directionMultiplier = isRtl
-        ? direction === "left" ? 1 : -1
-        : direction === "left" ? -1 : 1;
       const nextLeft =
-        getLogicalScrollLeft(current, isRtl) + directionMultiplier * getScrollAmount();
+        getLogicalScrollLeft(current, isRtl) +
+        (action === "next" ? 1 : -1) * getScrollAmount();
 
       scrollToLogicalLeft(current, nextLeft, isRtl, prefersReducedMotion ? "auto" : "smooth");
     }
@@ -171,35 +174,28 @@ export function ProductCarouselRow({
               <Link href={viewAllLink}>{t("common.viewAll")}</Link>
             </Button>
           )}
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              onClick={() => scroll("left")}
-              variant="secondary"
-              size="icon"
-              className="h-10 w-10"
-              aria-label={isRtl ? "Next products" : "Previous products"}
-            >
-              <DirectionalIcon
-                direction={isRtl ? "forward" : "back"}
-                family="chevron"
-                size={20}
-              />
-            </Button>
-            <Button
-              type="button"
-              onClick={() => scroll("right")}
-              variant="secondary"
-              size="icon"
-              className="h-10 w-10"
-              aria-label={isRtl ? "Previous products" : "Next products"}
-            >
-              <DirectionalIcon
-                direction={isRtl ? "back" : "forward"}
-                family="chevron"
-                size={20}
-              />
-            </Button>
+          <div className="flex items-center gap-2" dir="ltr">
+            {controlOrder.map((action) => (
+              <Button
+                key={action}
+                type="button"
+                onClick={() => scroll(action)}
+                variant="secondary"
+                size="icon"
+                className="h-10 w-10"
+                aria-label={
+                  action === "next"
+                    ? t("common.nextProducts", { fallback: "Next products" })
+                    : t("common.previousProducts", { fallback: "Previous products" })
+                }
+              >
+                <DirectionalIcon
+                  direction={action}
+                  family="chevron"
+                  size={20}
+                />
+              </Button>
+            ))}
           </div>
         </div>
       </div>

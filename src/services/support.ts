@@ -1,4 +1,5 @@
 import { apiRequest } from "./http";
+import type { EmailDelivery } from "./emailDeliveries";
 
 export type SupportThread = {
   id: string;
@@ -14,6 +15,7 @@ export type SupportThread = {
   latestMessage: string;
   createdAt: string;
   updatedAt: string;
+  emailDelivery?: EmailDelivery | null;
 };
 
 export type SupportMessage = {
@@ -26,8 +28,8 @@ export type SupportMessage = {
   createdAt: string;
 };
 
-export async function getMySupportThreads() {
-  const result = await apiRequest<{ supportThreads: SupportThread[] }>("/support/threads/my");
+export async function getMySupportThreads(signal?: AbortSignal) {
+  const result = await apiRequest<{ supportThreads: SupportThread[] }>("/support/threads/my", { signal });
   return result.supportThreads;
 }
 
@@ -45,14 +47,17 @@ export async function createSupportThread(input: {
   return result.supportThread;
 }
 
-export async function getSupportMessages(threadId: string, admin = false) {
+export async function getSupportMessages(threadId: string, admin = false, signal?: AbortSignal) {
   const prefix = admin ? "/admin/support" : "/support";
-  return apiRequest<{ supportThread: SupportThread; messages: SupportMessage[] }>(`${prefix}/threads/${threadId}/messages`);
+  return apiRequest<{ supportThread: SupportThread; messages: SupportMessage[] }>(
+    `${prefix}/threads/${threadId}/messages`,
+    { signal }
+  );
 }
 
 export async function sendSupportMessage(threadId: string, body: string, admin = false) {
   const prefix = admin ? "/admin/support" : "/support";
-  return apiRequest<{ supportThread: SupportThread; message: SupportMessage }>(`${prefix}/threads/${threadId}/messages`, {
+  return apiRequest<{ supportThread: SupportThread; message: SupportMessage; autoResponse: SupportMessage | null }>(`${prefix}/threads/${threadId}/messages`, {
     method: "POST",
     body: JSON.stringify({ body }),
   });

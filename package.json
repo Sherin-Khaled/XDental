@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
+  },
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "dev:server": "npm --prefix server run dev",
@@ -11,6 +14,13 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "start:server": "npm --prefix server start",
     "check:server": "npm --prefix server run check",
+    "test:account": "node --experimental-strip-types --test src/lib/accountPhase1.test.ts src/lib/accountPhase2.test.ts",
+    "test:phase4": "node --experimental-strip-types --test src/lib/checkoutIdempotency.test.ts src/lib/phase4Presentation.test.ts",
+    "test:phase5": "node --experimental-strip-types --test src/lib/checkoutIdempotency.test.ts src/lib/welcomeRewardsPopup.test.ts",
+    "test:admin-ui": "node --experimental-strip-types --test src/lib/adminUiStabilization.test.ts",
+    "test:phase7b": "node --experimental-strip-types --test src/lib/adminCatalogPhase7bLogic.test.ts src/lib/adminCatalogPhase7bUi.test.ts",
+    "test:phase7c": "node --experimental-strip-types --test src/lib/adminCatalogPhase7cUi.test.ts",
+    "test:launch-readiness": "node --experimental-strip-types --test src/lib/catalogLaunchReadiness.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "tsc -p tsconfig.json --noEmit"
   },

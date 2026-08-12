@@ -1,24 +1,46 @@
 import { useState, type FormEvent } from "react";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { MessageCircle, Phone } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { Button } from "@/components/dental/Button";
 import { useLanguage } from "@/context/LanguageContext";
+import { subscribeToNewsletter } from "@/services/contact";
+import { ApiError } from "@/services/http";
 
 const CONTACT_ITEMS = [
-  { Icon: Phone, text: "+20 100 123 4567", labelKey: "home.contact.call" },
-  { Icon: Mail, text: "support@xdentalstore.com", labelKey: "home.contact.email" },
-  { Icon: MapPin, text: "15 Dental Trade Center, Cairo", labelKey: "home.contact.visit" },
+  { Icon: MessageCircle, text: "01035777335", labelKey: "home.contact.ordersWhatsApp" },
+  { Icon: Phone, text: "01552229405", labelKey: "home.contact.mainSupport" },
+  { Icon: Phone, text: "01065057035", labelKey: "home.contact.branch" },
 ];
 
 export function ContactNewsletterSection() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
 
-  const handleNewsletterSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleNewsletterSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
-    setEmail("");
+    if (isSubscribing) return;
+    const website = String(new FormData(event.currentTarget).get("website") ?? "").trim();
+
+    setIsSubscribing(true);
+    setSubscribeError(null);
+    try {
+      await subscribeToNewsletter({ email, source: "contact", locale: language, website });
+      setSubmitted(true);
+      setEmail("");
+    } catch (error) {
+      setSubscribeError(
+        error instanceof ApiError && error.status !== 0
+          ? error.message
+          : t("home.contact.subscribeError", {
+              fallback: "The subscription could not be completed. Please try again.",
+            })
+      );
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -59,7 +81,7 @@ export function ContactNewsletterSection() {
               {CONTACT_ITEMS.map(({ Icon, text, labelKey }) => (
                 <div key={labelKey} className="flex items-center gap-4">
                   <div
-                    className="flex shrink-0 items-center justify-center"
+                    className="xd-icon-card-surface flex shrink-0 items-center justify-center"
                     style={{
                       width: 44,
                       height: 44,
@@ -68,7 +90,11 @@ export function ContactNewsletterSection() {
                       border: "1px solid var(--xd-gold-border-soft)",
                     }}
                   >
-                    <Icon size={17} strokeWidth={1.75} style={{ color: "var(--xd-gold-text)" }} />
+                    <Icon
+                      size={17}
+                      strokeWidth={1.75}
+                      className="xd-icon-amber xd-premium-icon"
+                    />
                   </div>
                   <div>
                     <div className="mb-0.5 text-[11px]" style={{ color: "var(--xd-muted-2)" }}>
@@ -165,6 +191,7 @@ export function ContactNewsletterSection() {
                 </div>
               ) : (
                 <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row" style={{ gap: 12 }}>
+                  <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-10000px] h-px w-px overflow-hidden" />
                   <input
                     type="email"
                     value={email}
@@ -192,13 +219,21 @@ export function ContactNewsletterSection() {
                   />
                   <Button
                     type="submit"
+                    disabled={isSubscribing}
                     variant="primary"
                     className="h-[52px] shrink-0 gap-1.5 px-6 text-[15px] font-semibold"
                   >
-                    {t("common.subscribe")}
+                    {isSubscribing
+                      ? t("common.saving", { fallback: "Saving..." })
+                      : t("common.subscribe")}
                     <DirectionalIcon direction="forward" style={{ width: 15, height: 15 }} />
                   </Button>
                 </form>
+              )}
+              {subscribeError && (
+                <p role="alert" className="mt-3 text-[13px] font-semibold text-[#C62828]">
+                  {subscribeError}
+                </p>
               )}
             </div>
           </div>

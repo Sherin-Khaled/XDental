@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -23,6 +23,8 @@ import { DentalSelect, type DentalSelectOption } from "@/components/dental/Selec
 import { useLanguage } from "@/context/LanguageContext";
 import { accountT, accountValue } from "@/lib/accountI18n";
 import { cn } from "@/lib/utils";
+import { presentSupportMessageBody } from "@/lib/supportMessagePresentation";
+import { calculateSupportSummary } from "@/lib/supportSummary";
 import {
   createSupportThread,
   getMySupportThreads,
@@ -315,7 +317,7 @@ function TicketCard({
         </div>
 
         <div className="mt-4 inline-flex max-w-full rounded-[10px] border border-[var(--xd-info-text)]/10 bg-[var(--xd-info-bg)] px-3 py-2 text-[12px] font-semibold leading-5 text-[var(--xd-info-text)]">
-          {accountT(t, "support.latestLabel", "Latest")}: {accountValue(t, ticket.latest)}
+          {accountT(t, "support.latestLabel", "Latest")}: {presentSupportMessageBody(t, accountValue(t, ticket.latest))}
         </div>
       </div>
 
@@ -359,7 +361,7 @@ function TicketCard({
                     : "bg-[var(--xd-info-bg)] text-[var(--xd-info-text)]"
                 )}>
                   <p className="mb-1 text-[10px] font-bold uppercase tracking-wide opacity-70">{message.senderRole}</p>
-                  <p>{message.body}</p>
+                  <p>{presentSupportMessageBody(t, message.body)}</p>
                 </div>
               </div>
             )) : (
@@ -569,42 +571,65 @@ export default function AccountSupportTickets() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
   const [newTicketForm, setNewTicketForm] = useState<NewTicketForm>(emptyNewTicket);
+  const refreshRequestId = useRef(0);
+  const refreshController = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    getMySupportThreads()
-      .then(async (threads) => {
-        if (!active) return;
-        setTickets(threads.map((thread) => toTicket(thread)));
-        const requestedThread = new URLSearchParams(window.location.search).get("thread");
-        if (requestedThread && threads.some((thread) => thread.id === requestedThread)) {
-          const result = await getSupportMessages(requestedThread);
-          if (active) {
-            setTickets((current) => current.map((ticket) => ticket.id === requestedThread ? toTicket(result.supportThread, result.messages) : ticket));
-            setExpandedTicketId(requestedThread);
-          }
-        }
-      })
-      .catch(() => {
-        if (active) setStatusMessage(accountT(t, "support.loadFailed", "Failed to load support tickets."));
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+  const refreshTickets = useCallback(async (showLoading = false) => {
+    refreshController.current?.abort();
+    const controller = new AbortController();
+    refreshController.current = controller;
+    const requestId = ++refreshRequestId.current;
+    if (showLoading) setIsLoading(true);
+
+    try {
+      const threads = await getMySupportThreads(controller.signal);
+      if (controller.signal.aborted || requestId !== refreshRequestId.current) return;
+      setTickets((current) =>
+        threads.map((thread) => {
+          const previous = current.find((ticket) => ticket.id === thread.id);
+          return toTicket(thread, previous?.messages);
+        })
+      );
+
+      const requestedThread = new URLSearchParams(window.location.search).get("thread");
+      if (requestedThread && threads.some((thread) => thread.id === requestedThread)) {
+        const result = await getSupportMessages(requestedThread, false, controller.signal);
+        if (controller.signal.aborted || requestId !== refreshRequestId.current) return;
+        setTickets((current) =>
+          current.map((ticket) =>
+            ticket.id === requestedThread
+              ? toTicket(result.supportThread, result.messages)
+              : ticket
+          )
+        );
+        setExpandedTicketId(requestedThread);
+      }
+    } catch {
+      if (!controller.signal.aborted && requestId === refreshRequestId.current) {
+        setStatusMessage(accountT(t, "support.loadFailed", "Failed to load support tickets."));
+      }
+    } finally {
+      if (requestId === refreshRequestId.current) setIsLoading(false);
+    }
   }, [t]);
 
-  const stats = useMemo(
-    () => ({
-      open: tickets.filter((ticket) => ticket.status === "Open").length,
-      waiting: tickets.filter((ticket) => ticket.status === "Waiting for Support").length,
-      resolved: tickets.filter((ticket) => ticket.status === "Resolved").length,
-      urgent: tickets.filter((ticket) => ticket.priority === "Urgent").length,
-    }),
-    [tickets]
-  );
+  useEffect(() => {
+    void refreshTickets(true);
+    const handleFocus = () => void refreshTickets();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void refreshTickets();
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      refreshRequestId.current += 1;
+      refreshController.current?.abort();
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refreshTickets]);
+
+  const stats = useMemo(() => calculateSupportSummary(tickets), [tickets]);
 
   const filteredTickets = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -661,6 +686,7 @@ export default function AccountSupportTickets() {
       setNewTicketForm(emptyNewTicket);
       setIsNewTicketOpen(false);
       setStatusMessage(accountT(t, "support.ticketOpened", "Ticket #{ticketNumber} opened.", { ticketNumber: thread.ticketNumber }));
+      void refreshTickets();
     } catch {
       setStatusMessage(accountT(t, "support.sendFailed", "Failed to send message. Please try again."));
     }
@@ -671,11 +697,16 @@ export default function AccountSupportTickets() {
     try {
       const result = await sendSupportMessage(ticket.id, replyDraft);
       setTickets((current) => current.map((item) => item.id === ticket.id
-        ? toTicket(result.supportThread, [...(item.messages ?? []), result.message])
+        ? toTicket(result.supportThread, [
+            ...(item.messages ?? []),
+            result.message,
+            ...(result.autoResponse ? [result.autoResponse] : []),
+          ])
         : item));
       setReplyTicketId(null);
       setReplyDraft("");
       setStatusMessage(accountT(t, "support.replyAdded", "Reply added to Ticket #{ticketNumber}.", { ticketNumber: ticket.ticketNumber }));
+      void refreshTickets();
     } catch {
       setStatusMessage(accountT(t, "support.sendFailed", "Failed to send message. Please try again."));
     }
@@ -745,7 +776,7 @@ export default function AccountSupportTickets() {
             {isLoading && <div role="status" className="text-[13px] font-semibold text-[#717182]">{accountT(t, "common.loading", "Loading...")}</div>}
 
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard value={stats.open} label={accountValue(t, "Open")} />
+              <StatCard value={stats.active} label={accountValue(t, "Active Tickets")} />
               <StatCard value={stats.waiting} label={accountValue(t, "Waiting for Support")} />
               <StatCard value={stats.resolved} label={accountValue(t, "Resolved")} />
               <StatCard value={stats.urgent} label={accountValue(t, "Urgent")} />

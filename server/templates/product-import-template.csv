@@ -1,4 +1,4 @@
-externalProductId,name,brand,sku,category,description,price,stockQuantity,isAvailable,imageUrl,sourceSystem
-DEMO-1001,Prophy Paste Mint,Demo Dental,DD-PP-001,Prophylaxis,Mint polishing paste sample,125.50,40,true,https://example.com/images/prophy-paste.jpg,EXCEL_IMPORT
-DEMO-1002,Disposable Saliva Ejectors,Sample Supply,SS-SE-100,Disposables,Flexible sample saliva ejectors,89.00,120,yes,,EXCEL_IMPORT
-DEMO-1003,LED Curing Light Sleeve,Example Med,EM-CLS-010,Infection Control,Disposable sample protective sleeve,45.75,0,false,,NEWACC
+﻿sku,name,slug,brand,category,subcategory,price,stockQuantity,status,isAvailable,outOfStock,imageUrl,description,externalProductId,sourceSystem
+DD-CP-001,Universal Nano Composite A2,universal-nano-composite-a2,Demo Dental,Restorative,Composite,125.50,40,ACTIVE,true,false,https://example.com/images/composite-a2.jpg,Light-cure nano composite sample,DEMO-1001,EXCEL_IMPORT
+SS-RF-100,Rotary File Set 25mm,,Sample Supply,Endodontics,Rotary Files,89.00,120,ACTIVE,true,false,,NiTi rotary file sample set,DEMO-1002,EXCEL_IMPORT
+EM-GL-010,Nitrile Examination Gloves M,,Example Med,Consumables,Gloves,45.75,0,OUT_OF_STOCK,false,true,,Powder-free nitrile gloves sample,DEMO-1003,NEWACC

@@ -2,17 +2,21 @@ import * as React from "react"
 import { MoreHorizontal } from "lucide-react"
 
 import { DirectionalIcon } from "@/components/DirectionalIcon"
+import { useLanguage } from "@/context/LanguageContext"
 import { cn } from "@/lib/utils"
 import { ButtonProps, buttonVariants } from "@/components/ui/button"
 
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
-  <nav
-    role="navigation"
-    aria-label="pagination"
-    className={cn("mx-auto flex w-full justify-center", className)}
-    {...props}
-  />
-)
+const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => {
+  const { t } = useLanguage()
+  return (
+    <nav
+      role="navigation"
+      aria-label={t("common.pagination", { fallback: "Pagination" })}
+      className={cn("mx-auto flex w-full justify-center", className)}
+      {...props}
+    />
+  )
+}
 Pagination.displayName = "Pagination"
 
 const PaginationContent = React.forwardRef<
@@ -63,33 +67,39 @@ PaginationLink.displayName = "PaginationLink"
 const PaginationPrevious = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
-    aria-label="Go to previous page"
-    size="default"
-    className={cn("gap-1 pl-2.5", className)}
-    {...props}
-  >
-    <DirectionalIcon direction="back" family="chevron" className="h-4 w-4" />
-    <span>Previous</span>
-  </PaginationLink>
-)
+}: React.ComponentProps<typeof PaginationLink>) => {
+  const { t } = useLanguage()
+  return (
+    <PaginationLink
+      aria-label={t("common.previousPage", { fallback: "Previous page" })}
+      size="default"
+      className={cn("gap-1 ps-2.5", className)}
+      {...props}
+    >
+      <DirectionalIcon direction="previous" family="chevron" className="h-4 w-4" />
+      <span>{t("common.previous", { fallback: "Previous" })}</span>
+    </PaginationLink>
+  )
+}
 PaginationPrevious.displayName = "PaginationPrevious"
 
 const PaginationNext = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
-    aria-label="Go to next page"
-    size="default"
-    className={cn("gap-1 pr-2.5", className)}
-    {...props}
-  >
-    <span>Next</span>
-    <DirectionalIcon direction="forward" family="chevron" className="h-4 w-4" />
-  </PaginationLink>
-)
+}: React.ComponentProps<typeof PaginationLink>) => {
+  const { t } = useLanguage()
+  return (
+    <PaginationLink
+      aria-label={t("common.nextPage", { fallback: "Next page" })}
+      size="default"
+      className={cn("gap-1 pe-2.5", className)}
+      {...props}
+    >
+      <span>{t("common.next", { fallback: "Next" })}</span>
+      <DirectionalIcon direction="next" family="chevron" className="h-4 w-4" />
+    </PaginationLink>
+  )
+}
 PaginationNext.displayName = "PaginationNext"
 
 const PaginationEllipsis = ({
