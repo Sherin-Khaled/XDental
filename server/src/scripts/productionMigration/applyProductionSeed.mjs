@@ -13,8 +13,10 @@
  * Supabase project exists yet for it to target.
  *
  * Insert order matters for FK integrity and is fixed here:
- *   1. Brand, Permission, DeliveryZone, HeroSlide (no dependencies on
- *      anything else in the bundle)
+ *   1. Brand, Permission, DeliveryZone, HeroSlide, LoyaltyProgramSettings
+ *      (no dependencies on anything else in the bundle — the loyalty
+ *      settings row is seeded with enabled: false, see
+ *      exportProductionSeed.mjs for why it's required at all)
  *   2. Category (topologically pre-sorted parent-before-child by the
  *      export step; inserted in that exact order)
  *   3. Product (depends on Brand.id / Category.id already existing)
@@ -86,6 +88,7 @@ async function main() {
     deliveryZone: await prisma.deliveryZone.count(),
     heroSlide: await prisma.heroSlide.count(),
     permission: await prisma.permission.count(),
+    loyaltyProgramSettings: await prisma.loyaltyProgramSettings.count(),
   };
   const nonEmpty = Object.entries(existingCounts).filter(([, count]) => count > 0);
   if (nonEmpty.length > 0) {
@@ -118,6 +121,9 @@ async function main() {
     if (bundle.tables.permission.length) await tx.permission.createMany({ data: bundle.tables.permission });
     if (bundle.tables.deliveryZone.length) await tx.deliveryZone.createMany({ data: bundle.tables.deliveryZone });
     if (bundle.tables.heroSlide.length) await tx.heroSlide.createMany({ data: bundle.tables.heroSlide });
+    if (bundle.tables.loyaltyProgramSettings?.length) {
+      await tx.loyaltyProgramSettings.createMany({ data: bundle.tables.loyaltyProgramSettings });
+    }
     // Category rows are pre-sorted parent-before-child by the export step;
     // createMany does not guarantee row order execution, so insert
     // sequentially here to respect the self-referential FK.

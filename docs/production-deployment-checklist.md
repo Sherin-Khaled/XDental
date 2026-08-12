@@ -64,6 +64,25 @@ directly in Hostinger's environment configuration instead.
 - `MAIL_ENABLED` / `SMTP_*` — email sending no-ops safely when disabled; no primary user action (signup, order, contact) depends on it succeeding
 - `WEB_PUSH_ENABLED` / `WEB_PUSH_VAPID_*` — push notifications; missing config doesn't crash startup or break the frontend prompt
 
+## Known accepted security findings
+
+**`uuid` (moderate, via `exceljs@4.4.0 → uuid@8.3.2`)** — `GHSA-w5hq-g745-h8pq`,
+a missing buffer-bounds check in `uuid`'s `v3`/`v5`/`v6` functions when a
+`buf` argument is explicitly passed. Accepted as non-exploitable in this
+codebase: traced every `uuid` call site inside `exceljs` (the only
+consumer of `uuid` here, used by the production admin catalog-import
+Excel-upload feature) — exactly one file
+(`cf-rule-ext-xform.js`) imports `uuid`, and it calls only `uuidv4()` with
+zero arguments. `v4` is not the affected function, and the affected
+functions are never called with a `buf` argument anywhere in this
+dependency tree. `exceljs@4.4.0` is the latest published 4.x release and
+still depends on the vulnerable `uuid@^8.3.0`; the only fix `npm audit`
+offers is downgrading to `exceljs@3.4.0` (`isSemVerMajor: true`), which is
+a breaking regression, not a fix — not applied. Revisit if `exceljs`
+publishes a release that bumps its own `uuid` dependency, or if a future
+feature adds a new `uuid` v3/v5/v6 call site with an explicit `buf`
+argument (search codebase for this before adding one).
+
 ## Pre-flight order (for when this actually runs — not done yet)
 
 1. Create Supabase project → get `DATABASE_URL` (+ `DIRECT_URL` if pooled)

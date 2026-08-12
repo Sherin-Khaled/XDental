@@ -33,6 +33,19 @@
  *   - HeroSlide:    the 3 currently PUBLISHED slides (excludes any DRAFT)
  *   - Permission:   all rows — role/permission definitions are system
  *                    configuration, not customer data
+ *   - LoyaltyProgramSettings: ONE synthesized row, `enabled: false`,
+ *                    every other field left at the schema's own documented
+ *                    defaults (not invented, not read from the local DB —
+ *                    see LOYALTY_SETTINGS_SAFE_DEFAULT below). Required
+ *                    because `getLoyaltyProgramSettings()` in
+ *                    loyalty.service.js upserts this singleton on first
+ *                    read with `enabled: true` and real default point
+ *                    values if the row is missing, and that read happens
+ *                    from an unauthenticated public endpoint
+ *                    (`getPublicLoyaltySettings`) — so a genuinely absent
+ *                    row does not stay absent, it self-activates on the
+ *                    very first page load that touches it. Pre-seeding it
+ *                    disabled prevents that.
  *
  * Explicitly excluded (not queried, not exported): DeliveryOffer,
  * ScheduledPromotion, FlashSale, User and everything keyed off User,
@@ -62,6 +75,30 @@ const APPROVED_DELIVERY_ZONE_SLUGS = [
   "sheikh-zayed",
   "other",
 ];
+
+// Matches loyalty.service.js's SETTINGS_ID exactly — the app looks up the
+// singleton by this literal id, not by any query.
+const LOYALTY_SETTINGS_ID = "default";
+
+// Every numeric field is the schema's own @default(...) value from
+// server/prisma/schema.prisma's LoyaltyProgramSettings model — not
+// invented here, not read from the local DB (whose row is itself just
+// these same defaults, auto-created by the app's own upsert during local
+// testing). The only deliberate override is `enabled: false`.
+const LOYALTY_SETTINGS_SAFE_DEFAULT = {
+  id: LOYALTY_SETTINGS_ID,
+  enabled: false,
+  standardPointsPerEgp10: 1,
+  vipPointsPerEgp10: 2,
+  pointsPerRedemptionUnit: 100,
+  redemptionValueEgp: "10",
+  welcomePoints: 200,
+  welcomeMinimumSubtotalEgp: "500",
+  welcomeExpiryDays: 30,
+  minimumRedemptionPoints: 100,
+  maximumRedemptionPercent: "20",
+  expiryMonths: 12,
+};
 
 function checksum(rows) {
   return createHash("sha256").update(JSON.stringify(rows)).digest("hex");
@@ -231,6 +268,10 @@ async function main() {
     orderBy: { key: "asc" },
   });
 
+  // --- LoyaltyProgramSettings: one synthesized row, not read from the DB
+  //     at all — see LOYALTY_SETTINGS_SAFE_DEFAULT above for why. ---
+  const loyaltyProgramSettings = [LOYALTY_SETTINGS_SAFE_DEFAULT];
+
   await prisma.$disconnect();
 
   await mkdir(OUTPUT_DIR, { recursive: true });
@@ -246,6 +287,7 @@ async function main() {
       deliveryZone: deliveryZones,
       heroSlide: heroSlides,
       permission: permissions,
+      loyaltyProgramSettings,
     },
     counts: {
       product: products.length,
@@ -254,6 +296,7 @@ async function main() {
       deliveryZone: deliveryZones.length,
       heroSlide: heroSlides.length,
       permission: permissions.length,
+      loyaltyProgramSettings: loyaltyProgramSettings.length,
     },
     checksums: {
       product: checksum(products),
@@ -262,6 +305,7 @@ async function main() {
       deliveryZone: checksum(deliveryZones),
       heroSlide: checksum(heroSlides),
       permission: checksum(permissions),
+      loyaltyProgramSettings: checksum(loyaltyProgramSettings),
     },
   };
 
@@ -274,6 +318,7 @@ async function main() {
   console.log(`DeliveryZone: ${deliveryZones.length} (expected 9)`);
   console.log(`HeroSlide:    ${heroSlides.length} (expected 3, updatedById forced null)`);
   console.log(`Permission:   ${permissions.length}`);
+  console.log(`LoyaltyProgramSettings: ${loyaltyProgramSettings.length} (synthesized, enabled: false)`);
   console.log(`\nBundle written to: ${path.join(OUTPUT_DIR, "production-seed-bundle.json")}`);
   console.log("\nNo database was written to. No connection to Supabase or any remote host was made.");
 }

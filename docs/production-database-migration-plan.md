@@ -45,6 +45,7 @@ structure. Nothing to decide here; this happens identically every time.
 | `Permission` | 21 | Role/permission definitions the app's own RBAC depends on |
 | `DeliveryZone` | **9** (exact slug allowlist) | `new-cairo`, `nasr-city`, `heliopolis`, `maadi`, `dokki`, `mohandessin`, `6th-of-october`, `sheikh-zayed`, `other` — excludes the `freedelivery` test row |
 | `HeroSlide` | **3** | Only rows with `status = PUBLISHED` at export time |
+| `LoyaltyProgramSettings` | **1** (synthesized) | Required — see §4c. Seeded as a single row with `enabled: false`; every other field is the schema's own documented default, not invented or copied from the local DB |
 | `ProductOption`/`ProductOptionValue`/`ProductVariant`/`ProductVariantOptionValue`/`ProductImage` | 0 each | Currently empty — the 12,942 launch products are all simple products with no variants or gallery images yet. Re-check counts before the real migration in case admin work adds any before then |
 
 ### EXCLUDE_FROM_PRODUCTION_MIGRATION (approved)
@@ -68,7 +69,6 @@ structure. Nothing to decide here; this happens identically every time.
 | `EmailDelivery` | 3 | Test email delivery log entries |
 | `Product` (non-launch subset) | 8 | 1 `LOCAL_CATALOG` + 3 `EXCEL_IMPORT` + 4 `sourceSystem: null` rows (names like "sss", "sssd") — all already `INACTIVE`/unavailable |
 | `PushSubscription`, `SupplyList`, `NewsletterSubscriber`, `ContactMessage` | 0 each | Empty; nothing to decide |
-| `LoyaltyProgramSettings` | — | Not carried in this pass; not referenced by any approved table's FK, revisit separately if the loyalty program needs config at launch |
 
 Production starts the excluded tables empty. Real customers, orders, and
 support threads accumulate naturally after launch.
@@ -161,6 +161,42 @@ Checked directly in `schema.prisma`: `CatalogImportRow.batchId → CatalogImport
 relations point *away* from `Product`/`Brand`/`Category`, not toward them —
 neither table has a field that any approved table depends on. See §6.
 
+### 4c. LoyaltyProgramSettings — required, seeded disabled
+
+Initial launch does not need active wallet/points/loyalty rewards, but a
+**missing** `LoyaltyProgramSettings` row is not the same as a **disabled**
+one — traced the actual code path rather than assuming:
+
+- `getLoyaltyProgramSettings()` in `server/src/services/loyalty.service.js`
+  fetches the singleton via `prisma.loyaltyProgramSettings.upsert({ where:
+  { id: "default" }, create: { id: "default" }, update: {} })`. If the row
+  doesn't exist, this **creates it on the spot** using only `id` — every
+  other field falls back to the schema's own `@default(...)` values,
+  which include `enabled: true` and real point values (`welcomePoints:
+  200`, `vipPointsPerEgp10: 2`, etc.).
+- That function is called from `getPublicLoyaltySettings()` in
+  `loyalty.controller.js`, mounted on an **unauthenticated public route**
+  — reachable on ordinary page loads, not admin-only.
+- Net effect of leaving the row absent: the loyalty program does not stay
+  off. It silently turns itself on, with unreviewed default point values,
+  the moment the first visitor's browser touches that endpoint after
+  launch — plausibly within minutes.
+- Confirmed the `enabled` flag is a real functional gate, not just a UI
+  toggle — e.g. `awardDeliveredOrderLoyalty()` has `if (!settings.enabled)
+  return [];` before any point-earning logic runs.
+- The row currently sitting in the local DB (`created 2026-08-02`) is
+  exactly the schema defaults — it's what the app's own upsert created
+  during local testing, not a hand-tuned business decision, so it isn't
+  copied into the export either.
+
+**Decision: seed it, forced disabled.** `exportProductionSeed.mjs`
+synthesizes one row (`LOYALTY_SETTINGS_SAFE_DEFAULT`) — `enabled: false`,
+every numeric field left at the schema's own documented default (not
+invented, not copied from local DB usage) — rather than reading it from
+any database. No points, wallet credit, or promotional values were
+decided or invented here. Turning the program on and choosing real point
+values is a separate future decision made through the admin panel.
+
 ## 5. Required application configuration/permissions/roles
 
 - `Permission` (21 rows) must be seeded (`npm run seed:permissions`) so the
@@ -242,17 +278,19 @@ Two scripts in `server/src/scripts/productionMigration/`:
   whatever `DATABASE_URL` currently points at (today: the local dev DB)
   and writes `production-seed-export/production-seed-bundle.json`. Purely
   additive/read-only against the source database. Already run against the
-  local DB this session: **12,942 / 555 / 147 / 9 / 3 / 21** rows across
-  `Product`/`Brand`/`Category`/`DeliveryZone`/`HeroSlide`/`Permission`,
-  matching every expectation in §2 and §4a exactly.
+  local DB this session: **12,942 / 555 / 147 / 9 / 3 / 21 / 1** rows across
+  `Product`/`Brand`/`Category`/`DeliveryZone`/`HeroSlide`/`Permission`/
+  `LoyaltyProgramSettings`, matching every expectation in §2, §4a, and §4c
+  exactly.
 
 - **`applyProductionSeed.mjs`** — reads the bundle, re-verifies its
   checksums, and inserts everything into whatever `DATABASE_URL` currently
-  points at, in FK-safe order (Brand/Permission/DeliveryZone/HeroSlide →
-  Category, parent-before-child → Product), inside one transaction. Runs
-  in dry-run/validate-only mode unless given `--confirm-apply`. It also
+  points at, in FK-safe order (Brand/Permission/DeliveryZone/HeroSlide/
+  LoyaltyProgramSettings → Category, parent-before-child → Product), inside
+  one transaction. Runs in dry-run/validate-only mode unless given
+  `--confirm-apply`. It also
   refuses outright if the target database already has rows in any of the
-  six target tables — it seeds a freshly-migrated empty database, it does
+  seven target tables — it seeds a freshly-migrated empty database, it does
   not merge into an existing one. Tested this session **in dry-run mode
   against the local DB on purpose** — as expected, it correctly detected
   the local DB is non-empty (it's the source, not a fresh target) and
