@@ -27,6 +27,11 @@ server/backups/
 # images belong in object storage, never in Git or the frontend.
 /image-acquisition-output/
 
+# Production-data export bundles produced by the (not-yet-run) production
+# seed export script — real catalogue data, regenerable from the local DB
+# on demand, never committed.
+/production-seed-export/
+
 # Stray one-off product-list JSON dumps produced while scoping image
 # acquisition (should have lived under /image-acquisition-output/ but were
 # written to the project root) — scratch input data, not app source.
