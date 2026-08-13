@@ -41,6 +41,7 @@ import {
   type AdminProductSortDirection,
   type AdminProductSortKey,
   type AdminProductStatus,
+  type AdminProductPurchaseMode,
   type AdminProductStockFilter,
   type AdminProductTypeFilter,
 } from "@/services/adminCatalog";
@@ -63,6 +64,12 @@ type ProductForm = {
   imageUrl: string;
   description: string;
   featured: "true" | "false";
+  isWeeklyOffer: "true" | "false";
+  isBestSeller: "true" | "false";
+  isNewArrival: "true" | "false";
+  isHotDeal: "true" | "false";
+  isFastDelivery: "true" | "false";
+  purchaseMode: AdminProductPurchaseMode;
 };
 
 type ProductFormErrors = Partial<Record<keyof ProductForm, string>>;
@@ -80,6 +87,12 @@ const EMPTY_FORM: ProductForm = {
   imageUrl: "",
   description: "",
   featured: "false",
+  isWeeklyOffer: "false",
+  isBestSeller: "false",
+  isNewArrival: "false",
+  isHotDeal: "false",
+  isFastDelivery: "false",
+  purchaseMode: "STANDARD",
 };
 const STATUS_TONES: Record<AdminProductStatus, StatusTone> = {
   ACTIVE: "green",
@@ -118,6 +131,12 @@ function toForm(product: AdminProduct): ProductForm {
     imageUrl: product.imageUrl ?? "",
     description: product.description ?? "",
     featured: product.featured ? "true" : "false",
+    isWeeklyOffer: product.isWeeklyOffer ? "true" : "false",
+    isBestSeller: product.isBestSeller ? "true" : "false",
+    isNewArrival: product.isNewArrival ? "true" : "false",
+    isHotDeal: product.isHotDeal ? "true" : "false",
+    isFastDelivery: product.isFastDelivery ? "true" : "false",
+    purchaseMode: product.purchaseMode,
   };
 }
 
@@ -445,6 +464,12 @@ export default function AdminProducts() {
         imageUrl,
         description: form.description.trim() || undefined,
         featured: form.featured === "true",
+        isWeeklyOffer: form.isWeeklyOffer === "true",
+        isBestSeller: form.isBestSeller === "true",
+        isNewArrival: form.isNewArrival === "true",
+        isHotDeal: form.isHotDeal === "true",
+        isFastDelivery: form.isFastDelivery === "true",
+        purchaseMode: form.purchaseMode,
       };
       if (editingProduct) {
         await updateAdminProduct(editingProduct.id, input);
@@ -522,6 +547,12 @@ export default function AdminProducts() {
         imageUrl: product.imageUrl ?? undefined,
         description: product.description ?? undefined,
         featured: false,
+        isWeeklyOffer: false,
+        isBestSeller: false,
+        isNewArrival: false,
+        isHotDeal: false,
+        isFastDelivery: false,
+        purchaseMode: product.purchaseMode,
       });
       toast({ title: t("admin.products.duplicatedSuccess") });
       setRefreshVersion((value) => value + 1);
@@ -609,7 +640,10 @@ export default function AdminProducts() {
         <div><span className="text-sm font-bold">{t("admin.products.category")}</span><DentalSelect label={t("admin.products.category")} value={form.categoryId} onChange={(value) => updateField("categoryId", value)} options={[{ value: NONE_VALUE, label: t("admin.products.noCategory") }, ...categories.map((category) => ({ value: category.id, label: category.name }))]} triggerClassName="mt-2 h-[50px] rounded-[14px]" />{formErrors.categoryId && <p className="mt-1.5 text-xs font-semibold text-[#B42318]">{formErrors.categoryId}</p>}</div>
         <ProductField id="price" label={t("admin.products.price")} value={form.price} onChange={(value) => updateField("price", value)} error={formErrors.price} type="number" min={0} step={0.01} /><ProductField id="stock" label={t("admin.products.stock")} value={form.stock} onChange={(value) => updateField("stock", value)} error={formErrors.stock} type="number" min={0} step={1} />
         <div><span className="text-sm font-bold">{t("admin.products.status")}</span><DentalSelect label={t("admin.products.status")} value={form.status} onChange={(value) => updateField("status", value as AdminProductStatus)} options={statusOptions} triggerClassName="mt-2 h-[50px] rounded-[14px]" />{form.stock === "0" && <p className="mt-1.5 text-xs font-semibold text-[#B88A44]">{t("admin.products.zeroStockWarning")}</p>}</div>
-        <div><span className="text-sm font-bold">{t("admin.products.featured")}</span><DentalSelect label={t("admin.products.featured")} value={form.featured} onChange={(value) => updateField("featured", value as "true" | "false")} options={[{ value: "false", label: t("common.no", { fallback: "No" }) }, { value: "true", label: t("common.yes", { fallback: "Yes" }) }]} triggerClassName="mt-2 h-[50px] rounded-[14px]" /></div>
+        <div><span className="text-sm font-bold">{t("admin.products.purchaseMode", { fallback: "Purchase mode" })}</span><DentalSelect label={t("admin.products.purchaseMode", { fallback: "Purchase mode" })} value={form.purchaseMode} onChange={(value) => updateField("purchaseMode", value as AdminProductPurchaseMode)} options={[{ value: "STANDARD", label: t("admin.products.purchaseModes.standard", { fallback: "Standard checkout" }) }, { value: "INQUIRY", label: t("admin.products.purchaseModes.inquiry", { fallback: "Product inquiry" }) }, { value: "QUOTE", label: t("admin.products.purchaseModes.quote", { fallback: "Quote request" }) }]} triggerClassName="mt-2 h-[50px] rounded-[14px]" /></div>
+        {([['featured', 'featured'], ['isWeeklyOffer', 'weeklyOffer'], ['isBestSeller', 'bestSeller'], ['isNewArrival', 'newArrival'], ['isHotDeal', 'hotDeal'], ['isFastDelivery', 'fastDelivery']] as const).map(([field, label]) => (
+          <div key={field}><span className="text-sm font-bold">{t(`admin.products.${label}`, { fallback: label })}</span><DentalSelect label={t(`admin.products.${label}`, { fallback: label })} value={form[field]} onChange={(value) => updateField(field, value as "true" | "false")} options={[{ value: "false", label: t("common.no", { fallback: "No" }) }, { value: "true", label: t("common.yes", { fallback: "Yes" }) }]} triggerClassName="mt-2 h-[50px] rounded-[14px]" /></div>
+        ))}
         <ProductImageUploader
           value={form.imageUrl}
           file={imageFile}

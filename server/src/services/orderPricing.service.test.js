@@ -5,6 +5,8 @@ import {
   evaluateVipTierShipping,
   OrderPricingError,
   serializePricingTotals,
+  validateOrderableProduct,
+  validateOrderableVariant,
 } from "./orderPricing.service.js";
 
 const now = new Date("2026-07-28T12:00:00.000Z");
@@ -23,6 +25,25 @@ function product(overrides = {}) {
     ...overrides,
   };
 }
+
+test("authoritative checkout rejects inquiry and quote purchase modes", () => {
+  for (const purchaseMode of ["INQUIRY", "QUOTE"]) {
+    const requestOnlyProduct = product({ purchaseMode });
+    assert.throws(
+      () => validateOrderableProduct(requestOnlyProduct, 1, { requirePrice: true }),
+      (error) => error instanceof OrderPricingError && error.code === "PRODUCT_REQUIRES_REQUEST"
+    );
+    assert.throws(
+      () => validateOrderableVariant(requestOnlyProduct, {
+        id: "variant-1",
+        status: "ACTIVE",
+        isAvailable: true,
+        stockQuantity: 5,
+      }, 1, { requirePrice: true }),
+      (error) => error instanceof OrderPricingError && error.code === "PRODUCT_REQUIRES_REQUEST"
+    );
+  }
+});
 
 function promotion(overrides = {}) {
   return {

@@ -18,6 +18,7 @@ import { useStore } from "@/context/StoreContext";
 import { cn } from "@/lib/utils";
 import { calculateDiscount, formatCurrency } from "@/utils";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { useLanguage } from "@/context/LanguageContext";
 import { getCategoryTranslationKey, getLocalizedProductDescription, getLocalizedProductName } from "@/lib/catalogTranslations";
 import { getProductStockLimit, isProductPurchasable } from "@/lib/cartStock";
@@ -26,6 +27,7 @@ import { createQuote, getMyQuote, type Quote } from "@/services/quotes";
 import { fetchPublicProduct, fetchPublicProducts } from "@/services/catalog";
 import { useImageFallback } from "@/hooks/use-image-fallback";
 import type { Product } from "@/types/product";
+import { SITE_URL } from "@/data/seo";
 
 type DetailTab = "description" | "specifications" | "reviews" | "shipping";
 
@@ -198,9 +200,33 @@ export default function ProductDetail() {
   const discount = product ? calculateDiscount(product.oldPrice ?? undefined, product.currentPrice) : 0;
   const isWishlisted = product ? isInWishlist(product.id) : false;
   const isOutOfStock = product ? !isProductPurchasable(product) : false;
+  const purchaseMode = product?.purchaseMode ?? "STANDARD";
+  const isStandardPurchase = purchaseMode === "STANDARD";
   const isLowStock = product ? isLowStockProduct(product) : false;
   const galleryItems = product ? [product.image || PRODUCT_IMAGE] : [PRODUCT_IMAGE];
   const mainGalleryImage = useImageFallback(galleryItems[selectedImageIndex], PRODUCT_IMAGE);
+  const productPath = product ? `/products/${product.slug || product.id}` : "/products";
+  const hasCatalogImage = Boolean(product?.image && !product.image.endsWith("/toothtools.webp"));
+  const productStructuredData = product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: productName,
+    description: productDescription,
+    ...(product.sku ? { sku: product.sku } : {}),
+    ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+    ...(hasCatalogImage ? { image: [product.image] } : {}),
+    ...(isStandardPurchase ? {
+      offers: {
+        "@type": "Offer",
+        url: `${SITE_URL}${productPath}`,
+        priceCurrency: "EGP",
+        price: product.currentPrice.toFixed(2),
+        availability: product.available
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      },
+    } : {}),
+  } : null;
 
   useEffect(() => {
     if (!id) return;
@@ -326,7 +352,11 @@ export default function ProductDetail() {
   };
 
   const handleAddToCart = () => {
-    if (isOutOfStock) {
+    if (purchaseMode === "QUOTE") {
+      openQuoteRequest();
+      return;
+    }
+    if (purchaseMode === "INQUIRY" || isOutOfStock) {
       if (!isAuthenticated) {
         navigate(`/signin?redirect=${encodeURIComponent(`/products/${product.slug || product.id}`)}`);
         return;
@@ -445,9 +475,24 @@ export default function ProductDetail() {
     <div className="bg-[var(--xd-bg)] pb-16 pt-12 lg:pb-20">
       <SEO
         page="productDetail"
-        path={`/products/${product.slug || product.id}`}
+        path={productPath}
         values={{ name: productName, brand: product.brand }}
+        description={productDescription}
+        image={hasCatalogImage ? product.image : undefined}
+        type="product"
       />
+      <StructuredData data={[
+        productStructuredData!,
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: t("nav.home"), item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: t("nav.products"), item: `${SITE_URL}/products` },
+            { "@type": "ListItem", position: 3, name: productName, item: `${SITE_URL}${productPath}` },
+          ],
+        },
+      ]} />
       <Container>
         <nav className="mb-8 flex flex-wrap items-center gap-2 text-[12px] font-semibold text-[#8A8D9A]">
           <Link href="/" className="transition-colors hover:text-[#050505]">
@@ -603,7 +648,7 @@ export default function ProductDetail() {
             )}
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              {!isOutOfStock && maximumOrderQuantity > 0 && (
+              {(!isStandardPurchase || !isOutOfStock) && maximumOrderQuantity > 0 && (
                 <QuantityControl
                   quantity={quantity}
                   max={maximumOrderQuantity}
@@ -617,20 +662,28 @@ export default function ProductDetail() {
                 variant="primary"
                 className="h-11 flex-1 gap-1 px-6 text-[14px]"
               >
-                {isOutOfStock ? <MessageSquareText size={16} /> : <ShoppingCart size={16} />}
-                {isOutOfStock ? t("productDetail.requestProduct", { fallback: "Request Product" }) : t("common.addToCart")}
+                {purchaseMode === "STANDARD" && !isOutOfStock ? <ShoppingCart size={16} /> : <MessageSquareText size={16} />}
+                {purchaseMode === "QUOTE"
+                  ? t("common.requestQuote")
+                  : purchaseMode === "INQUIRY"
+                    ? t("productDetail.productInquiry", { fallback: "Product Inquiry" })
+                    : isOutOfStock
+                      ? t("productDetail.requestProduct", { fallback: "Request Product" })
+                      : t("common.addToCart")}
               </Button>
             </div>
 
-            <Button
-              type="button"
-              onClick={openQuoteRequest}
-              variant="secondary"
-              size="sm"
-              className="mt-3 h-11 w-full text-[13px]"
-            >
-              {t("common.requestQuote")}
-            </Button>
+            {isStandardPurchase && (
+              <Button
+                type="button"
+                onClick={openQuoteRequest}
+                variant="secondary"
+                size="sm"
+                className="mt-3 h-11 w-full text-[13px]"
+              >
+                {t("common.requestQuote")}
+              </Button>
+            )}
 
             {statusMessage && (
               <div

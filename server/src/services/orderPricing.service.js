@@ -152,6 +152,14 @@ export function aggregateProductQuantities(resolvedItems) {
 }
 
 export function validateOrderableProduct(product, quantity, { requirePrice }) {
+  if ((product?.purchaseMode ?? "STANDARD") !== "STANDARD") {
+    throw new OrderPricingError(
+      409,
+      `${product.name} must be requested directly and cannot be checked out.`,
+      "PRODUCT_REQUIRES_REQUEST",
+      { productId: product.id, productName: product.name }
+    );
+  }
   const stockIssue = evaluateStockAvailability(product, quantity);
   if (stockIssue) {
     throw new OrderPricingError(
@@ -174,6 +182,14 @@ export function validateOrderableProduct(product, quantity, { requirePrice }) {
 }
 
 export function validateOrderableVariant(product, variant, quantity, { requirePrice }) {
+  if ((product?.purchaseMode ?? "STANDARD") !== "STANDARD") {
+    throw new OrderPricingError(
+      409,
+      `${product.name} must be requested directly and cannot be checked out.`,
+      "PRODUCT_REQUIRES_REQUEST",
+      { productId: product.id, productName: product.name }
+    );
+  }
   if (!variant || !isVariantSellable(variant)) {
     throw new OrderPricingError(409, `${product.name} variant is not currently available.`, "VARIANT_UNAVAILABLE", {
       requestedQuantity: quantity,

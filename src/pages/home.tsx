@@ -419,42 +419,38 @@ export default function Home() {
   const { currentUser, isAuthenticated } = useStore();
   const prefersReducedMotion = useReducedMotion();
   const trustedBrandsImage = `${import.meta.env.BASE_URL}hero%20section/brandsImg.png`;
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [weeklyOfferProducts, setWeeklyOfferProducts] = useState<Product[]>([]);
+  const [bestSellerProducts, setBestSellerProducts] = useState<Product[]>([]);
   const [clinicEssentialsProducts, setClinicEssentialsProducts] = useState<Product[]>([]);
   const [fastDeliveryProducts, setFastDeliveryProducts] = useState<Product[]>([]);
-  const weeklyOfferProducts = featuredProducts;
-  const bestSellerProducts = featuredProducts;
   const hasClinicSpecialty = Boolean(currentUser?.clinicSpecialty?.trim());
   const activeClinicSpecialty = isAuthenticated && hasClinicSpecialty
     ? normalizeClinicSpecialty(currentUser?.clinicSpecialty)
     : DEFAULT_CLINIC_SPECIALTY;
 
-  // Small, bounded fetch: the "featured" flag backs both the Weekly Offers
-  // and Best Sellers rows (they've always shared the same source list), so
-  // one fetch of up to 12 products covers both sections. Falls back to an
-  // unfiltered small page if nothing is marked featured yet.
+  // Keep each merchandising collection independent and bounded. Empty
+  // collections stay empty until an administrator explicitly assigns them.
   useEffect(() => {
     const controller = new AbortController();
-    fetchPublicProducts({ featured: true, limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal })
-      .then(async ({ products }) => {
-        if (controller.signal.aborted) return;
-        if (products.length > 0) {
-          setFeaturedProducts(products);
-          return;
+    Promise.all([
+      fetchPublicProducts({ isWeeklyOffer: true, limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal }),
+      fetchPublicProducts({ isBestSeller: true, limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal }),
+    ])
+      .then(([weekly, best]) => {
+        if (!controller.signal.aborted) {
+          setWeeklyOfferProducts(weekly.products);
+          setBestSellerProducts(best.products);
         }
-        const fallback = await fetchPublicProducts({ limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal });
-        if (!controller.signal.aborted) setFeaturedProducts(fallback.products);
       })
       .catch(() => {});
     return () => controller.abort();
   }, []);
 
-  // Fast Delivery row: mirrors the previous behavior of showing the first
-  // small batch of available products (not actually filtered by a delivery
-  // flag — that flag is never set by any importer today).
+  // Fast Delivery is an explicit merchandising assignment, additionally
+  // constrained to products that are currently available.
   useEffect(() => {
     const controller = new AbortController();
-    fetchPublicProducts({ availability: "available", limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal })
+    fetchPublicProducts({ isFastDelivery: true, availability: "available", limit: HOME_SECTION_PRODUCT_LIMIT, signal: controller.signal })
       .then(({ products }) => {
         if (!controller.signal.aborted) setFastDeliveryProducts(products);
       })

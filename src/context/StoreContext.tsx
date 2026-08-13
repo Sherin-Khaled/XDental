@@ -544,6 +544,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart = (product: Product, quantity: number, selectedOptions?: string) => {
+    if ((product.purchaseMode ?? "STANDARD") !== "STANDARD") {
+      const blocked = {
+        ok: false as const,
+        code: "PRODUCT_UNAVAILABLE" as const,
+        requestedQuantity: quantity,
+        availableQuantity: 0,
+        productId: product.id,
+        productName: product.name,
+      };
+      toast({
+        title: t("cart.productRequiresRequestTitle", { fallback: "Request required" }),
+        description: t("cart.productRequiresRequest", { fallback: "This product must be requested directly and cannot be added to the cart." }),
+        variant: "destructive",
+      });
+      return blocked;
+    }
     const normalizedOptions = selectedOptions?.trim() || undefined;
     const requestedTotal = cartProductQuantity(cartRef.current, product.id) + quantity;
     const guard = guardProductQuantity(product, requestedTotal);

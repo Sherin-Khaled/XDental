@@ -12,6 +12,7 @@ type SEOProps = {
   image?: string;
   robots?: RobotsDirective;
   values?: Record<string, string | number>;
+  type?: "website" | "product";
 };
 
 function upsertMeta(selector: string, create: () => HTMLMetaElement, content: string) {
@@ -25,13 +26,12 @@ function upsertMeta(selector: string, create: () => HTMLMetaElement, content: st
   element.content = content;
 }
 
-function upsertLink(rel: string, selector: string, href: string, hreflang?: string) {
+function upsertLink(rel: string, selector: string, href: string) {
   let element = document.head.querySelector<HTMLLinkElement>(selector);
 
   if (!element) {
     element = document.createElement("link");
     element.rel = rel;
-    if (hreflang) element.hreflang = hreflang;
     document.head.appendChild(element);
   }
 
@@ -61,9 +61,10 @@ export function SEO({
   title,
   titleFormat = "brandFirst",
   description,
-  image = `${SITE_URL}/opengraph.jpg`,
+  image = `${SITE_URL}/favicon.webp`,
   robots,
   values,
+  type = "website",
 }: SEOProps) {
   const { language, t } = useLanguage();
 
@@ -98,7 +99,7 @@ export function SEO({
       const meta = document.createElement("meta");
       meta.setAttribute("property", "og:type");
       return meta;
-    }, "website");
+    }, type);
 
     upsertMeta("meta[property='og:url']", () => {
       const meta = document.createElement("meta");
@@ -155,10 +156,7 @@ export function SEO({
     }, image);
 
     upsertLink("canonical", "link[rel='canonical']", canonicalUrl);
-    upsertLink("alternate", "link[rel='alternate'][hreflang='en']", `${SITE_URL}${pagePath}`, "en");
-    upsertLink("alternate", "link[rel='alternate'][hreflang='ar']", `${SITE_URL}${pagePath}`, "ar");
-    upsertLink("alternate", "link[rel='alternate'][hreflang='x-default']", `${SITE_URL}${pagePath}`, "x-default");
-  }, [description, image, language, page, path, robots, t, title, titleFormat, values]);
+  }, [description, image, language, page, path, robots, t, title, titleFormat, type, values]);
 
   return null;
 }

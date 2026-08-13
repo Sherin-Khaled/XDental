@@ -16,6 +16,7 @@ import { DailyOfferAlert } from "@/components/DailyOfferAlert";
 import { FloatingSupportChat } from "@/components/dental/FloatingSupportChat";
 import { GoldIconGradientDefs } from "@/components/dental/GoldIconGradientDefs";
 import { WelcomeRewardsPopup } from "@/components/WelcomeRewardsPopup";
+import { SEO } from "@/components/SEO";
 
 // Lazy-loaded route pages — each page becomes its own JS chunk
 const Home                = lazy(() => import("@/pages/home"));
@@ -201,7 +202,12 @@ function RequireAccountAuth({ children }: { children: ReactNode }) {
     return <PageFallback />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SEO page="account" path={location.split("?")[0]} />
+      {children}
+    </>
+  );
 }
 
 function RequireAdminAuth({ children }: { children: ReactNode }) {
@@ -240,7 +246,12 @@ function RequireAdminAuth({ children }: { children: ReactNode }) {
     return <PageFallback />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SEO page="account" path={adminPathname} />
+      {children}
+    </>
+  );
 }
 
 function withAccountProtection(Component: ElementType) {

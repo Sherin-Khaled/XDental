@@ -245,6 +245,12 @@ enum ProductStatus {
   INACTIVE
 }
 
+enum ProductPurchaseMode {
+  STANDARD
+  INQUIRY
+  QUOTE
+}
+
 enum SupplyListStatus {
   ACTIVE
   ARCHIVED
@@ -728,6 +734,12 @@ model Product {
   stockQuantity     Int?
   status            ProductStatus @default(ACTIVE)
   featured          Boolean     @default(false)
+  isWeeklyOffer     Boolean     @default(false)
+  isBestSeller      Boolean     @default(false)
+  isNewArrival      Boolean     @default(false)
+  isHotDeal         Boolean     @default(false)
+  isFastDelivery    Boolean     @default(false)
+  purchaseMode      ProductPurchaseMode @default(STANDARD)
   isAvailable       Boolean     @default(true)
   imageUrl          String?
   sourceSystem      String?
@@ -750,6 +762,12 @@ model Product {
   @@index([category])
   @@index([status])
   @@index([featured])
+  @@index([isWeeklyOffer])
+  @@index([isBestSeller])
+  @@index([isNewArrival])
+  @@index([isHotDeal])
+  @@index([isFastDelivery])
+  @@index([purchaseMode])
 }
 
 model CartItem {

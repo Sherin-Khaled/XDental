@@ -30,10 +30,15 @@ export type PublicCatalogProduct = {
   shortDescription: string | null;
   shortDescriptionAr: string | null;
   featured: boolean;
+  isWeeklyOffer: boolean;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
+  isHotDeal: boolean;
+  isFastDelivery: boolean;
+  purchaseMode: "STANDARD" | "INQUIRY" | "QUOTE";
   available: boolean;
   isAvailable: boolean;
   deliveryLabel?: string | null;
-  isFastDelivery?: boolean | null;
   options: string[];
 };
 
@@ -84,8 +89,7 @@ type ProductPage = {
 export function mapProduct(product: PublicCatalogProduct): Product {
   const available = product.available && product.status !== "OUT_OF_STOCK";
   const productImage = resolveApiAssetUrl(product.imageUrl || product.images[0]);
-  const isFastDelivery =
-    Boolean(product.isFastDelivery) || product.deliveryLabel?.trim().toLowerCase() === "fast delivery";
+  const isFastDelivery = product.isFastDelivery;
   return {
     id: product.id,
     sku: product.sku,
@@ -106,11 +110,14 @@ export function mapProduct(product: PublicCatalogProduct): Product {
     stockStatus: !available ? "Out of Stock" : product.status === "LOW_STOCK" ? "Low Stock" : "In Stock",
     deliveryLabel: product.deliveryLabel ?? (isFastDelivery ? "Fast Delivery" : null),
     options: product.options ?? [],
-    isWeeklyOffer: product.featured,
-    isBestSeller: product.featured,
+    isWeeklyOffer: product.isWeeklyOffer,
+    isBestSeller: product.isBestSeller,
+    isNewArrival: product.isNewArrival,
+    isHotDeal: product.isHotDeal,
     isRecommended: product.featured,
     isFastDelivery,
-    isNew: false,
+    isNew: product.isNewArrival,
+    purchaseMode: product.purchaseMode,
     isFavorite: false,
     description: product.description,
     descriptionAr: product.descriptionAr,
@@ -134,6 +141,11 @@ export async function fetchPublicProducts(
     status?: PublicProductStatus;
     availability?: "available" | "out-of-stock" | "low-stock";
     featured?: boolean;
+    isWeeklyOffer?: boolean;
+    isBestSeller?: boolean;
+    isNewArrival?: boolean;
+    isHotDeal?: boolean;
+    isFastDelivery?: boolean;
     hasDiscount?: boolean;
     priceMin?: number;
     priceMax?: number;
@@ -153,6 +165,9 @@ export async function fetchPublicProducts(
   if (params.status) query.set("status", params.status);
   if (params.availability) query.set("availability", params.availability);
   if (params.featured !== undefined) query.set("featured", String(params.featured));
+  for (const field of ["isWeeklyOffer", "isBestSeller", "isNewArrival", "isHotDeal", "isFastDelivery"] as const) {
+    if (params[field] !== undefined) query.set(field, String(params[field]));
+  }
   if (params.hasDiscount !== undefined) query.set("hasDiscount", String(params.hasDiscount));
   if (params.priceMin !== undefined) query.set("priceMin", String(params.priceMin));
   if (params.priceMax !== undefined) query.set("priceMax", String(params.priceMax));

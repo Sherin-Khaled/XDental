@@ -15,9 +15,12 @@ export interface Product {
   options?: string[];
   isWeeklyOffer?: boolean;
   isBestSeller?: boolean;
+  isNewArrival?: boolean;
+  isHotDeal?: boolean;
   isRecommended?: boolean;
   isFastDelivery?: boolean;
   isNew?: boolean;
+  purchaseMode?: "STANDARD" | "INQUIRY" | "QUOTE";
   isFavorite?: boolean;
   description?: string | null;
   descriptionAr?: string | null;

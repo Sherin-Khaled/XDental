@@ -14,7 +14,7 @@ DATABASE_URL=<production-connection-string> npx prisma migrate deploy
 ```
 
 Run from `server/`, using the production `DATABASE_URL`. This applies all
-32 committed migrations in order against an empty database and creates the
+33 committed migrations in order against an empty database and creates the
 `_prisma_migrations` history table Prisma uses to track what's applied.
 Verified against a real fresh-checkout dependency install in this session
 (`npx prisma generate` via `postinstall`, `npx prisma validate` both
@@ -247,7 +247,7 @@ imports happen there.
 - `Brand`/`Category` counts must equal **555/147** (the approved
   referenced-only subset — not the full local 607/218).
 - `npx prisma migrate status` on the production `DATABASE_URL` must report
-  "Database schema is up to date!" with all 32 migrations applied.
+  "Database schema is up to date!" with all 33 migrations applied.
 
 **Failure detection**: any count mismatch, any FK constraint violation
 during import (which Postgres will reject outright — `Product` migration
@@ -275,7 +275,7 @@ is gitignored and must stay off any shared/committed location.
 Two scripts in `server/src/scripts/productionMigration/`:
 
 - **`exportProductionSeed.mjs`** — reads the approved dataset (§2) from
-  whatever `DATABASE_URL` currently points at (today: the local dev DB)
+whatever `DATABASE_URL` currently points at (today: the local dev DB)
   and writes `production-seed-export/production-seed-bundle.json`. Purely
   additive/read-only against the source database. Already run against the
   local DB this session: **12,942 / 555 / 147 / 9 / 3 / 21 / 1** rows across
@@ -298,7 +298,8 @@ Two scripts in `server/src/scripts/productionMigration/`:
   pointed at anything real.
 
 When Supabase exists: run `exportProductionSeed.mjs` once more for a fresh
-bundle (or reuse the existing one if nothing changed), point
+bundle after migration 33 is present locally. Do not reuse a bundle created
+before the merchandising/purchase-mode fields were added. Then point
 `DATABASE_URL` at the new production database, run
 `prisma migrate deploy`, then `applyProductionSeed.mjs --confirm-apply`.
 Neither script has been run with real production credentials or

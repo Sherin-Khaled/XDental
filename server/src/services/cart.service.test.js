@@ -133,6 +133,33 @@ test("rejects unavailable products before storing them", async () => {
   );
 });
 
+test("rejects inquiry and quote products before they can be stored in a cart", async () => {
+  for (const purchaseMode of ["INQUIRY", "QUOTE"]) {
+    const transaction = {
+      product: {
+        findUnique: async () => ({
+          id: "product-1",
+          name: "Request-only Product",
+          price: 250,
+          stockQuantity: 10,
+          status: "ACTIVE",
+          isAvailable: true,
+          purchaseMode,
+          variants: [],
+        }),
+      },
+      cartItem: { findMany: async () => [] },
+    };
+    await assert.rejects(
+      addUserCartItem({ $transaction: async (callback) => callback(transaction) }, "customer-a", {
+        productId: "product-1",
+        quantity: 1,
+      }),
+      (error) => error instanceof CartRequestError && error.code === "PRODUCT_REQUIRES_REQUEST"
+    );
+  }
+});
+
 test("allows exactly the available stock and rejects one unit above it", async () => {
   let savedQuantity = null;
   const transaction = {

@@ -23,6 +23,12 @@ function simpleProduct(overrides = {}) {
     images: [],
     description: null,
     featured: false,
+    isWeeklyOffer: false,
+    isBestSeller: false,
+    isNewArrival: false,
+    isHotDeal: false,
+    isFastDelivery: false,
+    purchaseMode: "STANDARD",
     isAvailable: true,
     options: [],
     variants: [],
@@ -66,6 +72,23 @@ test("a simple product with no variants and no gallery serializes using legacy i
   assert.deepEqual(serialized.variants, undefined);
   assert.equal(serialized.available, true);
   assert.equal(serialized.isAvailable, true);
+});
+
+test("the public serializer keeps merchandising flags and purchase mode independent", () => {
+  const serialized = serializePublicProduct(simpleProduct({
+    isWeeklyOffer: true,
+    isBestSeller: false,
+    isNewArrival: true,
+    isHotDeal: false,
+    isFastDelivery: true,
+    purchaseMode: "INQUIRY",
+  }));
+  assert.equal(serialized.isWeeklyOffer, true);
+  assert.equal(serialized.isBestSeller, false);
+  assert.equal(serialized.isNewArrival, true);
+  assert.equal(serialized.isHotDeal, false);
+  assert.equal(serialized.isFastDelivery, true);
+  assert.equal(serialized.purchaseMode, "INQUIRY");
 });
 
 test("the public API serializer returns base, sale, and effective prices", () => {

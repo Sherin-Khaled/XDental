@@ -71,6 +71,7 @@ function getCollectionFromSearchParams(searchParams: URLSearchParams) {
   if (searchParams.get("isWeeklyOffer") === "true") return "Weekly Offers";
   if (searchParams.get("isBestSeller") === "true") return "Best Selling";
   if (searchParams.get("isNewArrival") === "true") return "New Arrivals";
+  if (searchParams.get("isHotDeal") === "true") return "Hot Deals";
   if (searchParams.get("isFastDelivery") === "true") return "Fast Delivery";
 
   return collectionQueryValues[normalizeCollectionQuery(searchParams.get("collection"))] ?? "All Products";
@@ -315,8 +316,6 @@ export default function Products() {
   // "Limited Stock" the collection and "Out of Stock" the availability
   // checkbox). Those resolve to `alwaysEmpty` instead of a request.
   const queryParams = useMemo(() => {
-    const collectionAlwaysEmpty = activeCollection === "Fast Delivery" || activeCollection === "New Arrivals";
-
     const collectionCategoryNames = activeCollection === "Clinic Essentials" ? clinicEssentialsNames : null;
     let categoryNames: string[] | undefined;
     if (allowedCategoryNames && collectionCategoryNames) {
@@ -330,15 +329,20 @@ export default function Products() {
       (allowedCategoryNames || collectionCategoryNames) && categoryNames && categoryNames.length === 0
     );
 
-    const offersWantFeatured = selectedOffers.includes("Weekly Offers") || selectedOffers.includes("Best Selling");
-    const offersWantDiscount = selectedOffers.includes("Hot Deals") || selectedOffers.includes("Discounted");
-    const offersContribute = offersWantFeatured || offersWantDiscount;
+    const offersWantWeekly = selectedOffers.includes("Weekly Offers");
+    const offersWantBest = selectedOffers.includes("Best Selling");
+    const offersWantHot = selectedOffers.includes("Hot Deals");
+    const offersWantDiscount = selectedOffers.includes("Discounted");
+    const offersContribute = offersWantWeekly || offersWantBest || offersWantHot || offersWantDiscount;
     const offersAlwaysEmpty = selectedOffers.length > 0 && !offersContribute;
-    const wantsFeatured = activeCollection === "Weekly Offers" || activeCollection === "Best Selling" || offersWantFeatured;
-    const wantsDiscount = activeCollection === "Hot Deals" || offersWantDiscount;
+    const wantsWeekly = activeCollection === "Weekly Offers" || offersWantWeekly;
+    const wantsBest = activeCollection === "Best Selling" || offersWantBest;
+    const wantsNew = activeCollection === "New Arrivals";
+    const wantsHot = activeCollection === "Hot Deals" || offersWantHot;
+    const wantsFast = activeCollection === "Fast Delivery" || selectedAvailability.includes("Fast Delivery");
 
     const stockOptions = selectedAvailability.filter((option) => option !== "Fast Delivery");
-    const availabilityAlwaysEmpty = selectedAvailability.length > 0 && stockOptions.length === 0;
+    const availabilityAlwaysEmpty = selectedAvailability.length > 0 && stockOptions.length === 0 && !wantsFast;
     let availabilityParam: "available" | "out-of-stock" | "low-stock" | undefined;
     if (activeCollection === "Limited Stock") availabilityParam = "low-stock";
     if (stockOptions.length === 1) {
@@ -353,7 +357,6 @@ export default function Products() {
       activeCollection === "Limited Stock" && stockOptions.length === 1 && stockOptions[0] === "Out of Stock";
 
     if (
-      collectionAlwaysEmpty ||
       categoryContradiction ||
       offersAlwaysEmpty ||
       availabilityAlwaysEmpty ||
@@ -367,8 +370,12 @@ export default function Products() {
       search: debouncedSearchQuery || undefined,
       categories: categoryNames,
       brands: selectedBrandSlugs.length > 0 ? [...selectedBrandSlugs].sort() : undefined,
-      featured: wantsFeatured || undefined,
-      hasDiscount: wantsDiscount || undefined,
+      isWeeklyOffer: wantsWeekly || undefined,
+      isBestSeller: wantsBest || undefined,
+      isNewArrival: wantsNew || undefined,
+      isHotDeal: wantsHot || undefined,
+      isFastDelivery: wantsFast || undefined,
+      hasDiscount: offersWantDiscount || undefined,
       availability: availabilityParam,
       priceMin: priceRange.min.trim() ? Number(priceRange.min) : undefined,
       priceMax: priceRange.max.trim() ? Number(priceRange.max) : undefined,

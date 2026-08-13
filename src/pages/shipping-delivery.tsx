@@ -115,7 +115,7 @@ export default function ShippingDelivery() {
   // fast-delivery products, never the full catalogue.
   useEffect(() => {
     const controller = new AbortController();
-    fetchPublicProducts({ limit: FAST_DELIVERY_LIMIT * 3, signal: controller.signal })
+    fetchPublicProducts({ isFastDelivery: true, limit: FAST_DELIVERY_LIMIT * 3, signal: controller.signal })
       .then(({ products: page }) => {
         if (!controller.signal.aborted) setCandidateProducts(page);
       })

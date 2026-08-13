@@ -2,6 +2,7 @@ import { apiRequest } from "./http";
 
 export type AdminCategoryStatus = "ACTIVE" | "DRAFT" | "INACTIVE";
 export type AdminProductStatus = "ACTIVE" | "LOW_STOCK" | "OUT_OF_STOCK" | "DRAFT" | "INACTIVE";
+export type AdminProductPurchaseMode = "STANDARD" | "INQUIRY" | "QUOTE";
 
 export type AdminCategory = {
   id: string;
@@ -47,6 +48,12 @@ export type AdminProduct = {
   shortDescription: string | null;
   shortDescriptionAr: string | null;
   featured: boolean;
+  isWeeklyOffer: boolean;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
+  isHotDeal: boolean;
+  isFastDelivery: boolean;
+  purchaseMode: AdminProductPurchaseMode;
   isAvailable: boolean;
   createdAt: string;
   updatedAt: string;
@@ -84,6 +91,12 @@ export type AdminProductInput = {
   shortDescription?: string;
   shortDescriptionAr?: string;
   featured: boolean;
+  isWeeklyOffer?: boolean;
+  isBestSeller?: boolean;
+  isNewArrival?: boolean;
+  isHotDeal?: boolean;
+  isFastDelivery?: boolean;
+  purchaseMode?: AdminProductPurchaseMode;
 };
 
 export async function getAdminCategories(

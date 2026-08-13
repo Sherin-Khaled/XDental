@@ -657,6 +657,17 @@
       "shortDescriptionField": "Short description",
       "shortDescriptionArField": "Short description (Arabic)",
       "featured": "Featured",
+      "weeklyOffer": "Weekly Offer",
+      "bestSeller": "Best Seller",
+      "newArrival": "New Arrival",
+      "hotDeal": "Hot Deal",
+      "fastDelivery": "Fast Delivery",
+      "purchaseMode": "Purchase mode",
+      "purchaseModes": {
+        "standard": "Standard checkout",
+        "inquiry": "Product inquiry",
+        "quote": "Quote request"
+      },
       "actions": "Actions",
       "edit": "Edit",
       "delete": "Delete",

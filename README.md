@@ -20,7 +20,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Requirements
 
-- Node.js 18 or later
+- Node.js 22.x (`>=22.0.0 <23.0.0`, matching both package manifests)
 - npm 9 or later
 
 ## Available scripts

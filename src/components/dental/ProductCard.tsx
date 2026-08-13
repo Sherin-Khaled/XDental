@@ -29,6 +29,8 @@ export function ProductCard({
   const { t, language } = useLanguage();
   const isWishlisted = isInWishlist(product.id);
   const isOutOfStock = !isProductPurchasable(product);
+  const purchaseMode = product.purchaseMode ?? "STANDARD";
+  const requiresDirectRequest = purchaseMode !== "STANDARD";
   const isLowStock = isLowStockProduct(product);
   const productHref = `/products/${encodeURIComponent(product.slug || product.id)}`;
   const discount = calculateDiscount(product.oldPrice ?? undefined, product.currentPrice);
@@ -42,7 +44,7 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
 
-    if (isOutOfStock) {
+    if (isOutOfStock || requiresDirectRequest) {
       navigate(productHref);
       return;
     }
@@ -156,10 +158,16 @@ export function ProductCard({
               variant="primary"
               size="sm"
               className="product-card-action h-10 w-full gap-1 text-[13px] font-semibold sm:h-[42px]"
-              data-testid={`${isOutOfStock ? "button-request-product" : "button-add-cart"}-${product.id}`}
+              data-testid={`${isOutOfStock || requiresDirectRequest ? "button-request-product" : "button-add-cart"}-${product.id}`}
             >
-              {isOutOfStock ? <MessageSquareText size={15} strokeWidth={2} /> : <ShoppingCart size={15} strokeWidth={2} />}
-              {isOutOfStock ? t("productDetail.requestProduct") : t("common.addToCart")}
+              {isOutOfStock || requiresDirectRequest ? <MessageSquareText size={15} strokeWidth={2} /> : <ShoppingCart size={15} strokeWidth={2} />}
+              {purchaseMode === "QUOTE"
+                ? t("common.requestQuote")
+                : purchaseMode === "INQUIRY"
+                  ? t("productDetail.productInquiry", { fallback: "Product Inquiry" })
+                  : isOutOfStock
+                    ? t("productDetail.requestProduct")
+                    : t("common.addToCart")}
             </Button>
           </div>
         </div>

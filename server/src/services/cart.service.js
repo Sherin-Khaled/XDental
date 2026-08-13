@@ -63,6 +63,15 @@ function cartKey(productId, selectedOptions) {
 }
 
 function assertCartProductAvailable(product, quantity) {
+  if ((product?.purchaseMode ?? "STANDARD") !== "STANDARD") {
+    throw new CartRequestError(409, `${product.name} must be requested directly.`, {
+      code: "PRODUCT_REQUIRES_REQUEST",
+      requestedQuantity: quantity,
+      availableQuantity: 0,
+      productId: product.id,
+      productName: product.name,
+    });
+  }
   const stockIssue = evaluateStockAvailability(product, quantity);
   if (stockIssue) {
     throw new CartRequestError(
@@ -83,6 +92,15 @@ function assertCartProductAvailable(product, quantity) {
 }
 
 function assertCartVariantAvailable(product, variant, quantity) {
+  if ((product?.purchaseMode ?? "STANDARD") !== "STANDARD") {
+    throw new CartRequestError(409, `${product.name} must be requested directly.`, {
+      code: "PRODUCT_REQUIRES_REQUEST",
+      requestedQuantity: quantity,
+      availableQuantity: 0,
+      productId: product.id,
+      productName: product.name,
+    });
+  }
   if (!variant || !isVariantSellable(variant)) {
     throw new CartRequestError(409, `${product.name} variant is not currently available.`, {
       code: "VARIANT_UNAVAILABLE",
@@ -110,6 +128,7 @@ const cartProductSelect = {
   stockQuantity: true,
   status: true,
   isAvailable: true,
+  purchaseMode: true,
   variants: { include: { selections: { include: { option: true, optionValue: true } } } },
 };
 

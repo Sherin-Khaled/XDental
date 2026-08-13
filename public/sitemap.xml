@@ -31,23 +31,38 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://xdentalstore.com/cart</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://xdentalstore.com/faqs</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://xdentalstore.com/how-to-order</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://xdentalstore.com/shipping-delivery</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://xdentalstore.com/returns-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://xdentalstore.com/track-order</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://xdentalstore.com/privacy</loc>
+    <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://xdentalstore.com/checkout</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://xdentalstore.com/terms</loc>
+    <changefreq>yearly</changefreq>
     <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://xdentalstore.com/login</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://xdentalstore.com/signup</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.2</priority>
   </url>
 </urlset>

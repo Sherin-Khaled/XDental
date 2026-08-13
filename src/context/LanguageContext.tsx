@@ -7,8 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import en from "@/locales/en.json";
-import ar from "@/locales/ar.json";
 
 export type Language = "en" | "ar";
 type TranslationTree = Record<string, unknown>;
@@ -28,7 +26,13 @@ type LanguageContextValue = {
   t: (key: string, options?: TranslateOptions) => string;
 };
 
-const translations: Record<Language, TranslationTree> = { en, ar };
+type TranslationModule = { default: TranslationTree };
+
+const translationLoaders: Record<Language, () => Promise<TranslationModule>> = {
+  en: () => import("@/locales/en.json"),
+  ar: () => import("@/locales/ar.json"),
+};
+const translationCache: Partial<Record<Language, TranslationTree>> = {};
 const STORAGE_KEY = "xdental.language";
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
 
@@ -63,7 +67,29 @@ function interpolate(value: string, replacements?: TranslationValues) {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(readInitialLanguage);
+  const [translations, setTranslations] = useState<Partial<Record<Language, TranslationTree>>>(
+    translationCache
+  );
   const direction = language === "ar" ? "rtl" : "ltr";
+
+  useEffect(() => {
+    let cancelled = false;
+    const requiredLanguages: Language[] = language === "ar" ? ["en", "ar"] : ["en"];
+
+    Promise.all(
+      requiredLanguages.map(async (requiredLanguage) => {
+        if (!translationCache[requiredLanguage]) {
+          translationCache[requiredLanguage] = (await translationLoaders[requiredLanguage]()).default;
+        }
+      })
+    ).then(() => {
+      if (!cancelled) setTranslations({ ...translationCache });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language]);
 
   const setLanguage = useCallback((nextLanguage: Language) => {
     setLanguageState(nextLanguage);
@@ -87,8 +113,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: string, options?: TranslateOptions) => {
-      const activeValue = getNestedValue(translations[language], key);
-      const fallbackValue = getNestedValue(translations.en, key);
+      const activeValue = translations[language]
+        ? getNestedValue(translations[language], key)
+        : undefined;
+      const fallbackValue = translations.en
+        ? getNestedValue(translations.en, key)
+        : undefined;
       const resolved =
         typeof activeValue === "string"
           ? activeValue
@@ -113,7 +143,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [direction, language, setLanguage, t, toggleLanguage]
   );
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  const isReady = Boolean(translations.en && translations[language]);
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {isReady ? children : (
+        <div className="flex min-h-screen items-center justify-center bg-[var(--xd-bg)]" role="status" aria-label="Loading language">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--xd-gold-active)] border-t-transparent" />
+        </div>
+      )}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {

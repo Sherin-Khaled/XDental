@@ -184,6 +184,12 @@ function serializeProduct(product, brandByName = new Map(), categoryByName = new
     shortDescription: product.shortDescription ?? null,
     shortDescriptionAr: product.shortDescriptionAr ?? null,
     featured: product.featured,
+    isWeeklyOffer: product.isWeeklyOffer,
+    isBestSeller: product.isBestSeller,
+    isNewArrival: product.isNewArrival,
+    isHotDeal: product.isHotDeal,
+    isFastDelivery: product.isFastDelivery,
+    purchaseMode: product.purchaseMode,
     isAvailable: product.isAvailable,
     sourceSystem: product.sourceSystem ?? null,
     lastSyncedAt: product.lastSyncedAt ?? null,
@@ -526,6 +532,14 @@ async function parseProductInput(body, existing = null) {
   const price = parsePrice(hasOwn(body, "price") ? body.price : existing?.price);
   const stock = parseStock(hasOwn(body, "stock") ? body.stock : existing?.stockQuantity);
   const featured = hasOwn(body, "featured") ? body.featured : existing?.featured ?? false;
+  const booleanFields = ["isWeeklyOffer", "isBestSeller", "isNewArrival", "isHotDeal", "isFastDelivery"];
+  const merchandising = Object.fromEntries(booleanFields.map((field) => [
+    field,
+    hasOwn(body, field) ? body[field] : existing?.[field] ?? false,
+  ]));
+  const purchaseMode = hasOwn(body, "purchaseMode")
+    ? cleanText(body.purchaseMode, 20).toUpperCase()
+    : existing?.purchaseMode ?? "STANDARD";
   const slug = hasOwn(body, "slug")
     ? slugify(body.slug) || slugify(name)
     : existing && name === existing.name
@@ -540,6 +554,12 @@ async function parseProductInput(body, existing = null) {
   if (!PRODUCT_STATUSES.has(requestedStatus)) return { error: { message: "Invalid product status.", field: "status" } };
   if (!validImageUrl(imageUrl)) return { error: { message: "Image URL must use http or https.", field: "imageUrl" } };
   if (typeof featured !== "boolean") return { error: { message: "Featured must be true or false.", field: "featured" } };
+  for (const [field, value] of Object.entries(merchandising)) {
+    if (typeof value !== "boolean") return { error: { message: `${field} must be true or false.`, field } };
+  }
+  if (!["STANDARD", "INQUIRY", "QUOTE"].includes(purchaseMode)) {
+    return { error: { message: "Invalid purchase mode.", field: "purchaseMode" } };
+  }
 
   const brandId = hasOwn(body, "brandId") ? cleanText(body.brandId, 191) : undefined;
   const categoryId = hasOwn(body, "categoryId") ? cleanText(body.categoryId, 191) : undefined;
@@ -561,6 +581,8 @@ async function parseProductInput(body, existing = null) {
       stockQuantity: stock.value,
       status,
       featured,
+      ...merchandising,
+      purchaseMode,
       imageUrl: imageUrl || null,
       description: description || null,
       descriptionAr: descriptionAr || null,

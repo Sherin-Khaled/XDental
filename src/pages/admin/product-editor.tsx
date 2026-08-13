@@ -12,6 +12,7 @@ import {
   type AdminCategory,
   type AdminProductInput,
   type AdminProductStatus,
+  type AdminProductPurchaseMode,
 } from "@/services/adminCatalog";
 import { getAdminBrands, type AdminBrand } from "@/services/adminBrands";
 import { getAdminProductCatalog, type AdminProductCatalog } from "@/services/adminProductCatalog";
@@ -40,6 +41,12 @@ type DetailsForm = {
   stock: string;
   status: AdminProductStatus;
   featured: boolean;
+  isWeeklyOffer: boolean;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
+  isHotDeal: boolean;
+  isFastDelivery: boolean;
+  purchaseMode: AdminProductPurchaseMode;
   description: string;
   descriptionAr: string;
   shortDescription: string;
@@ -47,7 +54,7 @@ type DetailsForm = {
 };
 
 function emptyForm(): DetailsForm {
-  return { name: "", nameAr: "", sku: "", brandId: NONE_VALUE, categoryId: NONE_VALUE, price: "", stock: "", status: "ACTIVE", featured: false, description: "", descriptionAr: "", shortDescription: "", shortDescriptionAr: "" };
+  return { name: "", nameAr: "", sku: "", brandId: NONE_VALUE, categoryId: NONE_VALUE, price: "", stock: "", status: "ACTIVE", featured: false, isWeeklyOffer: false, isBestSeller: false, isNewArrival: false, isHotDeal: false, isFastDelivery: false, purchaseMode: "STANDARD", description: "", descriptionAr: "", shortDescription: "", shortDescriptionAr: "" };
 }
 
 function formFromCatalog(catalog: AdminProductCatalog): DetailsForm {
@@ -61,6 +68,12 @@ function formFromCatalog(catalog: AdminProductCatalog): DetailsForm {
     stock: String(catalog.stockQuantity ?? 0),
     status: catalog.status,
     featured: catalog.featured,
+    isWeeklyOffer: catalog.isWeeklyOffer,
+    isBestSeller: catalog.isBestSeller,
+    isNewArrival: catalog.isNewArrival,
+    isHotDeal: catalog.isHotDeal,
+    isFastDelivery: catalog.isFastDelivery,
+    purchaseMode: catalog.purchaseMode,
     description: catalog.description ?? "",
     descriptionAr: catalog.descriptionAr ?? "",
     shortDescription: catalog.shortDescription ?? "",
@@ -196,6 +209,12 @@ export default function AdminProductEditor() {
       shortDescription: form.shortDescription.trim() || undefined,
       shortDescriptionAr: form.shortDescriptionAr.trim() || undefined,
       featured: form.featured,
+      isWeeklyOffer: form.isWeeklyOffer,
+      isBestSeller: form.isBestSeller,
+      isNewArrival: form.isNewArrival,
+      isHotDeal: form.isHotDeal,
+      isFastDelivery: form.isFastDelivery,
+      purchaseMode: form.purchaseMode,
     };
     try {
       if (productId) {
@@ -358,8 +377,24 @@ export default function AdminProductEditor() {
                   optional={summary?.hasVariants ? t("admin.productEditor.variantStockOnly") : undefined}
                 />
                 <AdminSelect id="status" label={t("admin.products.status")} value={form.status} onChange={(value) => updateField("status", value as AdminProductStatus)} options={statusOptions} />
-                <div className="flex items-end">
+                <AdminSelect
+                  id="purchaseMode"
+                  label={t("admin.products.purchaseMode", { fallback: "Purchase mode" })}
+                  value={form.purchaseMode}
+                  onChange={(value) => updateField("purchaseMode", value as AdminProductPurchaseMode)}
+                  options={[
+                    { value: "STANDARD", label: t("admin.products.purchaseModes.standard", { fallback: "Standard checkout" }) },
+                    { value: "INQUIRY", label: t("admin.products.purchaseModes.inquiry", { fallback: "Product inquiry" }) },
+                    { value: "QUOTE", label: t("admin.products.purchaseModes.quote", { fallback: "Quote request" }) },
+                  ]}
+                />
+                <div className="sm:col-span-2 grid gap-3 rounded-[14px] border border-[#EFE2BC] bg-[#FBFAF7] p-4 sm:grid-cols-2 lg:grid-cols-3">
                   <AdminCheckbox id="featured" checked={form.featured} onCheckedChange={(checked) => updateField("featured", checked)} label={t("admin.products.featured")} />
+                  <AdminCheckbox id="isWeeklyOffer" checked={form.isWeeklyOffer} onCheckedChange={(checked) => updateField("isWeeklyOffer", checked)} label={t("admin.products.weeklyOffer", { fallback: "Weekly Offer" })} />
+                  <AdminCheckbox id="isBestSeller" checked={form.isBestSeller} onCheckedChange={(checked) => updateField("isBestSeller", checked)} label={t("admin.products.bestSeller", { fallback: "Best Seller" })} />
+                  <AdminCheckbox id="isNewArrival" checked={form.isNewArrival} onCheckedChange={(checked) => updateField("isNewArrival", checked)} label={t("admin.products.newArrival", { fallback: "New Arrival" })} />
+                  <AdminCheckbox id="isHotDeal" checked={form.isHotDeal} onCheckedChange={(checked) => updateField("isHotDeal", checked)} label={t("admin.products.hotDeal", { fallback: "Hot Deal" })} />
+                  <AdminCheckbox id="isFastDelivery" checked={form.isFastDelivery} onCheckedChange={(checked) => updateField("isFastDelivery", checked)} label={t("admin.products.fastDelivery", { fallback: "Fast Delivery" })} />
                 </div>
                 <AdminTextarea id="shortDescription" label={t("admin.products.shortDescriptionField")} value={form.shortDescription} maxLength={1000} onChange={(event) => updateField("shortDescription", event.target.value)} optional={t("admin.variants.optional")} />
                 <AdminTextarea id="shortDescriptionAr" dir="rtl" label={t("admin.products.shortDescriptionArField")} value={form.shortDescriptionAr} maxLength={1000} onChange={(event) => updateField("shortDescriptionAr", event.target.value)} optional={t("admin.variants.optional")} />

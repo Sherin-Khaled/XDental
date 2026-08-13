@@ -47,7 +47,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1096.0",
     "@prisma/client": "^6.19.3",
-    "@workspace/x-dental-store": "file:..",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

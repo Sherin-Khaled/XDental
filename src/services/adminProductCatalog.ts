@@ -3,6 +3,7 @@ import { apiRequest } from "./http";
 /** Typed wrappers around the Phase 7A admin variant/option/image endpoints (server/src/controllers/adminVariantCatalog.controller.js). */
 
 export type AdminVariantStatus = "ACTIVE" | "LOW_STOCK" | "OUT_OF_STOCK" | "DRAFT" | "INACTIVE";
+export type AdminProductPurchaseMode = "STANDARD" | "INQUIRY" | "QUOTE";
 
 export type AdminProductOptionValue = {
   id: string;
@@ -84,6 +85,12 @@ export type AdminProductCatalog = {
   stockQuantity: number | null;
   status: AdminVariantStatus;
   featured: boolean;
+  isWeeklyOffer: boolean;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
+  isHotDeal: boolean;
+  isFastDelivery: boolean;
+  purchaseMode: AdminProductPurchaseMode;
   isAvailable: boolean;
   imageUrl: string | null;
   sourceSystem: string | null;

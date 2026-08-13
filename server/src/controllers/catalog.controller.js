@@ -86,6 +86,12 @@ export function serializePublicProduct(
     shortDescription: product.shortDescription ?? null,
     shortDescriptionAr: product.shortDescriptionAr ?? null,
     featured: product.featured,
+    isWeeklyOffer: product.isWeeklyOffer,
+    isBestSeller: product.isBestSeller,
+    isNewArrival: product.isNewArrival,
+    isHotDeal: product.isHotDeal,
+    isFastDelivery: product.isFastDelivery,
+    purchaseMode: product.purchaseMode,
     available,
     isAvailable: available,
     hasVariants,
@@ -282,6 +288,15 @@ export async function getPublicProducts(request, response) {
   if (featuredText && !["true", "false"].includes(featuredText)) {
     return response.status(400).json({ message: "Featured must be true or false." });
   }
+  const merchandisingFilters = ["isWeeklyOffer", "isBestSeller", "isNewArrival", "isHotDeal", "isFastDelivery"];
+  const merchandisingValues = {};
+  for (const field of merchandisingFilters) {
+    const value = cleanText(request.query?.[field], 10).toLowerCase();
+    if (value && !["true", "false"].includes(value)) {
+      return response.status(400).json({ message: `${field} must be true or false.` });
+    }
+    if (value) merchandisingValues[field] = value === "true";
+  }
   const hasDiscountText = cleanText(request.query?.hasDiscount, 10).toLowerCase();
   if (hasDiscountText && !["true", "false"].includes(hasDiscountText)) {
     return response.status(400).json({ message: "hasDiscount must be true or false." });
@@ -335,6 +350,7 @@ export async function getPublicProducts(request, response) {
     ...(categoryNames ? { category: { in: categoryNames, mode: "insensitive" } } : {}),
     ...(brandNames ? { brand: { in: brandNames, mode: "insensitive" } } : {}),
     ...(featuredText ? { featured: featuredText === "true" } : {}),
+    ...merchandisingValues,
     ...(hasDiscountText ? { salePrice: hasDiscountText === "true" ? { not: null } : null } : {}),
     ...(availability ? { AND: [availability] } : {}),
     ...(search ? {

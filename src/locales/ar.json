@@ -657,6 +657,17 @@
       "shortDescriptionField": "الوصف المختصر",
       "shortDescriptionArField": "الوصف المختصر (بالعربية)",
       "featured": "مميز",
+      "weeklyOffer": "عرض أسبوعي",
+      "bestSeller": "الأكثر مبيعًا",
+      "newArrival": "وصل حديثًا",
+      "hotDeal": "صفقة مميزة",
+      "fastDelivery": "توصيل سريع",
+      "purchaseMode": "طريقة الشراء",
+      "purchaseModes": {
+        "standard": "شراء عادي",
+        "inquiry": "استفسار عن المنتج",
+        "quote": "طلب عرض سعر"
+      },
       "actions": "الإجراءات",
       "edit": "تعديل",
       "delete": "حذف",
