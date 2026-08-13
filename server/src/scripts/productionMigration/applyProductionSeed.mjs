@@ -14,12 +14,10 @@
  *
  * Insert order matters for FK integrity and is fixed here:
  *   1. Brand, Permission, DeliveryZone, HeroSlide, LoyaltyProgramSettings
- *      (no dependencies on anything else in the bundle — the loyalty
- *      settings row is seeded with enabled: false, see
- *      exportProductionSeed.mjs for why it's required at all)
- *   2. Category (topologically pre-sorted parent-before-child by the
+ *   2. DeliveryOffer, then DeliveryOfferZone
+ *   3. Category (topologically pre-sorted parent-before-child by the
  *      export step; inserted in that exact order)
- *   3. Product (depends on Brand.id / Category.id already existing)
+ *   4. Product (depends on Brand.id / Category.id already existing)
  * All of it runs inside a single Prisma transaction — the target
  * database ends up either fully populated or untouched, never partial.
  *
@@ -31,6 +29,10 @@ import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { PrismaClient } from "../../generated/prisma-client-runtime/client.js";
+import {
+  LAUNCH_LOYALTY_PROGRAM_SETTINGS,
+  buildLaunchDeliverySeedTables,
+} from "../../config/launchBusinessRules.js";
 
 const PROJECT_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const BUNDLE_PATH = path.join(PROJECT_ROOT, "production-seed-export", "production-seed-bundle.json");
@@ -76,6 +78,16 @@ async function main() {
   }
   console.log("Bundle integrity: all checksums and counts match.");
 
+  // Keep the approved catalogue payload untouched while replacing only the
+  // launch-time business configuration with the reviewed tracked constants.
+  const { deliveryZones, deliveryOffers, deliveryOfferZones } =
+    buildLaunchDeliverySeedTables();
+  bundle.tables.deliveryZone = deliveryZones;
+  bundle.tables.deliveryOffer = deliveryOffers;
+  bundle.tables.deliveryOfferZone = deliveryOfferZones;
+  bundle.tables.loyaltyProgramSettings = [{ ...LAUNCH_LOYALTY_PROGRAM_SETTINGS }];
+  console.log("Launch loyalty and delivery configuration loaded from tracked business rules.");
+
   const prisma = new PrismaClient();
 
   // Refuse to run against a database that already has data in any of the
@@ -86,6 +98,7 @@ async function main() {
     category: await prisma.category.count(),
     product: await prisma.product.count(),
     deliveryZone: await prisma.deliveryZone.count(),
+    deliveryOffer: await prisma.deliveryOffer.count(),
     heroSlide: await prisma.heroSlide.count(),
     permission: await prisma.permission.count(),
     loyaltyProgramSettings: await prisma.loyaltyProgramSettings.count(),
@@ -120,6 +133,10 @@ async function main() {
     if (bundle.tables.brand.length) await tx.brand.createMany({ data: bundle.tables.brand });
     if (bundle.tables.permission.length) await tx.permission.createMany({ data: bundle.tables.permission });
     if (bundle.tables.deliveryZone.length) await tx.deliveryZone.createMany({ data: bundle.tables.deliveryZone });
+    if (bundle.tables.deliveryOffer?.length) await tx.deliveryOffer.createMany({ data: bundle.tables.deliveryOffer });
+    if (bundle.tables.deliveryOfferZone?.length) {
+      await tx.deliveryOfferZone.createMany({ data: bundle.tables.deliveryOfferZone });
+    }
     if (bundle.tables.heroSlide.length) await tx.heroSlide.createMany({ data: bundle.tables.heroSlide });
     if (bundle.tables.loyaltyProgramSettings?.length) {
       await tx.loyaltyProgramSettings.createMany({ data: bundle.tables.loyaltyProgramSettings });

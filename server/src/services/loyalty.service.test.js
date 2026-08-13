@@ -8,6 +8,7 @@ import {
   createAdminWalletAdjustment,
   debitOrderLoyalty,
   expirePointsForUser,
+  getLoyaltyProgramSettings,
   initializeNewCustomerLoyalty,
   LoyaltyError,
   parseRequestedWalletCents,
@@ -21,15 +22,15 @@ const settings = {
   vipPointsPerEgp10: 2,
   pointsPerRedemptionUnit: 100,
   redemptionValueEgp: 10,
-  welcomePoints: 200,
-  welcomeMinimumSubtotalEgp: 500,
+  welcomePoints: 5_000,
+  welcomeMinimumSubtotalEgp: 5_000,
   welcomeExpiryDays: 30,
   minimumRedemptionPoints: 100,
   maximumRedemptionPercent: 20,
   expiryMonths: 12,
 };
 
-function basePricing({ subtotalCents = 100_000, monetaryDiscountCents = 10_000, shippingCents = 5_000 } = {}) {
+function basePricing({ subtotalCents = 1_000_000, monetaryDiscountCents = 100_000, shippingCents = 5_000 } = {}) {
   return {
     subtotalCents,
     monetaryDiscountCents,
@@ -90,8 +91,8 @@ test("checkout exposes real balances and enforces 100-point increments plus the 
   assert.equal(preview.loyalty.maximumRedeemablePoints, 1_000);
   assert.equal(preview.pointsRedemptionValueCents, 1_000);
   assert.equal(preview.walletCreditUsedCents, 2_000);
-  assert.equal(preview.totalCents, 94_000);
-  assert.equal(preview.remainingCodCents, 92_000);
+  assert.equal(preview.totalCents, 904_000);
+  assert.equal(preview.remainingCodCents, 902_000);
 
   await assert.rejects(
     applyLoyaltyPricing(database, {
@@ -106,8 +107,8 @@ test("checkout exposes real balances and enforces 100-point increments plus the 
   await assert.rejects(
     applyLoyaltyPricing(cappedDatabase, {
       userId: "customer-1",
-      pricing: basePricing({ subtotalCents: 10_000, monetaryDiscountCents: 0, shippingCents: 5_000 }),
-      requestedPoints: 300,
+      pricing: basePricing({ subtotalCents: 500_000, monetaryDiscountCents: 0, shippingCents: 5_000 }),
+      requestedPoints: 10_100,
     }),
     (error) => error instanceof LoyaltyError && error.code === "POINTS_REDEMPTION_LIMIT"
   );
@@ -121,9 +122,9 @@ test("points never pay shipping and wallet-funded product value does not earn po
     requestedPoints: 100,
     requestedWalletAmount: "60.00",
   });
-  assert.equal(preview.loyalty.eligibleProductSubtotalCents, 90_000);
-  assert.equal(preview.loyalty.eligibleEarningCents, 88_000);
-  assert.equal(preview.remainingCodCents, 88_000);
+  assert.equal(preview.loyalty.eligibleProductSubtotalCents, 900_000);
+  assert.equal(preview.loyalty.eligibleEarningCents, 898_000);
+  assert.equal(preview.remainingCodCents, 898_000);
 });
 
 test("standard earns 1% and VIP earns 2% using complete EGP 10 blocks rounded down", () => {
@@ -193,10 +194,31 @@ test("new public customer receives exactly one immediately available welcome gra
   const grantedAt = new Date("2026-08-02T10:00:00Z");
   await initializeNewCustomerLoyalty(database, "new-customer", grantedAt);
   await initializeNewCustomerLoyalty(database, "new-customer", grantedAt);
-  assert.equal(account.availablePoints, 200);
+  assert.equal(account.availablePoints, 5_000);
   assert.equal(account.pendingPoints, 0);
   assert.equal(pointRows.get("welcome:new-customer:granted").expiresAt.toISOString(), "2026-09-01T10:00:00.000Z");
   assert.deepEqual(calls, { point: 1, notification: 1 });
+});
+
+test("enabling launch loyalty settings does not automatically credit existing customers", async () => {
+  let accountWrites = 0;
+  let transactionWrites = 0;
+  const database = {
+    loyaltyProgramSettings: {
+      upsert: async ({ create }) => {
+        assert.equal(create.enabled, true);
+        assert.equal(create.welcomePoints, 5_000);
+        assert.equal(create.welcomeMinimumSubtotalEgp, "5000");
+        return settings;
+      },
+    },
+    loyaltyAccount: { update: async () => { accountWrites += 1; } },
+    loyaltyPointTransaction: { create: async () => { transactionWrites += 1; } },
+  };
+
+  await getLoyaltyProgramSettings(database);
+  assert.equal(accountWrites, 0);
+  assert.equal(transactionWrites, 0);
 });
 
 test("delivery leaves legacy pending welcome untouched and awards normal order points once", async () => {
@@ -254,46 +276,48 @@ test("delivery leaves legacy pending welcome untouched and awards normal order p
   assert.equal(updates, 1);
 });
 
-test("welcome points enforce EGP 500 and are usable on the first eligible checkout", async () => {
+test("signup points enforce EGP 5,000 and are usable on the first order without a prior purchase", async () => {
   const welcome = {
     id: "welcome-1",
     type: "WELCOME_GRANTED",
-    points: 200,
+    points: 5_000,
     status: "ACTIVE",
     expiresAt: new Date("2026-09-01T10:00:00Z"),
     idempotencyKey: "welcome:customer-1:granted",
     createdAt: new Date("2026-08-02T10:00:00Z"),
   };
-  const database = pricingDatabase({ availablePoints: 200, transactions: [welcome] });
+  const database = pricingDatabase({ availablePoints: 5_000, transactions: [welcome] });
 
   await assert.rejects(
     applyLoyaltyPricing(database, {
       userId: "customer-1",
-      pricing: basePricing({ subtotalCents: 49_900, monetaryDiscountCents: 0 }),
+      pricing: basePricing({ subtotalCents: 499_900, monetaryDiscountCents: 0 }),
       requestedPoints: 100,
       now: new Date("2026-08-02T11:00:00Z"),
     }),
-    (error) => error instanceof LoyaltyError && error.code === "WELCOME_MINIMUM_SUBTOTAL"
+    (error) => error instanceof LoyaltyError
+      && error.code === "POINTS_MINIMUM_SUBTOTAL"
+      && error.message === "Points can be redeemed on orders of EGP 5,000 or more."
   );
 
   const eligible = await applyLoyaltyPricing(database, {
     userId: "customer-1",
-    pricing: basePricing({ subtotalCents: 50_000, monetaryDiscountCents: 0 }),
-    requestedPoints: 200,
+    pricing: basePricing({ subtotalCents: 500_000, monetaryDiscountCents: 0 }),
+    requestedPoints: 5_000,
     now: new Date("2026-08-02T11:00:00Z"),
   });
-  assert.equal(eligible.pointsRedemptionValueCents, 2_000);
+  assert.equal(eligible.pointsRedemptionValueCents, 50_000);
   assert.equal(eligible.shippingCents, 5_000);
-  assert.equal(eligible.totalCents, 53_000);
-  assert.equal(eligible.pricingBreakdown.loyalty.welcomePointsRedeemed, 200);
+  assert.equal(eligible.totalCents, 455_000);
+  assert.equal(eligible.pricingBreakdown.loyalty.welcomePointsRedeemed, 5_000);
 });
 
-test("earned points remain redeemable below the welcome minimum without consuming welcome points", async () => {
+test("all point redemption is rejected below EGP 5,000, including earned points", async () => {
   const transactions = [
     {
       id: "welcome-1",
       type: "WELCOME_GRANTED",
-      points: 200,
+      points: 5_000,
       status: "ACTIVE",
       expiresAt: new Date("2026-09-01T10:00:00Z"),
       createdAt: new Date("2026-08-01T10:00:00Z"),
@@ -307,15 +331,16 @@ test("earned points remain redeemable below the welcome minimum without consumin
       createdAt: new Date("2026-08-02T10:00:00Z"),
     },
   ];
-  const database = pricingDatabase({ availablePoints: 300, transactions });
-  const pricing = await applyLoyaltyPricing(database, {
-    userId: "customer-1",
-    pricing: basePricing({ subtotalCents: 49_900, monetaryDiscountCents: 0 }),
-    requestedPoints: 100,
-    now: new Date("2026-08-02T11:00:00Z"),
-  });
-  assert.equal(pricing.pricingBreakdown.loyalty.welcomePointsRedeemed, 0);
-  assert.equal(pricing.pricingBreakdown.loyalty.earnedOrAdjustedPointsRedeemed, 100);
+  const database = pricingDatabase({ availablePoints: 5_100, transactions });
+  await assert.rejects(
+    applyLoyaltyPricing(database, {
+      userId: "customer-1",
+      pricing: basePricing({ subtotalCents: 499_900, monetaryDiscountCents: 0 }),
+      requestedPoints: 100,
+      now: new Date("2026-08-02T11:00:00Z"),
+    }),
+    (error) => error instanceof LoyaltyError && error.code === "POINTS_MINIMUM_SUBTOTAL"
+  );
 });
 
 test("welcome and order points cannot activate before delivery", async () => {

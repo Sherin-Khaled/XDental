@@ -123,15 +123,15 @@ export function WelcomeRewardsPopup() {
         <h2 id="welcome-rewards-title" className="mt-5 pe-8 font-display text-[27px] font-bold leading-tight text-[#050505] dark:text-[#F7F2E6] sm:text-[31px]">
           {t("welcomeRewards.headline", {
             fallback: "Get EGP {value} toward your first order",
-            values: { value: settings?.welcomeValueEgp ?? 20 },
+            values: { value: settings?.welcomeValueEgp ?? 500 },
           })}
         </h2>
         <p id="welcome-rewards-description" className="mt-3 text-[14px] leading-6 text-[#717182] dark:text-[#C6BEAE]">
           {t("welcomeRewards.description", {
             fallback: "Create your X Dental Store account and receive {points} welcome points (EGP {value}) to use on your first eligible purchase. Keep earning more points with every completed order.",
             values: {
-              points: settings?.welcomePoints ?? 0,
-              value: settings?.welcomeValueEgp ?? 0,
+              points: settings?.welcomePoints ?? 5_000,
+              value: settings?.welcomeValueEgp ?? 500,
             },
           })}
         </p>
@@ -142,15 +142,15 @@ export function WelcomeRewardsPopup() {
         >
           {t("welcomeRewards.cta", {
             fallback: "Create Account & Claim {points} Points",
-            values: { points: settings?.welcomePoints ?? 200 },
+            values: { points: settings?.welcomePoints ?? 5_000 },
           })}
         </Link>
         <p className="mt-3 text-center text-[11px] leading-5 text-[#8A8D9A] dark:text-[#BDB6A8]">
           {t("welcomeRewards.note", {
             fallback: "Valid for {days} days on eligible product purchases of EGP {minimum} or more. Points cannot be used for shipping.",
             values: {
-              days: settings?.welcomeExpiryDays ?? 0,
-              minimum: settings?.welcomeMinimumSubtotalEgp ?? 0,
+              days: settings?.welcomeExpiryDays ?? 30,
+              minimum: settings?.welcomeMinimumSubtotalEgp ?? 5_000,
             },
           })}
         </p>

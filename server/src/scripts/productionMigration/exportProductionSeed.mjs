@@ -28,26 +28,18 @@
  *                    product, PLUS their full parent-chain ancestry (a
  *                    category can be a parent with no directly-assigned
  *                    products but still be structurally required)
- *   - DeliveryZone: the 9 explicitly approved slugs only (excludes the
- *                    "freedelivery" test zone)
+ *   - DeliveryZone: the launch-approved bilingual areas synthesized from
+ *                    launchBusinessRules.js (excludes local/test zones)
+ *   - DeliveryOffer: the five approved Saturday-Wednesday recurring
+ *                    free-standard-delivery schedules and their zone links
  *   - HeroSlide:    the 3 currently PUBLISHED slides (excludes any DRAFT)
  *   - Permission:   all rows — role/permission definitions are system
  *                    configuration, not customer data
- *   - LoyaltyProgramSettings: ONE synthesized row, `enabled: false`,
- *                    every other field left at the schema's own documented
- *                    defaults (not invented, not read from the local DB —
- *                    see LOYALTY_SETTINGS_SAFE_DEFAULT below). Required
- *                    because `getLoyaltyProgramSettings()` in
- *                    loyalty.service.js upserts this singleton on first
- *                    read with `enabled: true` and real default point
- *                    values if the row is missing, and that read happens
- *                    from an unauthenticated public endpoint
- *                    (`getPublicLoyaltySettings`) — so a genuinely absent
- *                    row does not stay absent, it self-activates on the
- *                    very first page load that touches it. Pre-seeding it
- *                    disabled prevents that.
+ *   - LoyaltyProgramSettings: ONE launch-approved synthesized row with the
+ *                    program enabled, 5,000 immediate signup points, and a
+ *                    5,000 EGP redemption-order minimum.
  *
- * Explicitly excluded (not queried, not exported): DeliveryOffer,
+ * Explicitly excluded (not queried, not exported): local DeliveryOffer rows,
  * ScheduledPromotion, FlashSale, User and everything keyed off User,
  * CatalogImportBatch/CatalogImportRow. Real production promotions/coupons
  * are expected to be created fresh after go-live, not migrated from the
@@ -60,45 +52,13 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { PrismaClient } from "../../generated/prisma-client-runtime/client.js";
+import {
+  LAUNCH_LOYALTY_PROGRAM_SETTINGS,
+  buildLaunchDeliverySeedTables,
+} from "../../config/launchBusinessRules.js";
 
 const PROJECT_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const OUTPUT_DIR = path.join(PROJECT_ROOT, "production-seed-export");
-
-const APPROVED_DELIVERY_ZONE_SLUGS = [
-  "new-cairo",
-  "nasr-city",
-  "heliopolis",
-  "maadi",
-  "dokki",
-  "mohandessin",
-  "6th-of-october",
-  "sheikh-zayed",
-  "other",
-];
-
-// Matches loyalty.service.js's SETTINGS_ID exactly — the app looks up the
-// singleton by this literal id, not by any query.
-const LOYALTY_SETTINGS_ID = "default";
-
-// Every numeric field is the schema's own @default(...) value from
-// server/prisma/schema.prisma's LoyaltyProgramSettings model — not
-// invented here, not read from the local DB (whose row is itself just
-// these same defaults, auto-created by the app's own upsert during local
-// testing). The only deliberate override is `enabled: false`.
-const LOYALTY_SETTINGS_SAFE_DEFAULT = {
-  id: LOYALTY_SETTINGS_ID,
-  enabled: false,
-  standardPointsPerEgp10: 1,
-  vipPointsPerEgp10: 2,
-  pointsPerRedemptionUnit: 100,
-  redemptionValueEgp: "10",
-  welcomePoints: 200,
-  welcomeMinimumSubtotalEgp: "500",
-  welcomeExpiryDays: 30,
-  minimumRedemptionPoints: 100,
-  maximumRedemptionPercent: "20",
-  expiryMonths: 12,
-};
 
 function checksum(rows) {
   return createHash("sha256").update(JSON.stringify(rows)).digest("hex");
@@ -223,26 +183,10 @@ async function main() {
   }
   for (const id of categoriesById.keys()) visitCategory(id);
 
-  // --- DeliveryZone: explicit allowlist by slug ---
-  const deliveryZones = await prisma.deliveryZone.findMany({
-    where: { slug: { in: APPROVED_DELIVERY_ZONE_SLUGS } },
-    select: {
-      id: true,
-      slug: true,
-      nameEn: true,
-      nameAr: true,
-      isActive: true,
-      displayOrder: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-    orderBy: { displayOrder: "asc" },
-  });
-  if (deliveryZones.length !== APPROVED_DELIVERY_ZONE_SLUGS.length) {
-    const foundSlugs = new Set(deliveryZones.map((z) => z.slug));
-    const missing = APPROVED_DELIVERY_ZONE_SLUGS.filter((s) => !foundSlugs.has(s));
-    throw new Error(`Expected all 9 approved delivery zone slugs; missing: ${missing.join(", ")}`);
-  }
+  // --- Launch DeliveryZone / DeliveryOffer configuration: synthesized from
+  //     reviewed constants, never copied from local promotional test data. ---
+  const { deliveryZones, deliveryOffers, deliveryOfferZones } =
+    buildLaunchDeliverySeedTables();
 
   // --- HeroSlide: currently published only; updatedById always nulled
   //     (User is never migrated, so a dangling FK is not acceptable even
@@ -274,9 +218,8 @@ async function main() {
     orderBy: { key: "asc" },
   });
 
-  // --- LoyaltyProgramSettings: one synthesized row, not read from the DB
-  //     at all — see LOYALTY_SETTINGS_SAFE_DEFAULT above for why. ---
-  const loyaltyProgramSettings = [LOYALTY_SETTINGS_SAFE_DEFAULT];
+  // --- LoyaltyProgramSettings: launch-approved row, not read from local DB. ---
+  const loyaltyProgramSettings = [{ ...LAUNCH_LOYALTY_PROGRAM_SETTINGS }];
 
   await prisma.$disconnect();
 
@@ -291,6 +234,8 @@ async function main() {
       brand: brands,
       category: orderedCategories,
       deliveryZone: deliveryZones,
+      deliveryOffer: deliveryOffers,
+      deliveryOfferZone: deliveryOfferZones,
       heroSlide: heroSlides,
       permission: permissions,
       loyaltyProgramSettings,
@@ -300,6 +245,8 @@ async function main() {
       brand: brands.length,
       category: orderedCategories.length,
       deliveryZone: deliveryZones.length,
+      deliveryOffer: deliveryOffers.length,
+      deliveryOfferZone: deliveryOfferZones.length,
       heroSlide: heroSlides.length,
       permission: permissions.length,
       loyaltyProgramSettings: loyaltyProgramSettings.length,
@@ -309,6 +256,8 @@ async function main() {
       brand: checksum(brands),
       category: checksum(orderedCategories),
       deliveryZone: checksum(deliveryZones),
+      deliveryOffer: checksum(deliveryOffers),
+      deliveryOfferZone: checksum(deliveryOfferZones),
       heroSlide: checksum(heroSlides),
       permission: checksum(permissions),
       loyaltyProgramSettings: checksum(loyaltyProgramSettings),
@@ -321,10 +270,11 @@ async function main() {
   console.log(`Product:      ${products.length} (expected 12942)`);
   console.log(`Brand:        ${brands.length} (referenced by exported products)`);
   console.log(`Category:     ${orderedCategories.length} (${directCategoryIds.size} directly referenced + ${orderedCategories.length - directCategoryIds.size} ancestor-only)`);
-  console.log(`DeliveryZone: ${deliveryZones.length} (expected 9)`);
+  console.log(`DeliveryZone: ${deliveryZones.length} (launch-approved)`);
+  console.log(`DeliveryOffer: ${deliveryOffers.length} recurring free-delivery schedules`);
   console.log(`HeroSlide:    ${heroSlides.length} (expected 3, updatedById forced null)`);
   console.log(`Permission:   ${permissions.length}`);
-  console.log(`LoyaltyProgramSettings: ${loyaltyProgramSettings.length} (synthesized, enabled: false)`);
+  console.log(`LoyaltyProgramSettings: ${loyaltyProgramSettings.length} (synthesized, launch-enabled)`);
   console.log(`\nBundle written to: ${path.join(OUTPUT_DIR, "production-seed-bundle.json")}`);
   console.log("\nNo database was written to. No connection to Supabase or any remote host was made.");
 }

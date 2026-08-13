@@ -3,7 +3,13 @@ import assert from "node:assert/strict";
 import {
   DeliveryOfferEligibilityError,
   evaluateDeliveryOfferPricing,
+  isDeliveryOfferValidNow,
 } from "./deliveryOffer.service.js";
+import {
+  LAUNCH_DELIVERY_ZONES,
+  LAUNCH_FREE_DELIVERY_OFFERS,
+  buildLaunchDeliverySeedTables,
+} from "../config/launchBusinessRules.js";
 
 const now = new Date("2026-07-28T12:00:00.000Z");
 
@@ -124,4 +130,46 @@ test("multiple Delivery Offers choose lowest final shipping with deterministic t
     offer({ id: "free", offerType: "FREE_DELIVERY", discountType: null, discountValue: null }),
   ]));
   assert.equal(freeWinsTie.appliedOffer.sourceId, "free");
+});
+
+test("launch free-delivery configuration matches Saturday-Wednesday areas and excludes Thursday-Friday", () => {
+  const expectedByWeekday = new Map([
+    [6, ["shubra", "zeitoun", "hadayek-el-qobba", "abbassia", "shubra-masr", "ain-shams", "heliopolis", "dokki", "manial", "mohandessin"]],
+    [0, ["heliopolis", "first-settlement", "fifth-settlement", "dokki", "manial", "mohandessin"]],
+    [1, ["nasr-city", "heliopolis", "dokki", "manial", "mohandessin"]],
+    [2, ["first-settlement", "fifth-settlement", "dokki", "manial", "mohandessin"]],
+    [3, ["sheikh-zayed", "6th-of-october", "dokki", "manial", "mohandessin"]],
+  ]);
+  const datesByWeekday = new Map([
+    [6, new Date("2026-08-15T12:00:00Z")],
+    [0, new Date("2026-08-16T12:00:00Z")],
+    [1, new Date("2026-08-17T12:00:00Z")],
+    [2, new Date("2026-08-18T12:00:00Z")],
+    [3, new Date("2026-08-19T12:00:00Z")],
+    [4, new Date("2026-08-20T12:00:00Z")],
+    [5, new Date("2026-08-21T12:00:00Z")],
+  ]);
+
+  assert.equal(new Set(LAUNCH_DELIVERY_ZONES.map((zone) => zone.slug)).size, LAUNCH_DELIVERY_ZONES.length);
+  const seedTables = buildLaunchDeliverySeedTables();
+  assert.equal(seedTables.deliveryOffers.length, 5);
+  assert.equal(seedTables.deliveryOfferZones.length, 31);
+  for (const [weekday, expectedSlugs] of expectedByWeekday) {
+    const matching = LAUNCH_FREE_DELIVERY_OFFERS.filter((configuredOffer) =>
+      isDeliveryOfferValidNow(configuredOffer, datesByWeekday.get(weekday))
+    );
+    assert.equal(matching.length, 1);
+    assert.deepEqual(matching[0].zoneSlugs, expectedSlugs);
+    assert.equal(matching[0].offerType, "FREE_DELIVERY");
+    assert.equal(matching[0].appliesToStandard, true);
+    assert.equal(matching[0].appliesToFast, true);
+  }
+  for (const weekday of [4, 5]) {
+    assert.equal(
+      LAUNCH_FREE_DELIVERY_OFFERS.some((configuredOffer) =>
+        isDeliveryOfferValidNow(configuredOffer, datesByWeekday.get(weekday))
+      ),
+      false
+    );
+  }
 });

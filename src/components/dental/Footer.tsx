@@ -3,10 +3,8 @@ import { Link, useLocation } from "wouter";
 import {
   Facebook,
   Instagram,
-  Linkedin,
   MessageCircle,
   Phone,
-  Twitter,
 } from "lucide-react";
 import { DirectionalIcon } from "@/components/DirectionalIcon";
 import { BrandLogo } from "@/components/dental/BrandLogo";
@@ -61,10 +59,8 @@ const CONTACT = [
 ];
 
 const SOCIAL = [
-  { Icon: Instagram, label: "Instagram" },
-  { Icon: Twitter, label: "Twitter" },
-  { Icon: Facebook, label: "Facebook" },
-  { Icon: Linkedin, label: "LinkedIn" },
+  { Icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1HdimQMZhK/" },
+  { Icon: Instagram, label: "Instagram", href: "https://www.instagram.com/xdental_company" },
 ];
 
 export function Footer() {
@@ -233,10 +229,12 @@ export function Footer() {
           </p>
 
           <div className="flex items-center gap-2">
-            {SOCIAL.map(({ Icon, label }) => (
+            {SOCIAL.map(({ Icon, label, href }) => (
               <a
                 key={label}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={label}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-[#050505]/10 text-[#717182] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-bg-soft)] hover:text-[#050505]"
               >

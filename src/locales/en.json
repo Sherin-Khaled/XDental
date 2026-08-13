@@ -330,7 +330,7 @@
       "pointsUnit": "Points per redemption unit",
       "redemptionValue": "Redemption unit value (EGP)",
       "welcomePoints": "Welcome points",
-      "welcomeMinimumSubtotal": "Welcome minimum product subtotal (EGP)",
+      "welcomeMinimumSubtotal": "Minimum subtotal for points redemption (EGP)",
       "welcomeExpiryDays": "Welcome expiry (days)",
       "minimumPoints": "Minimum redemption points",
       "maximumPercent": "Maximum redemption (%)",
@@ -1890,7 +1890,8 @@
       "Support Numbers": "Support Numbers",
       "Customer Email": "Customer Email",
       "Orders WhatsApp": "Orders WhatsApp",
-      "Branch Contacts": "Branch Contacts"
+      "Branch Contacts": "Branch Contacts",
+      "Location Address": "18 St Gheet Al Eda - Abdeen - Cairo"
     },
     "contactLabels": {
       "Orders WhatsApp": "Orders WhatsApp",
@@ -2886,6 +2887,7 @@
       "pointsLabel": "Redeem reward points",
       "pointsAvailable": "{points} available - maximum {maximum}",
       "pointsRule": "100 points = EGP 10. Points apply to products only and cannot pay shipping.",
+      "pointsMinimumRule": "Points can be redeemed on orders of EGP {minimum} or more.",
       "welcomeMinimumRule": "Welcome points require at least EGP {minimum} of eligible products and expire after {days} days.",
       "walletLabel": "Use store credit",
       "walletAvailable": "Available: {amount}",
@@ -4176,7 +4178,7 @@
       "standardEarnRule": "Standard customers earn 1 point for each complete EGP 10 block of eligible delivered-order spending.",
       "vipEarnRule": "VIP customers earn 2 points for each complete EGP 10 block of eligible delivered-order spending.",
       "redemptionRuleBody": "Redeem in 100-point increments, where 100 points gives EGP 10 of eligible product value, up to 20% of the product subtotal. Points expire 12 months after activation.",
-      "welcomeRuleBody": "Welcome points are available immediately, expire after {days} days, and require at least EGP {minimum} of eligible products.",
+      "welcomeRuleBody": "{points} welcome points are available immediately and expire after {days} days. Points can be redeemed on orders of EGP {minimum} or more, including your first order.",
       "notCashNotice": "Points and store credit cannot be withdrawn or transferred. Wallet credit is used only for X Dental Store orders.",
       "activity": {
         "welcomePending": "Welcome points pending",

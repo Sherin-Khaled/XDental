@@ -60,7 +60,7 @@ const CONTACT_ACTIONS: {
   {
     Icon: Building2,
     label: "Visit / Warehouse",
-    subtitle: "Branch Contacts",
+    subtitle: "Location Address",
     contacts: [
       { label: "Branch Landline", value: "0223615151", href: "tel:+20223615151" },
       { label: "Branch Mobile", value: "01065057035", href: "tel:+201065057035" },
@@ -481,7 +481,7 @@ function LocationSection() {
           <div className="order-2 w-full overflow-hidden rounded-[22px] border border-[var(--xd-gold-border-soft)] bg-white shadow-[0_18px_46px_rgba(5,5,5,0.08)] lg:order-1 lg:rounded-[24px]">
             <iframe
               title={t("contactPage.locationTitle")}
-              src="https://www.google.com/maps?q=Cairo,%20Egypt&output=embed"
+              src="https://www.google.com/maps?q=18%20St%20Gheet%20Al%20Eda%20-%20Abdeen%20-%20Cairo&output=embed"
               className="h-[320px] w-full border-0 sm:h-[360px] lg:h-[410px]"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -501,9 +501,9 @@ function LocationSection() {
             </p>
 
             <a
-              href="https://www.google.com/maps/search/?api=1&query=Cairo%2C%20Egypt"
+              href="https://maps.app.goo.gl/8nHcgy3pM56rfD9D7?g_st=aw"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="mt-7 inline-flex h-11 items-center justify-center rounded-full border border-[var(--xd-gold-border-soft)] bg-white/80 px-5 text-[13px] font-bold text-[var(--xd-text)] shadow-[0_10px_24px_rgba(5,5,5,0.04)] transition hover:-translate-y-[1px] hover:border-[var(--xd-gold-border-hover)] hover:shadow-[0_14px_30px_rgba(5,5,5,0.07)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border)]"
             >
               Open in Google Maps

@@ -1552,13 +1552,12 @@ export default function Checkout() {
                           fallback: "100 points = EGP 10. Points apply to products only and cannot pay shipping.",
                         })}
                       </p>
-                      {trustedTotals && trustedTotals.welcomePointsAvailable > 0 && (
+                      {trustedTotals && (
                         <p className="mt-1 text-[11px] leading-4 text-[#8A8D9A] dark:text-[#BDB6A8]">
-                          {t("checkout.rewards.welcomeMinimumRule", {
-                            fallback: "Welcome points require at least EGP {minimum} of eligible products and expire after {days} days.",
+                          {t("checkout.rewards.pointsMinimumRule", {
+                            fallback: "Points can be redeemed on orders of EGP {minimum} or more.",
                             values: {
                               minimum: trustedTotals.welcomeMinimumSubtotal,
-                              days: trustedTotals.welcomeExpiryDays,
                             },
                           })}
                         </p>

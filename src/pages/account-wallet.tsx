@@ -258,7 +258,7 @@ export default function AccountWallet() {
                         {accountT(
                           t,
                           "wallet.welcomeRuleBody",
-                          "{points} welcome points are available immediately, expire after {days} days, and require at least EGP {minimum} of eligible products. Points cannot pay shipping; store credit is separate.",
+                          "{points} welcome points are available immediately and expire after {days} days. Points can be redeemed on orders of EGP {minimum} or more, including your first order. Points cannot pay shipping; store credit is separate.",
                           {
                             points: summary.settings.welcomePoints,
                             days: summary.settings.welcomeExpiryDays,

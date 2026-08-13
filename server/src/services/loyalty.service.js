@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { prisma } from "../config/db.js";
+import { LAUNCH_LOYALTY_PROGRAM_SETTINGS } from "../config/launchBusinessRules.js";
 
 const SETTINGS_ID = "default";
 const EGP10_CENTS = 1_000;
@@ -53,7 +54,10 @@ function welcomeExpiryDays(settings) {
 }
 
 function welcomeMinimumSubtotalCents(settings) {
-  return toCents(settings.welcomeMinimumSubtotalEgp ?? 500);
+  return toCents(
+    settings.welcomeMinimumSubtotalEgp
+      ?? LAUNCH_LOYALTY_PROGRAM_SETTINGS.welcomeMinimumSubtotalEgp
+  );
 }
 
 function safeReason(value) {
@@ -90,7 +94,7 @@ async function createMandatoryLoyaltyNotification(
 export async function getLoyaltyProgramSettings(database = prisma) {
   return database.loyaltyProgramSettings.upsert({
     where: { id: SETTINGS_ID },
-    create: { id: SETTINGS_ID },
+    create: { ...LAUNCH_LOYALTY_PROGRAM_SETTINGS },
     update: {},
   });
 }
@@ -103,7 +107,10 @@ export function serializeLoyaltySettings(settings) {
     pointsPerRedemptionUnit: settings.pointsPerRedemptionUnit,
     redemptionValueEgp: asNumber(settings.redemptionValueEgp),
     welcomePoints: settings.welcomePoints,
-    welcomeMinimumSubtotalEgp: asNumber(settings.welcomeMinimumSubtotalEgp ?? 500),
+    welcomeMinimumSubtotalEgp: asNumber(
+      settings.welcomeMinimumSubtotalEgp
+        ?? LAUNCH_LOYALTY_PROGRAM_SETTINGS.welcomeMinimumSubtotalEgp
+    ),
     welcomeExpiryDays: welcomeExpiryDays(settings),
     minimumRedemptionPoints: settings.minimumRedemptionPoints,
     maximumRedemptionPercent: asNumber(settings.maximumRedemptionPercent),
@@ -119,7 +126,10 @@ export function serializePublicLoyaltySettings(settings) {
   return {
     welcomePoints,
     welcomeValueEgp: redemptionUnits * asNumber(settings.redemptionValueEgp),
-    welcomeMinimumSubtotalEgp: asNumber(settings.welcomeMinimumSubtotalEgp ?? 500),
+    welcomeMinimumSubtotalEgp: asNumber(
+      settings.welcomeMinimumSubtotalEgp
+        ?? LAUNCH_LOYALTY_PROGRAM_SETTINGS.welcomeMinimumSubtotalEgp
+    ),
     welcomeExpiryDays: welcomeExpiryDays(settings),
     appliesTo: "PRODUCTS_ONLY",
   };
@@ -408,26 +418,18 @@ export async function applyLoyaltyPricing(
   const welcomePointsAvailable = remainingPointLots
     .filter((lot) => WELCOME_POINT_CREDIT_TYPES.has(lot.type))
     .reduce((sum, lot) => sum + lot.remainingPoints, 0);
-  const nonWelcomePointsAvailable = remainingPointLots
-    .filter((lot) => !WELCOME_POINT_CREDIT_TYPES.has(lot.type))
-    .reduce((sum, lot) => sum + lot.remainingPoints, 0);
   const eligibleProductSubtotalCents = Math.max(
     0,
     pricing.subtotalCents - pricing.monetaryDiscountCents
   );
   const welcomeMinimumCents = welcomeMinimumSubtotalCents(settings);
-  let maximumPoints = maximumRedeemablePoints(
-    eligibleProductSubtotalCents,
-    account.availablePoints,
-    settings
-  );
-  if (eligibleProductSubtotalCents < welcomeMinimumCents && welcomePointsAvailable > 0) {
-    maximumPoints = Math.min(
-      maximumPoints,
-      Math.floor(nonWelcomePointsAvailable / settings.pointsPerRedemptionUnit)
-        * settings.pointsPerRedemptionUnit
-    );
-  }
+  const maximumPoints = eligibleProductSubtotalCents < welcomeMinimumCents
+    ? 0
+    : maximumRedeemablePoints(
+        eligibleProductSubtotalCents,
+        account.availablePoints,
+        settings
+      );
   const redemptionDetails = welcomeRedemptionDetails(
     remainingPointLots,
     requestedPoints,
@@ -452,15 +454,11 @@ export async function applyLoyaltyPricing(
     if (requestedPoints > account.availablePoints) {
       throw new LoyaltyError(409, "INSUFFICIENT_POINTS", "Your available points balance changed.");
     }
-    if (
-      eligibleProductSubtotalCents < welcomeMinimumCents
-      && welcomePointsAvailable > 0
-      && requestedPoints > nonWelcomePointsAvailable
-    ) {
+    if (eligibleProductSubtotalCents < welcomeMinimumCents) {
       throw new LoyaltyError(
         409,
-        "WELCOME_MINIMUM_SUBTOTAL",
-        `Welcome points require at least EGP ${(welcomeMinimumCents / 100).toFixed(2)} of eligible products.`
+        "POINTS_MINIMUM_SUBTOTAL",
+        `Points can be redeemed on orders of EGP ${(welcomeMinimumCents / 100).toLocaleString("en-US")} or more.`
       );
     }
     if (requestedPoints > maximumPoints) {

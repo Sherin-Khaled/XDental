@@ -293,7 +293,7 @@ export default function AdminLoyalty() {
                   {numberSetting("pointsPerRedemptionUnit", t("admin.loyalty.pointsUnit", { fallback: "Points per redemption unit" }))}
                   {numberSetting("redemptionValueEgp", t("admin.loyalty.redemptionValue", { fallback: "Redemption unit value (EGP)" }))}
                   {numberSetting("welcomePoints", t("admin.loyalty.welcomePoints", { fallback: "Welcome points" }))}
-                  {numberSetting("welcomeMinimumSubtotalEgp", t("admin.loyalty.welcomeMinimumSubtotal", { fallback: "Welcome minimum product subtotal (EGP)" }))}
+                  {numberSetting("welcomeMinimumSubtotalEgp", t("admin.loyalty.welcomeMinimumSubtotal", { fallback: "Minimum subtotal for points redemption (EGP)" }))}
                   {numberSetting("welcomeExpiryDays", t("admin.loyalty.welcomeExpiryDays", { fallback: "Welcome expiry (days)" }))}
                   {numberSetting("minimumRedemptionPoints", t("admin.loyalty.minimumPoints", { fallback: "Minimum redemption points" }))}
                   {numberSetting("maximumRedemptionPercent", t("admin.loyalty.maximumPercent", { fallback: "Maximum redemption (%)" }))}
