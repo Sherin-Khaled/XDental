@@ -670,6 +670,7 @@ export default function Checkout() {
   const editedCheckoutFields = useRef<Set<CheckoutFormField>>(new Set());
   const autofilledUserId = useRef<string | null>(null);
   const previousCheckoutUserId = useRef<string | null | undefined>(undefined);
+  const defaultLocationAppliedUserId = useRef<string | null>(null);
   const checkoutItems = cart;
   const cartStockIssues = useMemo(() => getCartStockIssues(cart), [cart]);
   const subtotal = cartTotal;
@@ -677,6 +678,25 @@ export default function Checkout() {
     shippingMethods.find((method) => method.id === shippingMethod);
   const selectedPaymentMethod =
     paymentMethods.find((method) => method.id === paymentMethod);
+  const selectSavedClinicLocation = (value: string) => {
+    if (value === "manual") {
+      setSelectedClinicLocationId("");
+      return;
+    }
+    const location = currentUser?.clinicLocations.find((item) => item.id === value);
+    setSelectedClinicLocationId(value);
+    if (!location) return;
+    setForm((current) => ({
+      ...current,
+      governorate: location.governorate || current.governorate,
+      cityArea: location.cityArea || location.customArea || (language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn),
+      streetAddress: location.addressLine || current.streetAddress,
+      buildingNumber: location.buildingNumber || current.buildingNumber,
+      apartmentFloor: location.apartmentFloor || current.apartmentFloor,
+      postalCode: location.postalCode || current.postalCode,
+      clinicBranch: location.label || current.clinicBranch,
+    }));
+  };
   const shipping = subtotal > 0 ? selectedShippingMethod?.amount ?? 0 : 0;
   const checkoutOrderInput = useMemo<CreateOrderInput>(
     () => ({
@@ -731,6 +751,7 @@ export default function Checkout() {
     previousCheckoutUserId.current = activeUserId;
 
     if (!activeUserId || !currentUser) {
+      defaultLocationAppliedUserId.current = null;
       if (accountChanged) {
         editedCheckoutFields.current.clear();
         setForm({ ...initialFormState });
@@ -794,6 +815,14 @@ export default function Checkout() {
 
     autofilledUserId.current = activeUserId;
   }, [currentUser, isAuthenticated, isAuthLoading]);
+
+  useEffect(() => {
+    if (!currentUser || defaultLocationAppliedUserId.current === currentUser.id) return;
+    const defaultLocation = currentUser.clinicLocations.find((location) => location.isDefault);
+    if (!defaultLocation) return;
+    defaultLocationAppliedUserId.current = currentUser.id;
+    selectSavedClinicLocation(defaultLocation.id);
+  }, [currentUser]);
 
   useEffect(() => {
     if (isAuthLoading || hasCompletedOrder.current) return;
@@ -1355,7 +1384,7 @@ export default function Checkout() {
                   <DentalSelect
                     label={t("checkout.deliveryOfferLocationLabel", { fallback: "Delivery offer location" })}
                     value={selectedClinicLocationId || "manual"}
-                    onChange={(value) => setSelectedClinicLocationId(value === "manual" ? "" : value)}
+                    onChange={selectSavedClinicLocation}
                     placeholder={t("checkout.manualAddressNoZoneOffer", { fallback: "Use manual delivery address" })}
                     triggerClassName="dark:border-white/10 dark:bg-white/[0.04] dark:text-[#F7F2E6]"
                     contentClassName="max-h-[min(320px,calc(100vh-180px))] overflow-y-auto"
@@ -1363,7 +1392,7 @@ export default function Checkout() {
                       { value: "manual", label: t("checkout.manualAddressNoZoneOffer", { fallback: "Use manual delivery address" }) },
                       ...currentUser.clinicLocations.map((location) => ({
                         value: location.id,
-                        label: `${location.customArea || (language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn)} · ${language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn}`,
+                        label: `${location.label || location.customArea || (language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn)} · ${language === "ar" ? location.deliveryZone.nameAr : location.deliveryZone.nameEn}`,
                       })),
                     ]}
                   />

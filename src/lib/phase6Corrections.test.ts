@@ -31,13 +31,16 @@ test("admin loyalty refresh keeps the selected customer stable and submits signe
   assert.match(loyalty, /points: Number\(points\)/);
 });
 
-test("checkout consumes the server-provided welcome and VIP shipping breakdown", () => {
+test("checkout shows the approved welcome threshold and keeps expiry guidance in the welcome surface", () => {
   const checkout = source("pages/checkout.tsx");
+  const popup = source("components/WelcomeRewardsPopup.tsx");
   const orderTypes = source("services/orders.ts");
   const serverPricing = repoSource("server/src/services/orderPricing.service.js");
   assert.match(checkout, /vipShippingDiscount/);
   assert.match(checkout, /welcomeMinimumSubtotal/);
-  assert.match(checkout, /welcomeExpiryDays/);
+  assert.match(checkout, /pointsMinimumRule/);
+  assert.doesNotMatch(checkout, /welcomeExpiryDays/);
+  assert.match(popup, /welcomeExpiryDays/);
   assert.match(orderTypes, /vipShippingSource/);
   assert.match(serverPricing, /VIP_STANDARD_FREE_SHIPPING/);
   assert.match(serverPricing, /VIP_FAST_UPGRADE_ONLY/);

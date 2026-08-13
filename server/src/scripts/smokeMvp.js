@@ -3,8 +3,9 @@ import "dotenv/config";
 import { prisma } from "../config/db.js";
 import { SUPPORT_AUTO_ACKNOWLEDGEMENT } from "../services/supportAcknowledgement.service.js";
 import { deleteUsersAndOwnedData } from "../services/testDataCleanup.service.js";
+import { AUTH_COOKIE_NAME, createToken } from "../utils/createToken.js";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = process.env.API_BASE_URL?.trim() || "http://localhost:5001/api";
 const TEST_PASSWORD = "SmokeTest123456!";
 const generatedEmails = new Set();
 let registeredUserId = null;
@@ -26,7 +27,7 @@ async function request(path, { method = "GET", body, cookie } = {}) {
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
   } catch {
-    throw new Error(`Request to ${path} failed. Confirm the backend is running on port 5000.`);
+    throw new Error(`Request to ${path} failed. Confirm the backend is running at ${API_BASE_URL}.`);
   }
 
   const payload = await response.json().catch(() => ({}));
@@ -56,6 +57,18 @@ try {
     health.server?.status === "ok" && health.database?.status === "connected",
     "Health failed because the server or PostgreSQL is not ready."
   );
+  const deliveryZones = requireOk("Delivery zones", await request("/delivery-zones"))
+    .deliveryZones;
+  requireValue(
+    Array.isArray(deliveryZones) && deliveryZones[0]?.id,
+    "Registration smoke test requires at least one active delivery zone."
+  );
+  const admin = await prisma.user.findFirst({
+    where: { role: "ADMIN", isActive: true },
+    select: { id: true },
+  });
+  requireValue(admin?.id, "MVP smoke test requires an active admin for visibility checks.");
+  const adminCookie = `${AUTH_COOKIE_NAME}=${createToken(admin.id)}`;
   console.log("✅ Health OK");
 
   let email;
@@ -65,14 +78,34 @@ try {
     generatedEmails.add(email);
     const registration = await request("/auth/register", {
       method: "POST",
-      body: { name: "Smoke Test Customer", email, password: TEST_PASSWORD },
+      body: {
+        name: "Smoke Test Customer",
+        email,
+        password: TEST_PASSWORD,
+        clinicSpecialty: "General Dentistry",
+        clinicLocations: [
+          {
+            deliveryZoneId: deliveryZones[0].id,
+            addressLine: "Smoke test clinic address",
+          },
+        ],
+      },
     });
     if (registration.response.status === 409) continue;
     registeredUser = requireOk("Register", registration).user;
   }
   requireValue(registeredUser?.id, "Register failed after retrying with unique test customers.");
   registeredUserId = registeredUser.id;
+  const welcomeLoyalty = await prisma.loyaltyAccount.findUnique({
+    where: { userId: registeredUser.id },
+    select: { availablePoints: true },
+  });
+  requireValue(
+    welcomeLoyalty?.availablePoints === 5000,
+    "Registration did not grant exactly 5,000 immediately available welcome points."
+  );
   console.log(`✅ Register OK (${registeredUser.id})`);
+  console.log("✅ 5,000 welcome points OK");
 
   const loginResult = await request("/auth/login", {
     method: "POST",
@@ -113,6 +146,11 @@ try {
     Array.isArray(productRequests) && productRequests.some((item) => item.id === productRequestId),
     "Created product request was not returned by the customer endpoint."
   );
+  const adminProductRequest = requireOk(
+    "Admin product request visibility",
+    await request(`/admin/product-requests/${productRequestId}`, { cookie: adminCookie })
+  ).productRequest;
+  requireValue(adminProductRequest?.id === productRequestId, "Product request was absent from the admin workflow.");
   console.log(`✅ Product request OK (${productRequestId})`);
 
   const supportThreads = requireOk(
@@ -123,6 +161,11 @@ try {
     Array.isArray(supportThreads) && supportThreads.some((item) => item.id === threadId),
     "Linked support thread was not returned by the customer endpoint."
   );
+  const adminThreadMessages = requireOk(
+    "Admin support inbox visibility",
+    await request(`/admin/support/threads/${threadId}/messages`, { cookie: adminCookie })
+  ).messages;
+  requireValue(Array.isArray(adminThreadMessages), "Support thread was absent from the admin inbox.");
   console.log(`✅ Support thread OK (${threadId})`);
 
   const initialProductThreadMessages = requireOk(

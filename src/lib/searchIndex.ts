@@ -59,7 +59,7 @@ const accountPages = [
   { id: "orders", titleKey: "account.myOrders", fallback: "My Orders", href: "/account/orders" },
   { id: "wishlist", titleKey: "account.wishlist", fallback: "Wishlist", href: "/account/wishlist" },
   { id: "supply-lists", titleKey: "account.mySupplyLists", fallback: "My Supply Lists", href: "/account/supply-lists", suggested: true },
-  { id: "clinic-branches", titleKey: "account.clinicBranches", fallback: "Clinic Branches", href: "/account/clinic-branches" },
+  { id: "clinic-locations", titleKey: "account.clinicLocations", fallback: "Clinic Locations", href: "/account/clinic-branches" },
   { id: "address-book", titleKey: "account.addressBook", fallback: "Address Book", href: "/account/address-book" },
   { id: "quotes", titleKey: "account.quotes", fallback: "Quotes", href: "/account/quotes", suggested: true, keywords: ["Request Quote", "Request a Quote"] },
   { id: "product-requests", titleKey: "account.productRequests", fallback: "Product Requests", href: "/account/product-requests" },

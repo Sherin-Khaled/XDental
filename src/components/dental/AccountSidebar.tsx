@@ -68,7 +68,7 @@ const accountLinks: AccountLink[] = [
   },
   {
     href: "/account/clinic-branches",
-    labelKey: "account.clinicBranches",
+    labelKey: "account.clinicLocations",
     icon: Building2,
     isActive: (location) => location.startsWith("/account/clinic-branches"),
   },

@@ -208,6 +208,26 @@ export async function deleteUsersAndOwnedData(client, ids) {
   return client.$transaction(async (transaction) => {
     const ownedIds = await collectOwnedIds(transaction, userIds);
     const { notificationIds, orderIds, quoteIds, supportThreadIds } = ownedIds;
+    const ledgerBackedUsers = await transaction.loyaltyAccount.findMany({
+      where: { userId: { in: userIds } },
+      select: { userId: true },
+    });
+    const ledgerBackedUserIds = ledgerBackedUsers.map(({ userId }) => userId);
+    const deletableUserIds = userIds.filter((id) => !ledgerBackedUserIds.includes(id));
+    const [loyaltyOrderLinks, walletOrderLinks] = await Promise.all([
+      transaction.loyaltyPointTransaction.findMany({
+        where: { orderId: { in: orderIds } },
+        select: { orderId: true },
+      }),
+      transaction.walletTransaction.findMany({
+        where: { orderId: { in: orderIds } },
+        select: { orderId: true },
+      }),
+    ]);
+    const retainedOrderIds = new Set(
+      [...loyaltyOrderLinks, ...walletOrderLinks].map(({ orderId }) => orderId).filter(Boolean)
+    );
+    const deletableOrderIds = orderIds.filter((id) => !retainedOrderIds.has(id));
 
     const notifications = await transaction.notification.deleteMany({
       where: { id: { in: notificationIds } },
@@ -228,14 +248,38 @@ export async function deleteUsersAndOwnedData(client, ids) {
       where: { id: { in: supportThreadIds } },
     });
     const orderItems = await transaction.orderItem.deleteMany({
-      where: { orderId: { in: orderIds } },
+      where: { orderId: { in: deletableOrderIds } },
     });
     const orders = await transaction.order.deleteMany({
-      where: { id: { in: orderIds } },
+      where: { id: { in: deletableOrderIds } },
     });
+    await transaction.authSession.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.pushSubscription.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.userClinicLocation.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.wishlistItem.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.cartItem.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.supplyList.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
+    await transaction.accountPreference.deleteMany({ where: { userId: { in: ledgerBackedUserIds } } });
     const users = await transaction.user.deleteMany({
-      where: { id: { in: userIds } },
+      where: { id: { in: deletableUserIds } },
     });
+    for (const userId of ledgerBackedUserIds) {
+      await transaction.user.update({
+        where: { id: userId },
+        data: {
+          name: "Deleted smoke-test customer",
+          email: `deleted-smoke-${userId}@anonymized.invalid`,
+          phone: null,
+          professionalRole: null,
+          clinicSpecialty: null,
+          clinicName: null,
+          profileImageUrl: null,
+          isActive: false,
+          lifecycleState: "DELETED",
+          lifecycleUpdatedAt: new Date(),
+        },
+      });
+    }
 
     return {
       notifications: notifications.count,
@@ -246,7 +290,7 @@ export async function deleteUsersAndOwnedData(client, ids) {
       orders: orders.count,
       quoteItems: quoteItems.count,
       quotes: quotes.count,
-      users: users.count,
+      users: users.count + ledgerBackedUserIds.length,
     };
   });
 }

@@ -37,6 +37,13 @@ import {
 } from "@/services/cart";
 import { disconnectBrowserPushForCustomer } from "@/services/pushNotifications";
 import {
+  addMyWishlistItem,
+  clearMyWishlist,
+  fetchMyWishlist,
+  mergeMyWishlist,
+  removeMyWishlistItem,
+} from "@/services/wishlist";
+import {
   getAccountPreferences,
   updateAccountPreferences,
 } from "@/services/account";
@@ -177,8 +184,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const authRequestId = useRef(0);
   const currentUserRef = useRef<AuthUser | null>(null);
   const cartRef = useRef<CartItem[]>([]);
+  const wishlistRef = useRef<string[]>(initialWishlistIds);
   const cartSyncQueue = useRef<Promise<void>>(Promise.resolve());
+  const wishlistSyncQueue = useRef<Promise<void>>(Promise.resolve());
   const cartMutationRevision = useRef(0);
+  const wishlistMutationRevision = useRef(0);
   const languageSaveRequestId = useRef(0);
   const languageSaveInFlight = useRef<{
     language: Language;
@@ -229,6 +239,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   ) => guestItems.length > 0
     ? mergeMyCart(toCartItemInputs(guestItems))
     : fetchMyCart(signal);
+
+  const replaceWishlist = (productIds: string[]) => {
+    wishlistRef.current = productIds;
+    setWishlistIds(productIds);
+  };
+
+  const loadAuthenticatedWishlist = async (
+    guestProductIds: string[],
+    signal?: AbortSignal
+  ) => guestProductIds.length > 0
+    ? mergeMyWishlist(guestProductIds)
+    : fetchMyWishlist(signal);
+
+  const showWishlistSyncError = () => {
+    toast({
+      title: t("wishlist.syncErrorTitle", { fallback: "Wishlist not saved" }),
+      description: t("wishlist.syncErrorBody", {
+        fallback: "Your wishlist could not be saved. Please try again.",
+      }),
+      variant: "destructive",
+    });
+  };
+
+  const enqueueWishlistMutation = (
+    mutation: () => Promise<string[]>,
+    revision: number
+  ) => {
+    wishlistSyncQueue.current = wishlistSyncQueue.current
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          const serverWishlist = await mutation();
+          if (wishlistMutationRevision.current === revision) replaceWishlist(serverWishlist);
+        } catch {
+          showWishlistSyncError();
+          try {
+            const serverWishlist = await fetchMyWishlist();
+            if (wishlistMutationRevision.current === revision) replaceWishlist(serverWishlist);
+          } catch {
+            // Keep the optimistic view if both mutation and authoritative refresh are unavailable.
+          }
+        }
+      });
+  };
 
   const showCartSyncError = (error?: unknown) => {
     if (
@@ -310,6 +364,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } catch {
           if (!controller.signal.aborted) showCartSyncError();
         }
+        try {
+          const authenticatedWishlist = await loadAuthenticatedWishlist(
+            wishlistRef.current,
+            controller.signal
+          );
+          if (authRequestId.current === requestId) replaceWishlist(authenticatedWishlist);
+        } catch {
+          if (!controller.signal.aborted) showWishlistSyncError();
+        }
       } catch {
         if (authRequestId.current === requestId) {
           currentUserRef.current = null;
@@ -326,11 +389,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string): Promise<AuthActionResult> => {
     const requestId = ++authRequestId.current;
     const guestItems = cartRef.current;
+    const guestWishlistIds = wishlistRef.current;
     clearLegacyPreviewAuthStorage();
     queryClient.clear();
     currentUserRef.current = null;
     setCurrentUser(null);
-    setWishlistIds([]);
     setIsAuthLoading(true);
 
     try {
@@ -349,6 +412,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (authRequestId.current === requestId) replaceCart(authenticatedCart);
         } catch {
           if (authRequestId.current === requestId) showCartSyncError();
+        }
+        try {
+          const authenticatedWishlist = await loadAuthenticatedWishlist(guestWishlistIds);
+          if (authRequestId.current === requestId) replaceWishlist(authenticatedWishlist);
+        } catch {
+          if (authRequestId.current === requestId) showWishlistSyncError();
         }
         if (authRequestId.current === requestId) setIsAuthLoading(false);
       }
@@ -380,12 +449,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }: SignUpInput): Promise<AuthActionResult> => {
     const requestId = ++authRequestId.current;
     const guestItems = cartRef.current;
+    const guestWishlistIds = wishlistRef.current;
     const normalizedPhone = cleanOptionalText(phone);
     clearLegacyPreviewAuthStorage();
     queryClient.clear();
     currentUserRef.current = null;
     setCurrentUser(null);
-    setWishlistIds([]);
     setIsAuthLoading(true);
 
     try {
@@ -411,6 +480,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (authRequestId.current === requestId) replaceCart(authenticatedCart);
         } catch {
           if (authRequestId.current === requestId) showCartSyncError();
+        }
+        try {
+          const authenticatedWishlist = await loadAuthenticatedWishlist(guestWishlistIds);
+          if (authRequestId.current === requestId) replaceWishlist(authenticatedWishlist);
+        } catch {
+          if (authRequestId.current === requestId) showWishlistSyncError();
         }
         if (authRequestId.current === requestId) setIsAuthLoading(false);
       }
@@ -442,7 +517,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     currentUserRef.current = null;
     setCurrentUser(null);
     replaceCart([]);
-    setWishlistIds([]);
+    replaceWishlist([]);
+    wishlistMutationRevision.current += 1;
     setIsAuthLoading(false);
     languageSaveRequestId.current += 1;
     languageSaveInFlight.current = null;
@@ -452,6 +528,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       await cartSyncQueue.current;
     } catch {
       // Local sign-out still completes if cart synchronization is unavailable.
+    }
+    try {
+      await wishlistSyncQueue.current;
+    } catch {
+      // Local sign-out still completes if wishlist synchronization is unavailable.
     }
 
     if (signedOutUser?.role.toUpperCase() === "CUSTOMER") {
@@ -705,24 +786,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const waitForCartSync = () => cartSyncQueue.current;
 
   const toggleWishlist = (productId: string) => {
-    setWishlistIds((prev) => {
-      if (prev.includes(productId)) {
-        toast({ title: "Removed from Wishlist", description: "Item removed from your wishlist." });
-        return prev.filter((id) => id !== productId);
-      }
-      toast({ title: "Added to Wishlist", description: "Item added to your wishlist." });
-      return [...prev, productId];
-    });
+    const removing = wishlistRef.current.includes(productId);
+    replaceWishlist(removing
+      ? wishlistRef.current.filter((id) => id !== productId)
+      : [...wishlistRef.current, productId]);
+    toast(removing
+      ? { title: "Removed from Wishlist", description: "Item removed from your wishlist." }
+      : { title: "Added to Wishlist", description: "Item added to your wishlist." });
+    if (currentUserRef.current?.role.toLowerCase() === "customer") {
+      const revision = ++wishlistMutationRevision.current;
+      enqueueWishlistMutation(
+        () => removing ? removeMyWishlistItem(productId) : addMyWishlistItem(productId),
+        revision
+      );
+    }
   };
 
   const removeFromWishlist = (productId: string) => {
-    setWishlistIds((prev) => prev.filter((id) => id !== productId));
+    replaceWishlist(wishlistRef.current.filter((id) => id !== productId));
     toast({ title: "Removed from Wishlist", description: "Item removed from your wishlist." });
+    if (currentUserRef.current?.role.toLowerCase() === "customer") {
+      const revision = ++wishlistMutationRevision.current;
+      enqueueWishlistMutation(() => removeMyWishlistItem(productId), revision);
+    }
   };
 
   const clearWishlist = () => {
-    setWishlistIds([]);
+    replaceWishlist([]);
     toast({ title: "Wishlist Cleared", description: "All saved products were removed from your wishlist." });
+    if (currentUserRef.current?.role.toLowerCase() === "customer") {
+      const revision = ++wishlistMutationRevision.current;
+      enqueueWishlistMutation(clearMyWishlist, revision);
+    }
   };
 
   const isInWishlist = (productId: string) => wishlistIds.includes(productId);

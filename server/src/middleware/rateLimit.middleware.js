@@ -113,6 +113,13 @@ export const cartMutationRateLimit = createRateLimiter({
   message: "Too many cart updates. Please wait and try again.",
 });
 
+export const wishlistMutationRateLimit = createRateLimiter({
+  name: "wishlist-mutation",
+  windowMs: FIFTEEN_MINUTES_MS,
+  max: getLimit("RATE_LIMIT_WISHLIST_MAX", 300, 1_000),
+  message: "Too many wishlist updates. Please wait and try again.",
+});
+
 export const supplyListMutationRateLimit = createRateLimiter({
   name: "supply-list-mutation",
   windowMs: FIFTEEN_MINUTES_MS,

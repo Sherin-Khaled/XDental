@@ -14,6 +14,7 @@ import { Layout }          from "@/components/layout";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { DailyOfferAlert } from "@/components/DailyOfferAlert";
 import { FloatingSupportChat } from "@/components/dental/FloatingSupportChat";
+import { RecordingCursor } from "@/components/dental/RecordingCursor";
 import { GoldIconGradientDefs } from "@/components/dental/GoldIconGradientDefs";
 import { WelcomeRewardsPopup } from "@/components/WelcomeRewardsPopup";
 import { SEO } from "@/components/SEO";
@@ -389,6 +390,7 @@ function RoutedAppChrome() {
           <WelcomeRewardsPopup />
         </>
       )}
+      <RecordingCursor />
       <Toaster />
     </>
   );

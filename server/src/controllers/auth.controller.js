@@ -168,7 +168,10 @@ export async function register(request, response) {
           professionalRole: professionalRole || null,
           clinicSpecialty,
           clinicLocations: {
-            create: parsedClinicLocations.value,
+            create: parsedClinicLocations.value.map((location, index) => ({
+              ...location,
+              isDefault: location.isDefault ?? index === 0,
+            })),
           },
         },
         include: authUserInclude,

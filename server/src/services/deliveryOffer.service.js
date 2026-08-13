@@ -4,11 +4,15 @@ import { cleanText, isValidId } from "../utils/records.js";
 export const DELIVERY_TIMEZONE = "Africa/Cairo";
 const MAX_CLINIC_LOCATIONS = 20;
 const MAX_CUSTOM_AREA_LENGTH = 100;
+const MAX_LOCATION_LABEL_LENGTH = 80;
+const MAX_ADDRESS_LINE_LENGTH = 300;
+const MAX_ADDRESS_PART_LENGTH = 100;
 
 export const clinicLocationsInclude = {
   include: {
     deliveryZone: true,
   },
+  orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
 };
 
 export function serializeDeliveryZone(zone) {
@@ -29,6 +33,14 @@ export function serializeClinicLocation(location) {
     id: location.id,
     deliveryZoneId: location.deliveryZoneId,
     customArea: location.customArea ?? null,
+    label: location.label ?? null,
+    addressLine: location.addressLine ?? null,
+    governorate: location.governorate ?? null,
+    cityArea: location.cityArea ?? null,
+    buildingNumber: location.buildingNumber ?? null,
+    apartmentFloor: location.apartmentFloor ?? null,
+    postalCode: location.postalCode ?? null,
+    isDefault: location.isDefault,
     deliveryZone: serializeDeliveryZone(location.deliveryZone),
   };
 }
@@ -71,6 +83,14 @@ export async function validateClinicLocationInput(
       ? item.deliveryZoneId.trim()
       : "";
     const customArea = cleanText(item?.customArea, MAX_CUSTOM_AREA_LENGTH);
+    const label = cleanText(item?.label, MAX_LOCATION_LABEL_LENGTH);
+    const addressLine = cleanText(item?.addressLine, MAX_ADDRESS_LINE_LENGTH);
+    const governorate = cleanText(item?.governorate, MAX_ADDRESS_PART_LENGTH);
+    const cityArea = cleanText(item?.cityArea, MAX_ADDRESS_PART_LENGTH);
+    const buildingNumber = cleanText(item?.buildingNumber, MAX_ADDRESS_PART_LENGTH);
+    const apartmentFloor = cleanText(item?.apartmentFloor, MAX_ADDRESS_PART_LENGTH);
+    const postalCode = cleanText(item?.postalCode, MAX_ADDRESS_PART_LENGTH);
+    const isDefault = typeof item?.isDefault === "boolean" ? item.isDefault : undefined;
 
     if (!isValidId(deliveryZoneId)) {
       return {
@@ -92,6 +112,16 @@ export async function validateClinicLocationInput(
 
     seenZoneIds.add(deliveryZoneId);
     normalized.push({ deliveryZoneId, customArea });
+    Object.assign(normalized.at(-1), {
+      ...(label ? { label } : {}),
+      ...(addressLine ? { addressLine } : {}),
+      ...(governorate ? { governorate } : {}),
+      ...(cityArea ? { cityArea } : {}),
+      ...(buildingNumber ? { buildingNumber } : {}),
+      ...(apartmentFloor ? { apartmentFloor } : {}),
+      ...(postalCode ? { postalCode } : {}),
+      ...(isDefault !== undefined ? { isDefault } : {}),
+    });
   }
 
   const zones = await database.deliveryZone.findMany({
@@ -137,18 +167,99 @@ export async function validateClinicLocationInput(
     value.push({
       deliveryZoneId: item.deliveryZoneId,
       customArea: isOther ? item.customArea : null,
+      ...(item.label ? { label: item.label } : {}),
+      ...(item.addressLine ? { addressLine: item.addressLine } : {}),
+      ...(item.governorate ? { governorate: item.governorate } : {}),
+      ...(item.cityArea ? { cityArea: item.cityArea } : {}),
+      ...(item.buildingNumber ? { buildingNumber: item.buildingNumber } : {}),
+      ...(item.apartmentFloor ? { apartmentFloor: item.apartmentFloor } : {}),
+      ...(item.postalCode ? { postalCode: item.postalCode } : {}),
+      ...(item.isDefault !== undefined ? { isDefault: item.isDefault } : {}),
     });
   }
 
   return { value };
 }
 
+export async function validateSavedClinicLocationInput(input, options = {}) {
+  const parsed = await validateClinicLocationInput([input], options);
+  if (parsed.error) return parsed;
+  const value = parsed.value[0];
+  if (!value.label || value.label.length < 2) {
+    return { error: { message: "Location label must be at least 2 characters.", field: "label" } };
+  }
+  if (!value.addressLine || value.addressLine.length < 5) {
+    return { error: { message: "Enter the full clinic or delivery address.", field: "addressLine" } };
+  }
+  if (!value.governorate || !value.cityArea || !value.buildingNumber || !value.apartmentFloor) {
+    return { error: { message: "Governorate, city/area, building, and floor are required.", field: "addressLine" } };
+  }
+  return { value };
+}
+
 export async function replaceUserClinicLocations(database, userId, locations) {
-  await database.userClinicLocation.deleteMany({ where: { userId } });
+  const existing = await database.userClinicLocation.findMany({
+    where: { userId },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+  const desiredZoneIds = locations.map(({ deliveryZoneId }) => deliveryZoneId);
+  await database.userClinicLocation.deleteMany({
+    where: { userId, deliveryZoneId: { notIn: desiredZoneIds } },
+  });
+
+  const requestedDefault = locations.find((location) => location.isDefault === true);
+  if (requestedDefault) {
+    await database.userClinicLocation.updateMany({ where: { userId }, data: { isDefault: false } });
+  }
+
+  for (const [index, location] of locations.entries()) {
+    const current = existing.find((item) => item.deliveryZoneId === location.deliveryZoneId);
+    const metadata = {
+      ...(location.label !== undefined ? { label: location.label || null } : {}),
+      ...(location.addressLine !== undefined ? { addressLine: location.addressLine || null } : {}),
+      ...(location.governorate !== undefined ? { governorate: location.governorate || null } : {}),
+      ...(location.cityArea !== undefined ? { cityArea: location.cityArea || null } : {}),
+      ...(location.buildingNumber !== undefined ? { buildingNumber: location.buildingNumber || null } : {}),
+      ...(location.apartmentFloor !== undefined ? { apartmentFloor: location.apartmentFloor || null } : {}),
+      ...(location.postalCode !== undefined ? { postalCode: location.postalCode || null } : {}),
+      ...(location.isDefault !== undefined
+        ? { isDefault: requestedDefault ? location.deliveryZoneId === requestedDefault.deliveryZoneId : location.isDefault }
+        : {}),
+    };
+    if (current) {
+      await database.userClinicLocation.update({
+        where: { id: current.id },
+        data: { customArea: location.customArea, ...metadata },
+      });
+    } else {
+      await database.userClinicLocation.create({
+        data: {
+          userId,
+          deliveryZoneId: location.deliveryZoneId,
+          customArea: location.customArea,
+          label: location.label || null,
+          addressLine: location.addressLine || null,
+          governorate: location.governorate || null,
+          cityArea: location.cityArea || null,
+          buildingNumber: location.buildingNumber || null,
+          apartmentFloor: location.apartmentFloor || null,
+          postalCode: location.postalCode || null,
+          isDefault: location.isDefault ?? (existing.length === 0 && index === 0),
+        },
+      });
+    }
+  }
+
   if (locations.length > 0) {
-    await database.userClinicLocation.createMany({
-      data: locations.map((location) => ({ userId, ...location })),
-    });
+    const defaultCount = await database.userClinicLocation.count({ where: { userId, isDefault: true } });
+    if (defaultCount === 0) {
+      const first = await database.userClinicLocation.findFirst({
+        where: { userId },
+        orderBy: { createdAt: "asc" },
+        select: { id: true },
+      });
+      if (first) await database.userClinicLocation.update({ where: { id: first.id }, data: { isDefault: true } });
+    }
   }
 }
 

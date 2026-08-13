@@ -353,6 +353,7 @@ model User {
   reviewedAccountActionRequests AccountActionRequest[] @relation("AccountActionReviewer")
   accountActionHistory AccountActionRequestHistory[] @relation("AccountActionActor")
   cartItems          CartItem[]
+  wishlistItems      WishlistItem[]
   supplyLists        SupplyList[]
   orders             Order[]
   quotes             Quote[]
@@ -627,10 +628,19 @@ model UserClinicLocation {
   deliveryZoneId String
   deliveryZone   DeliveryZone @relation(fields: [deliveryZoneId], references: [id], onDelete: Restrict)
   customArea     String?
+  label          String?
+  addressLine    String?
+  governorate    String?
+  cityArea       String?
+  buildingNumber String?
+  apartmentFloor String?
+  postalCode     String?
+  isDefault      Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@unique([userId, deliveryZoneId])
+  @@index([userId, isDefault])
   @@index([deliveryZoneId])
   @@map("user_clinic_locations")
 }
@@ -751,6 +761,7 @@ model Product {
   variants          ProductVariant[]
   images            ProductImage[]
   cartItems          CartItem[]
+  wishlistItems      WishlistItem[]
   supplyListItems    SupplyListItem[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -788,6 +799,20 @@ model CartItem {
   @@index([productId])
   @@index([variantId])
   @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([productId])
+  @@map("wishlist_items")
 }
 
 model SupplyList {

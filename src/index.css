@@ -992,6 +992,83 @@
   }
 }
 
+body.xd-recording-cursor-active,
+body.xd-recording-cursor-active * {
+  cursor: none !important;
+}
+
+.xd-recording-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483647;
+  display: flex;
+  height: 24px;
+  width: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(86, 57, 0, 0.24);
+  border-radius: 9999px;
+  background: var(--xd-gold-gradient);
+  box-shadow: 0 4px 14px rgba(217, 169, 15, 0.32), 0 0 0 3px rgba(249, 220, 92, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, width, height, opacity;
+  transition: width 120ms ease, height 120ms ease, opacity 100ms ease, box-shadow 120ms ease;
+}
+
+.xd-recording-cursor[data-visible="true"] {
+  opacity: 1;
+}
+
+.xd-recording-cursor[data-interactive="true"] {
+  height: 28px;
+  width: 28px;
+  box-shadow: 0 5px 18px rgba(217, 169, 15, 0.38), 0 0 0 4px rgba(249, 220, 92, 0.18);
+}
+
+.xd-recording-cursor[data-pressed="true"] {
+  height: 22px;
+  width: 22px;
+}
+
+.xd-recording-cursor__dot {
+  height: 4px;
+  width: 4px;
+  border-radius: 9999px;
+  background: #2F2307;
+}
+
+.xd-recording-cursor__pulse {
+  position: absolute;
+  inset: -1px;
+  border: 2px solid rgba(217, 169, 15, 0.72);
+  border-radius: inherit;
+  animation: xd-recording-cursor-pulse 360ms ease-out forwards;
+}
+
+@keyframes xd-recording-cursor-pulse {
+  from {
+    opacity: 0.8;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xd-recording-cursor {
+    transition: none;
+  }
+
+  .xd-recording-cursor__pulse {
+    display: none;
+    animation: none;
+  }
+}
+
 @layer utilities {
   .no-scrollbar,
   .scrollbar-hide {

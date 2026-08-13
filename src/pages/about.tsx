@@ -25,6 +25,7 @@ import { Container } from "@/components/dental/Container";
 import { Button } from "@/components/dental/Button";
 import { SectionReveal } from "@/components/dental/SectionReveal";
 import { PremiumAccentIcon } from "@/components/dental/PremiumAccentIcon";
+import { TimelineMedia } from "@/components/dental/TimelineMedia";
 import type { CarouselApi } from "@/components/ui/carousel";
 import {
   Carousel,
@@ -71,26 +72,38 @@ const BUYING_STEPS = [
   {
     id: "wishlist",
     Icon: ClipboardList,
-    imageSrc: PRODUCT_VISUAL,
-    imageClassName: "object-contain p-4",
+    media: {
+      type: "image" as const,
+      src: PRODUCT_VISUAL,
+      mediaClassName: "object-contain p-4",
+    },
   },
   {
     id: "supplyLists",
     Icon: SearchCheck,
-    imageSrc: CLINIC_SUPPORT_VISUAL,
-    imageClassName: "object-cover",
+    media: {
+      type: "image" as const,
+      src: CLINIC_SUPPORT_VISUAL,
+      mediaClassName: "object-cover",
+    },
   },
   {
     id: "quotes",
     Icon: Repeat,
-    imageSrc: PRODUCT_VISUAL,
-    imageClassName: "object-contain p-4",
+    media: {
+      type: "image" as const,
+      src: PRODUCT_VISUAL,
+      mediaClassName: "object-contain p-4",
+    },
   },
   {
     id: "productSupport",
     Icon: Headphones,
-    imageSrc: CLINIC_SUPPORT_VISUAL,
-    imageClassName: "object-cover",
+    media: {
+      type: "image" as const,
+      src: CLINIC_SUPPORT_VISUAL,
+      mediaClassName: "object-cover",
+    },
   },
 ];
 
@@ -781,8 +794,7 @@ function BuyingWorkflowSection() {
               ({
                 id,
                 Icon,
-                imageSrc,
-                imageClassName,
+                media,
               }) => (
                 <article
                   key={id}
@@ -798,7 +810,7 @@ function BuyingWorkflowSection() {
                     </p>
                   </div>
 
-                  <h3 className="mt-4 font-display text-[22px] font-bold leading-[29px] text-[var(--xd-text)]">
+                  <h3 className="mt-4 font-display text-[30px] font-bold leading-[1.12] text-[var(--xd-text)] sm:text-[36px]">
                     {t(`aboutPage.workflow.steps.${id}.title`)}
                   </h3>
 
@@ -806,14 +818,11 @@ function BuyingWorkflowSection() {
                     {t(`aboutPage.workflow.steps.${id}.description`)}
                   </p>
 
-                  <div className="mt-5 aspect-[3/2] overflow-hidden rounded-[16px] bg-white">
-                    <img
-                      src={imageSrc}
-                      alt={t(`aboutPage.workflow.steps.${id}.imageAlt`)}
-                      className={`h-full w-full ${imageClassName}`}
-                      loading="lazy"
-                    />
-                  </div>
+                  <TimelineMedia
+                    source={media}
+                    alt={t(`aboutPage.workflow.steps.${id}.imageAlt`)}
+                    className="mt-5 aspect-[3/2] rounded-[16px]"
+                  />
                 </article>
               )
             )}
@@ -886,7 +895,7 @@ function BuyingWorkflowSection() {
                         {t(`aboutPage.workflow.steps.${activeStep.id}.label`)}
                       </p>
 
-                      <h2 className="mt-3 font-display text-[34px] font-bold leading-[1.08] text-[var(--xd-text)] xl:text-[40px]">
+                      <h2 className="mt-3 font-display text-[clamp(2rem,2.5vw,2.75rem)] font-bold leading-[1.12] text-[var(--xd-text)]">
                         {t(`aboutPage.workflow.steps.${activeStep.id}.title`)}
                       </h2>
 
@@ -907,13 +916,13 @@ function BuyingWorkflowSection() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: imageExitX }}
                       transition={{ duration: 0.58, ease: "easeOut" }}
-                      className="h-[240px] w-full overflow-hidden rounded-[22px] bg-white shadow-[0_18px_44px_rgba(5,5,5,0.08)]"
+                      className="aspect-[3/2] w-full overflow-hidden rounded-[22px] bg-white shadow-[0_18px_44px_rgba(5,5,5,0.08)]"
                     >
-                      <img
-                        src={activeStep.imageSrc}
+                      <TimelineMedia
+                        source={activeStep.media}
                         alt={t(`aboutPage.workflow.steps.${activeStep.id}.imageAlt`)}
-                        className={`h-full w-full ${activeStep.imageClassName}`}
-                        loading={currentStepIndex === 0 ? "eager" : "lazy"}
+                        className="h-full w-full"
+                        eager={currentStepIndex === 0}
                       />
                     </motion.div>
                   </AnimatePresence>

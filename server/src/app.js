@@ -17,6 +17,7 @@ import newsletterRoutes from "./routes/newsletter.routes.js";
 import deliveryRoutes from "./routes/delivery.routes.js";
 import promotionRoutes from "./routes/promotion.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
 import supplyListRoutes from "./routes/supplyList.routes.js";
 import {
   PROFILE_IMAGE_DIRECTORY,
@@ -41,6 +42,7 @@ const PRIVATE_API_PATHS = [
   "/api/account",
   "/api/admin",
   "/api/cart",
+  "/api/wishlist",
   "/api/supply-lists",
   "/api/notifications",
   "/api/orders",
@@ -144,6 +146,7 @@ export function createApp({
   app.use("/api/account", accountRoutes);
   app.use("/api/loyalty", loyaltyRoutes);
   app.use("/api/cart", cartRoutes);
+  app.use("/api/wishlist", wishlistRoutes);
   app.use("/api/supply-lists", supplyListRoutes);
   app.use("/api/product-requests", productRequestRoutes);
   app.use("/api/support", supportRoutes);

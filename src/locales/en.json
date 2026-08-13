@@ -141,6 +141,7 @@
     "wishlist": "Wishlist",
     "mySupplyLists": "My Supply Lists",
     "clinicBranches": "Clinic Branches",
+    "clinicLocations": "Clinic Locations",
     "addressBook": "Address Book",
     "quotes": "Quotes",
     "quoteDetails": "Quote Details",
@@ -1806,21 +1807,21 @@
       "steps": {
         "step1": {
           "label": "STEP 1",
-          "title": "Browse by Category",
-          "description": "Find dental products organized by specialty, treatment type, and daily clinic needs.",
-          "imageAlt": "Dental clinic essentials category"
+          "title": "We're Here When You Need Us",
+          "description": "Chat directly with our customer service team for product questions, order assistance, and support whenever you need it.",
+          "imageAlt": "X Dental customer service support"
         },
         "step2": {
           "label": "STEP 2",
           "title": "Save to Supply Lists",
-          "description": "Keep frequently used products ready for reorder, comparison, or quote requests.",
-          "imageAlt": "Dental instruments for clinic supply lists"
+          "description": "Save frequently used products into reusable supply lists for faster reordering and easier clinic purchasing.",
+          "imageAlt": "Products saved to reusable clinic supply lists"
         },
         "step3": {
           "label": "STEP 3",
-          "title": "Earn Points & Unlock Rewards",
-          "description": "Earn points on completed purchases, view your rewards and store-credit balances, and redeem eligible value at checkout.",
-          "imageAlt": "Rewards available for completed clinic purchases",
+          "title": "Get Rewarded from Day One",
+          "description": "Create your account and receive 5,000 welcome points immediately, ready to use on eligible orders from your first purchase.",
+          "imageAlt": "Welcome rewards available from the first eligible purchase",
           "walletLink": "Rewards & Wallet",
           "checkoutLink": "Go to Checkout"
         },
@@ -3119,31 +3120,40 @@
   },
   "accountPages": {
     "address": {
+      "addLocationTitle": "Add Saved Location",
       "addAddressComingSoon": "Add Address (Coming soon)",
       "addAddress": "Add Address",
       "addNew": "Add New",
       "addNewAddress": "Add New Address",
       "address": "Address",
       "addressLabel": "Address Label",
-      "city": "City",
+      "building": "Building",
+      "cancel": "Cancel",
+      "city": "City / Area",
       "closeForm": "Close address form",
       "country": "Country",
       "default": "Default",
       "deleteAddress": "Delete Address",
+      "deleteFailed": "The location could not be deleted.",
+      "deletePersistedDescription": "Existing orders will not be changed. If this is the default, the oldest remaining location becomes default.",
       "deleteDescription": "This will remove {name} from your address book. Existing orders will not be changed.",
       "deleteNamed": "Delete {name} address",
       "deleteTitle": "Delete Address?",
       "description": "Manage delivery locations for clinic orders, quotes, and product requests.",
       "comingSoonDescription": "Saved addresses are not active yet. For now, please enter your delivery address during checkout.",
       "emptyTitle": "No saved addresses yet",
-      "emptyBody": "Saving addresses to your account will be available soon. Until then, your delivery address is entered with each order at checkout, and our team confirms it with you before delivery.",
+      "emptyBody": "Add a clinic delivery location to reuse it in Profile and checkout.",
       "browseProducts": "Browse Products",
       "editAddress": "Edit Address",
       "editNamed": "Edit {name} address",
       "eyebrow": "Delivery Details",
+      "deliveryArea": "Delivery Area",
+      "editLocationTitle": "Edit Saved Location",
+      "floorApartment": "Floor / Apartment",
       "formDescription": "Keep delivery details accurate for clinic orders and supply requests.",
       "governorate": "Governorate",
       "keepAddress": "Keep Address",
+      "labelPlaceholder": "Main Clinic",
       "makeDefault": "Make this the default delivery address",
       "messages": {
         "added": "{name} address added.",
@@ -3152,13 +3162,16 @@
         "updated": "{name} address updated."
       },
       "primaryDeliveryAddress": "Primary delivery address",
+      "postalCode": "Postal Code (optional)",
+      "selectDeliveryArea": "Select delivery area",
       "streetAddress": "Street Address",
+      "streetPlaceholder": "Street, building, floor, clinic",
       "title": "Address Book"
     },
     "branches": {
       "addBranchComingSoon": "Add Branch (Coming soon)",
       "addBranch": "Add Branch",
-      "addNewBranch": "Add New Branch",
+      "addNewBranch": "Add Clinic Location",
       "branch": "Branch",
       "branchName": "Branch Name",
       "closeForm": "Close branch form",
@@ -3168,7 +3181,7 @@
       "deleteBranchNamed": "Delete {name}",
       "deleteDescription": "This will remove {name} from clinic branch management. Existing orders will not be changed.",
       "deleteTitle": "Delete Branch?",
-      "description": "Manage clinic locations, delivery contacts, and branch-specific supply lists.",
+      "description": "Manage saved clinic delivery locations and their verified delivery areas.",
       "comingSoonDescription": "Clinic branches will be available soon for clinics with multiple delivery locations.",
       "emptyTitle": "Branch management is coming soon",
       "emptyBody": "You will be able to save multiple clinic locations and choose one during checkout. Until then, please add branch details in the delivery notes of your order, or contact support for multi-branch deliveries.",
@@ -3186,7 +3199,7 @@
       "ordersCount": "{count} Orders",
       "setAsDefault": "Set as Default",
       "supplyListsCount": "{count} Supply Lists",
-      "title": "Clinic Branches"
+      "title": "Clinic Locations"
     },
     "common": {
       "add": "Add",
@@ -4200,6 +4213,8 @@
       }
     },
     "wishlist": {
+      "syncErrorTitle": "Wishlist not saved",
+      "syncErrorBody": "Your wishlist could not be saved. Please try again.",
       "addAllToCart": "Add All to Cart",
       "clearWishlist": "Clear Wishlist",
       "description": "Keep products ready for later ordering, quote requests, or clinic supply planning.",

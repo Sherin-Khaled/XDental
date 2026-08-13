@@ -13,6 +13,7 @@ import {
   Building2,
   FileText,
   Gift,
+  MessageCircle,
   PackageCheck,
   Search,
   ShoppingCart,
@@ -25,6 +26,10 @@ import {
 import { Container } from "@/components/dental/Container";
 import { SectionReveal } from "@/components/dental/SectionReveal";
 import { PremiumAccentIcon } from "@/components/dental/PremiumAccentIcon";
+import {
+  TimelineMedia,
+  type TimelineMediaSource,
+} from "@/components/dental/TimelineMedia";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
@@ -319,42 +324,54 @@ function PopularShortcuts() {
 type CategoryWorkflowStep = {
   id: "step1" | "step2" | "step3" | "step4";
   Icon: LucideIcon;
-  imageSrc: string;
-  imageClassName: string;
+  media: TimelineMediaSource;
   featureLinks?: Array<{
     href: "/account/wallet" | "/checkout";
     label: "walletLink" | "checkoutLink";
+    hierarchy: "primary" | "secondary";
   }>;
 };
 
 const CATEGORY_WORKFLOW_STEPS: CategoryWorkflowStep[] = [
   {
     id: "step1",
-    Icon: ShoppingCart,
-    imageSrc: `${CAT_IMG_BASE}Clinic Essentials.svg`,
-    imageClassName: "object-contain p-9",
+    Icon: MessageCircle,
+    media: {
+      type: "image",
+      src: `${CAT_IMG_BASE}Clinic Essentials.svg`,
+      mediaClassName: "object-contain p-9",
+    },
   },
   {
     id: "step2",
     Icon: PackageCheck,
-    imageSrc: `${CAT_IMG_BASE}Dental Instruments.svg`,
-    imageClassName: "object-contain p-9",
+    media: {
+      type: "image",
+      src: `${CAT_IMG_BASE}Dental Instruments.svg`,
+      mediaClassName: "object-contain p-9",
+    },
   },
   {
     id: "step3",
     Icon: Gift,
-    imageSrc: `${CAT_IMG_BASE}Consumables.svg`,
-    imageClassName: "object-contain p-9",
+    media: {
+      type: "image",
+      src: `${CAT_IMG_BASE}Consumables.svg`,
+      mediaClassName: "object-contain p-9",
+    },
     featureLinks: [
-      { href: "/account/wallet", label: "walletLink" },
-      { href: "/checkout", label: "checkoutLink" },
+      { href: "/account/wallet", label: "walletLink", hierarchy: "primary" },
+      { href: "/checkout", label: "checkoutLink", hierarchy: "secondary" },
     ],
   },
   {
     id: "step4",
     Icon: Truck,
-    imageSrc: CATEGORY_IMAGE,
-    imageClassName: "object-contain p-6 mix-blend-multiply",
+    media: {
+      type: "image",
+      src: CATEGORY_IMAGE,
+      mediaClassName: "object-contain p-6 mix-blend-multiply",
+    },
   },
 ];
 
@@ -454,8 +471,7 @@ function ClinicHelp() {
               ({
                 id,
                 Icon,
-                imageSrc,
-                imageClassName,
+                media,
                 featureLinks,
               }) => (
                 <article
@@ -472,7 +488,7 @@ function ClinicHelp() {
                     </p>
                   </div>
 
-                  <h3 className="mt-4 font-display text-[22px] font-bold leading-[29px] text-[#050505]">
+                  <h3 className="mt-4 font-display text-[30px] font-bold leading-[1.12] text-[#050505] sm:text-[36px]">
                     {t(`categoriesPage.workflow.steps.${id}.title`)}
                   </h3>
 
@@ -486,7 +502,11 @@ function ClinicHelp() {
                         <Link
                           key={link.href}
                           href={link.href}
-                          className="inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                          className={
+                            link.hierarchy === "primary"
+                              ? "xd-gradient-gold inline-flex min-h-10 items-center rounded-full border border-transparent px-4 text-[12px] font-bold text-[var(--xd-gold-foreground)] shadow-[var(--xd-gold-gradient-shadow)] transition hover:-translate-y-px hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-focus-ring)]"
+                              : "inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-white/75 px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                          }
                         >
                           {t(`categoriesPage.workflow.steps.${id}.${link.label}`)}
                         </Link>
@@ -494,14 +514,11 @@ function ClinicHelp() {
                     </div>
                   )}
 
-                  <div className="mt-5 aspect-[3/2] overflow-hidden rounded-[16px] bg-white">
-                    <img
-                      src={imageSrc}
-                      alt={t(`categoriesPage.workflow.steps.${id}.imageAlt`)}
-                      className={`h-full w-full ${imageClassName}`}
-                      loading="lazy"
-                    />
-                  </div>
+                  <TimelineMedia
+                    source={media}
+                    alt={t(`categoriesPage.workflow.steps.${id}.imageAlt`)}
+                    className="mt-5 aspect-[3/2] rounded-[16px]"
+                  />
                 </article>
               )
             )}
@@ -575,7 +592,7 @@ function ClinicHelp() {
                         {t(`categoriesPage.workflow.steps.${activeStep.id}.label`)}
                       </p>
 
-                      <h2 className="mt-3 font-display text-[clamp(2rem,2.8vw,2.375rem)] font-bold leading-[1.12] text-[var(--xd-text)]">
+                      <h2 className="mt-3 font-display text-[clamp(2rem,2.5vw,2.75rem)] font-bold leading-[1.12] text-[var(--xd-text)]">
                         {t(`categoriesPage.workflow.steps.${activeStep.id}.title`)}
                       </h2>
 
@@ -589,7 +606,11 @@ function ClinicHelp() {
                             <Link
                               key={link.href}
                               href={link.href}
-                              className="inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-[var(--xd-gold-bg-soft)] px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-[var(--xd-gold-active)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                              className={
+                                link.hierarchy === "primary"
+                                  ? "xd-gradient-gold inline-flex min-h-10 items-center rounded-full border border-transparent px-4 text-[12px] font-bold text-[var(--xd-gold-foreground)] shadow-[var(--xd-gold-gradient-shadow)] transition hover:-translate-y-px hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-focus-ring)]"
+                                  : "inline-flex min-h-10 items-center rounded-full border border-[var(--xd-gold-border)] bg-white/75 px-4 text-[12px] font-bold text-[var(--xd-gold-text)] transition hover:border-[var(--xd-gold-border-hover)] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--xd-gold-border-hover)]"
+                              }
                             >
                               {t(`categoriesPage.workflow.steps.${activeStep.id}.${link.label}`)}
                             </Link>
@@ -612,11 +633,11 @@ function ClinicHelp() {
                       transition={{ duration: 0.58, ease: "easeOut" }}
                       className="aspect-[3/2] overflow-hidden rounded-[24px] border border-[var(--xd-gold-border-soft)] bg-white/70 shadow-[0_18px_44px_rgba(5,5,5,0.06)]"
                     >
-                      <img
-                        src={activeStep.imageSrc}
+                      <TimelineMedia
+                        source={activeStep.media}
                         alt={t(`categoriesPage.workflow.steps.${activeStep.id}.imageAlt`)}
-                        className={`h-full w-full ${activeStep.imageClassName}`}
-                        loading={currentStepIndex === 0 ? "eager" : "lazy"}
+                        className="h-full w-full"
+                        eager={currentStepIndex === 0}
                       />
                     </motion.div>
                   </AnimatePresence>

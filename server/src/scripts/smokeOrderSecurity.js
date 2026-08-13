@@ -74,6 +74,19 @@ function orderBody(product, quantity) {
   };
 }
 
+async function reviewedOrderBody(cookie, product, quantity) {
+  const body = orderBody(product, quantity);
+  const preview = requireOk(
+    "Order price preview",
+    await request("/orders/preview", { method: "POST", cookie, body })
+  );
+  requireValue(preview.totals?.pricingQuoteToken, "Order preview did not return a pricing quote token.");
+  return {
+    body: { ...body, pricingQuoteToken: preview.totals.pricingQuoteToken },
+    totals: preview.totals,
+  };
+}
+
 async function createTestProduct(suffix, data) {
   const product = await prisma.product.create({
     data: {
@@ -127,19 +140,21 @@ async function run() {
   requireValue(customerCookie, "Registration did not return an authentication cookie.");
 
   const pricedProduct = await createTestProduct(`${suffix}-priced`, { price: 321.45, stock: 5 });
+  const pricedOrderReview = await reviewedOrderBody(customerCookie, pricedProduct, 2);
+  const pricedOrderBody = pricedOrderReview.body;
   const checkoutRequestKey = crypto.randomUUID();
   const createdOrderResult = await request("/orders", {
     method: "POST",
     cookie: customerCookie,
     idempotencyKey: checkoutRequestKey,
-    body: orderBody(pricedProduct, 2),
+    body: pricedOrderBody,
   });
   const order = requireOk("Tampered-price order", createdOrderResult).order;
   requireValue(order.status === "PENDING_REVIEW", "New order did not start in pending review.");
   requireValue(order.paymentMethod === "cash", "New order was not saved as Cash on Delivery.");
   requireValue(order.paymentStatus === "PENDING_COLLECTION", "New order did not start pending cash collection.");
-  requireValue(order.subtotal === 642.9, `Expected authoritative subtotal 642.9, received ${order.subtotal}.`);
-  requireValue(order.total === 692.9, `Expected authoritative total 692.9, received ${order.total}.`);
+  requireValue(order.subtotal === pricedOrderReview.totals.subtotal, "Order subtotal differed from the reviewed authoritative subtotal.");
+  requireValue(order.total === pricedOrderReview.totals.total, "Order total differed from the reviewed authoritative total.");
   requireValue(order.items[0]?.unitPrice === 321.45, "Client unitPrice was not ignored.");
   requireValue(order.items[0]?.productName === pricedProduct.name, "Authoritative product snapshot was not used.");
   requireValue((await prisma.product.findUnique({ where: { id: pricedProduct.id } })).stockQuantity === 5, "Pending order decremented stock.");
@@ -149,7 +164,7 @@ async function run() {
     method: "POST",
     cookie: customerCookie,
     idempotencyKey: checkoutRequestKey,
-    body: orderBody(pricedProduct, 2),
+    body: pricedOrderBody,
   });
   const replayedOrder = requireOk("Repeated checkout request", replayedOrderResult).order;
   requireValue(replayedOrderResult.response.status === 200, "Repeated checkout did not return HTTP 200.");
@@ -163,18 +178,19 @@ async function run() {
   console.log("Repeated checkout returned the original order without creating a duplicate.");
 
   const concurrentCheckoutKey = crypto.randomUUID();
+  const concurrentOrderBody = (await reviewedOrderBody(customerCookie, pricedProduct, 1)).body;
   const concurrentRequests = await Promise.all([
     request("/orders", {
       method: "POST",
       cookie: customerCookie,
       idempotencyKey: concurrentCheckoutKey,
-      body: orderBody(pricedProduct, 1),
+      body: concurrentOrderBody,
     }),
     request("/orders", {
       method: "POST",
       cookie: customerCookie,
       idempotencyKey: concurrentCheckoutKey,
-      body: orderBody(pricedProduct, 1),
+      body: concurrentOrderBody,
     }),
   ]);
   const concurrentOrders = concurrentRequests.map((result, index) =>
@@ -195,7 +211,7 @@ async function run() {
   const unsupportedPayment = await request("/orders", {
     method: "POST",
     cookie: customerCookie,
-    body: { ...orderBody(pricedProduct, 1), paymentMethod: "card" },
+    body: { ...concurrentOrderBody, paymentMethod: "card" },
   });
   requireValue(unsupportedPayment.response.status === 400, "Unsupported payment method was not rejected.");
   console.log("Unsupported payment method rejected.");
@@ -263,13 +279,39 @@ async function run() {
   requireValue(delivered.order.status === "DELIVERED", "Order was not marked delivered.");
   console.log("Internal delivery workflow and cash collection completed.");
 
+  const orderHistory = requireOk(
+    "Customer order history",
+    await request("/orders/my", { cookie: customerCookie })
+  ).orders;
+  requireValue(orderHistory.some((item) => item.id === order.id), "Placed order was absent from customer history.");
+  const orderDetail = requireOk(
+    "Customer order detail",
+    await request(`/orders/my/${order.id}`, { cookie: customerCookie })
+  ).order;
+  requireValue(orderDetail.status === "DELIVERED", "Customer order detail did not expose the latest status.");
+  const publicTracking = requireOk(
+    "Public order tracking",
+    await request("/orders/track", {
+      method: "POST",
+      body: { orderNumber: order.orderNumber, phone: "+201000000000" },
+    })
+  );
+  requireValue(publicTracking.status === "DELIVERED", "Public tracking did not expose the latest order status.");
+  const incorrectTracking = await request("/orders/track", {
+    method: "POST",
+    body: { orderNumber: order.orderNumber, phone: "+201999999999" },
+  });
+  requireValue(incorrectTracking.response.status === 404, "Public tracking accepted an incorrect phone number.");
+  console.log("Customer history, order detail, and privacy-checked public tracking passed.");
+
   const cancelProduct = await createTestProduct(`${suffix}-cancel`, { price: 90, stock: 4 });
+  const cancelOrderBody = (await reviewedOrderBody(customerCookie, cancelProduct, 2)).body;
   const cancelOrder = requireOk(
     "Cancellation restoration order",
     await request("/orders", {
       method: "POST",
       cookie: customerCookie,
-      body: orderBody(cancelProduct, 2),
+      body: cancelOrderBody,
     })
   ).order;
   requireOk(
@@ -312,12 +354,13 @@ async function run() {
   console.log("Out-of-stock order rejected.");
 
   const confirmationProduct = await createTestProduct(`${suffix}-confirm`, { price: 50, stock: 2 });
+  const confirmationOrderBody = (await reviewedOrderBody(customerCookie, confirmationProduct, 2)).body;
   const pendingOrder = requireOk(
     "Pending confirmation order",
     await request("/orders", {
       method: "POST",
       cookie: customerCookie,
-      body: orderBody(confirmationProduct, 2),
+      body: confirmationOrderBody,
     })
   ).order;
   await prisma.product.update({
@@ -366,5 +409,5 @@ if (failure) {
   console.error(`Order security smoke failed: ${failure instanceof Error ? failure.message : "Unknown error"}`);
   process.exitCode = 1;
 } else {
-  console.log("Order security smoke passed; generated data removed.");
+  console.log("Order security smoke passed; mutable test data removed and immutable ledger-backed records anonymized.");
 }
