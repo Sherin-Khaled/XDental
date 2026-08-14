@@ -1,4 +1,4 @@
-# X Dental Store
+# Dentorax
 
 Production company-email activation is documented in
 [`docs/production-email-setup.md`](docs/production-email-setup.md). The backend
@@ -61,7 +61,7 @@ VITE_API_URL=https://api.example.com/api
 ```
 src/
   components/
-    dental/       # X Dental design-system components (Navbar, ProductCard, Button, …)
+    dental/       # Dentorax design-system components (Navbar, ProductCard, Button, …)
     ui/           # shadcn/ui primitives
     layout.tsx    # App shell (Navbar + Footer wrapper)
   context/
